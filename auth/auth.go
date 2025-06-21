@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/utahta/jquants/client"
 )
@@ -112,8 +113,17 @@ func (a *Auth) getConfigPath() (string, error) {
 		return "", fmt.Errorf("failed to get home directory: %w", err)
 	}
 
+	// セキュリティ: パスを構築して正規化
 	configDir := filepath.Join(home, ".jquants")
-	return filepath.Join(configDir, "refresh_token"), nil
+	configPath := filepath.Join(configDir, "refresh_token")
+	
+	// パスが適切なディレクトリ内にあることを確認
+	cleanPath := filepath.Clean(configPath)
+	if !strings.HasPrefix(cleanPath, filepath.Clean(home)) {
+		return "", fmt.Errorf("invalid config path")
+	}
+	
+	return cleanPath, nil
 }
 
 // saveRefreshToken saves the refresh token to config file
@@ -122,7 +132,7 @@ func (a *Auth) saveRefreshToken(token string) error {
 	if err != nil {
 		return err
 	}
-
+	
 	// ディレクトリを作成
 	if err := os.MkdirAll(filepath.Dir(configPath), 0700); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
@@ -142,7 +152,7 @@ func (a *Auth) loadRefreshToken() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		if os.IsNotExist(err) {
