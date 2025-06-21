@@ -139,3 +139,6 @@ func TestService_Method(t *testing.T) {
 2. **エラーハンドリング**: 一貫したエラーラップとコンテキスト情報の付与
 3. **型変換**: `types`パッケージのカスタム型を使用してJSONの不整合を処理
 4. **営業日**: 日本の株式市場の営業日を考慮したデータ取得
+5. **定数定義**: 市場区分コード、業種コードなどは定数として定義済み
+   - `MarketPrime`, `MarketStandard`, `MarketGrowth` など
+   - `Sector17Food`, `Sector33IT` など

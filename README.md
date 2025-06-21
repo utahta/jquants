@@ -119,6 +119,16 @@ companies, err := jq.Listed.GetInfo()
 // 特定銘柄の情報を取得
 company, err := jq.Listed.GetInfoByCode("7203")
 fmt.Printf("企業名: %s\n", company.CompanyName)
+
+// 市場区分で絞り込み（定数を使用）
+primeCompanies, err := jq.Listed.GetListedByMarket(jquants.MarketPrime, "")
+for _, company := range primeCompanies {
+    fmt.Printf("%s (%s) - %s\n", company.CompanyName, company.Code, company.MarketCodeName)
+}
+
+// 他の市場区分の例
+standardCompanies, err := jq.Listed.GetListedByMarket(jquants.MarketStandard, "")
+growthCompanies, err := jq.Listed.GetListedByMarket(jquants.MarketGrowth, "")
 ```
 
 ### 財務情報を取得
