@@ -291,21 +291,25 @@ func TestListedService_GetListedByMarket(t *testing.T) {
 			{
 				Code:           "7203",
 				CompanyName:    "トヨタ自動車",
+				MarketCode:     MarketPrime,
 				MarketCodeName: "プライム",
 			},
 			{
 				Code:           "9984",
 				CompanyName:    "ソフトバンクグループ",
+				MarketCode:     MarketPrime,
 				MarketCodeName: "プライム",
 			},
 			{
 				Code:           "4755",
 				CompanyName:    "楽天グループ",
+				MarketCode:     MarketPrime,
 				MarketCodeName: "プライム",
 			},
 			{
 				Code:           "3994",
 				CompanyName:    "マネーフォワード",
+				MarketCode:     MarketGrowth,
 				MarketCodeName: "グロース",
 			},
 		},
@@ -313,7 +317,7 @@ func TestListedService_GetListedByMarket(t *testing.T) {
 	mockClient.SetResponse("GET", "/listed/info", mockResponse)
 
 	// Test - プライム市場の銘柄を取得
-	infos, err := service.GetListedByMarket("プライム", "")
+	infos, err := service.GetListedByMarket(MarketPrime, "")
 	if err != nil {
 		t.Errorf("GetListedByMarket failed: %v", err)
 	}
@@ -324,8 +328,8 @@ func TestListedService_GetListedByMarket(t *testing.T) {
 	}
 
 	for _, info := range infos {
-		if info.MarketCodeName != "プライム" {
-			t.Errorf("Expected market プライム, got %s", info.MarketCodeName)
+		if info.MarketCode != MarketPrime {
+			t.Errorf("Expected market code %s, got %s", MarketPrime, info.MarketCode)
 		}
 	}
 }

@@ -6,6 +6,20 @@ import (
 	"github.com/utahta/jquants/client"
 )
 
+// 市場区分コード定義
+const (
+	MarketTSE1st           = "0101" // 東証一部
+	MarketTSE2nd           = "0102" // 東証二部
+	MarketMothers          = "0104" // マザーズ
+	MarketTokyoProMarket   = "0105" // TOKYO PRO MARKET
+	MarketJASDAQStandard   = "0106" // JASDAQ スタンダード
+	MarketJASDAQGrowth     = "0107" // JASDAQ グロース
+	MarketOther            = "0109" // その他
+	MarketPrime            = "0111" // プライム
+	MarketStandard         = "0112" // スタンダード
+	MarketGrowth           = "0113" // グロース
+)
+
 // 17業種コード定義
 const (
 	Sector17Food         = "1"  // 食品
@@ -185,8 +199,8 @@ func (s *ListedService) GetListedBySector33(sector33Code string, date string) ([
 }
 
 // GetListedByMarket は指定した市場区分の銘柄一覧を取得します。
-// marketCodeName: "プライム", "スタンダード", "グロース" など
-func (s *ListedService) GetListedByMarket(marketCodeName string, date string) ([]ListedInfo, error) {
+// marketCode: MarketPrime, MarketStandard, MarketGrowth など
+func (s *ListedService) GetListedByMarket(marketCode string, date string) ([]ListedInfo, error) {
 	allInfo, err := s.GetListedInfo("", date)
 	if err != nil {
 		return nil, err
@@ -194,7 +208,7 @@ func (s *ListedService) GetListedByMarket(marketCodeName string, date string) ([
 
 	var filtered []ListedInfo
 	for _, info := range allInfo {
-		if info.MarketCodeName == marketCodeName {
+		if info.MarketCode == marketCode {
 			filtered = append(filtered, info)
 		}
 	}
