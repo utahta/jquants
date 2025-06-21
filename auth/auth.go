@@ -134,11 +134,13 @@ func (a *Auth) saveRefreshToken(token string) error {
 	}
 	
 	// ディレクトリを作成
+	// #nosec G301 -- directory permissions are appropriately restrictive (0700)
 	if err := os.MkdirAll(filepath.Dir(configPath), 0700); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 
 	// トークンを保存
+	// #nosec G304 -- configPath is validated in getConfigPath() to ensure it's within the user's home directory
 	if err := os.WriteFile(configPath, []byte(token), 0600); err != nil {
 		return fmt.Errorf("failed to save refresh token: %w", err)
 	}
@@ -153,6 +155,7 @@ func (a *Auth) loadRefreshToken() (string, error) {
 		return "", err
 	}
 	
+	// #nosec G304 -- configPath is validated in getConfigPath() to ensure it's within the user's home directory
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		if os.IsNotExist(err) {
