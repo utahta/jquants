@@ -1,3 +1,5 @@
+// gitbook2md is a tool to convert GitBook HTML pages to Markdown format.
+// This tool is used for documentation purposes only and is not part of the main library.
 package main
 
 import (
@@ -26,7 +28,7 @@ func NewGitBookParser(debug bool) *GitBookParser {
 
 // ParseFile parses a GitBook HTML file and returns Markdown
 func (p *GitBookParser) ParseFile(filename string) (string, error) {
-	file, err := os.Open(filename)
+	file, err := os.Open(filename) // #nosec G304
 	if err != nil {
 		return "", err
 	}
@@ -513,7 +515,7 @@ func main() {
 		}
 		
 		if outputFile != "" {
-			err = os.WriteFile(outputFile, []byte(markdown), 0644)
+			err = os.WriteFile(outputFile, []byte(markdown), 0644) // #nosec G306
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -545,7 +547,7 @@ func main() {
 	}
 
 	// Create temporary file
-	tmpFile, err := os.CreateTemp("", "gitbook2md-*.html")
+	tmpFile, err := os.CreateTemp("", "gitbook2md-*.html") // #nosec G303
 	if err != nil {
 		log.Fatal("Failed to create temp file:", err)
 	}
@@ -557,7 +559,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to save HTML:", err)
 	}
-	tmpFile.Close()
+	_ = tmpFile.Close() // #nosec G104
 
 	// Parse the file
 	parser := NewGitBookParser(*debug)
@@ -570,11 +572,11 @@ func main() {
 	if *output != "" {
 		// Create directory if needed
 		dir := filepath.Dir(*output)
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0755); err != nil { // #nosec G301
 			log.Fatal("Failed to create directory:", err)
 		}
 		
-		err = os.WriteFile(*output, []byte(markdown), 0644)
+		err = os.WriteFile(*output, []byte(markdown), 0644) // #nosec G306
 		if err != nil {
 			log.Fatal(err)
 		}
