@@ -572,7 +572,8 @@ func main() {
 	if *output != "" {
 		// Create directory if needed
 		dir := filepath.Dir(*output)
-		if err := os.MkdirAll(dir, 0755); err != nil { // #nosec G301
+		// #nosec G301 -- Documentation directory needs to be readable
+		if err := os.MkdirAll(dir, 0755); err != nil {
 			log.Fatal("Failed to create directory:", err)
 		}
 		
