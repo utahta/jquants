@@ -142,6 +142,10 @@ func TestStatementsEndpoint(t *testing.T) {
 		validateFinancialValue(t, "ResultDividendPerShareFiscalYearEnd", latest.ResultDividendPerShareFiscalYearEnd)
 		validateFinancialValue(t, "ResultPayoutRatioAnnual", latest.ResultPayoutRatioAnnual)
 		
+		// 新規追加フィールド: REIT関連と配当総額
+		validateFinancialValue(t, "DistributionsPerUnitREIT", latest.DistributionsPerUnitREIT)
+		validateFinancialValue(t, "ResultTotalDividendPaidAnnual", latest.ResultTotalDividendPaidAnnual)
+		
 		// 予想配当情報の検証
 		validateFinancialValue(t, "ForecastDividendPerShareAnnual", latest.ForecastDividendPerShareAnnual)
 		validateFinancialValue(t, "ForecastDividendPerShare1stQuarter", latest.ForecastDividendPerShare1stQuarter)
@@ -150,6 +154,10 @@ func TestStatementsEndpoint(t *testing.T) {
 		validateFinancialValue(t, "ForecastDividendPerShareFiscalYearEnd", latest.ForecastDividendPerShareFiscalYearEnd)
 		validateFinancialValue(t, "ForecastPayoutRatioAnnual", latest.ForecastPayoutRatioAnnual)
 		
+		// 新規追加フィールド: 予想REIT関連と配当総額
+		validateFinancialValue(t, "ForecastDistributionsPerUnitREIT", latest.ForecastDistributionsPerUnitREIT)
+		validateFinancialValue(t, "ForecastTotalDividendPaidAnnual", latest.ForecastTotalDividendPaidAnnual)
+		
 		// 予想財務データの検証
 		validateFinancialValue(t, "ForecastNetSales", latest.ForecastNetSales)
 		validateFinancialValue(t, "ForecastOperatingProfit", latest.ForecastOperatingProfit)
@@ -157,9 +165,40 @@ func TestStatementsEndpoint(t *testing.T) {
 		validateFinancialValue(t, "ForecastProfit", latest.ForecastProfit)
 		validateFinancialValue(t, "ForecastEarningsPerShare", latest.ForecastEarningsPerShare)
 		
+		// 第2四半期予想
+		validateFinancialValue(t, "ForecastNetSales2ndQuarter", latest.ForecastNetSales2ndQuarter)
+		validateFinancialValue(t, "ForecastOperatingProfit2ndQuarter", latest.ForecastOperatingProfit2ndQuarter)
+		validateFinancialValue(t, "ForecastOrdinaryProfit2ndQuarter", latest.ForecastOrdinaryProfit2ndQuarter)
+		validateFinancialValue(t, "ForecastProfit2ndQuarter", latest.ForecastProfit2ndQuarter)
+		validateFinancialValue(t, "ForecastEarningsPerShare2ndQuarter", latest.ForecastEarningsPerShare2ndQuarter)
+		
+		// 翌期予想配当
+		validateFinancialValue(t, "NextYearForecastDividendPerShare1stQuarter", latest.NextYearForecastDividendPerShare1stQuarter)
+		validateFinancialValue(t, "NextYearForecastDividendPerShare2ndQuarter", latest.NextYearForecastDividendPerShare2ndQuarter)
+		validateFinancialValue(t, "NextYearForecastDividendPerShare3rdQuarter", latest.NextYearForecastDividendPerShare3rdQuarter)
+		validateFinancialValue(t, "NextYearForecastDividendPerShareFiscalYearEnd", latest.NextYearForecastDividendPerShareFiscalYearEnd)
+		validateFinancialValue(t, "NextYearForecastDividendPerShareAnnual", latest.NextYearForecastDividendPerShareAnnual)
+		validateFinancialValue(t, "NextYearForecastDistributionsPerUnitREIT", latest.NextYearForecastDistributionsPerUnitREIT)
+		validateFinancialValue(t, "NextYearForecastPayoutRatioAnnual", latest.NextYearForecastPayoutRatioAnnual)
+		
+		// 翌期第2四半期予想
+		validateFinancialValue(t, "NextYearForecastNetSales2ndQuarter", latest.NextYearForecastNetSales2ndQuarter)
+		validateFinancialValue(t, "NextYearForecastOperatingProfit2ndQuarter", latest.NextYearForecastOperatingProfit2ndQuarter)
+		validateFinancialValue(t, "NextYearForecastOrdinaryProfit2ndQuarter", latest.NextYearForecastOrdinaryProfit2ndQuarter)
+		validateFinancialValue(t, "NextYearForecastProfit2ndQuarter", latest.NextYearForecastProfit2ndQuarter)
+		validateFinancialValue(t, "NextYearForecastEarningsPerShare2ndQuarter", latest.NextYearForecastEarningsPerShare2ndQuarter)
+		
+		// 翌期通期予想
+		validateFinancialValue(t, "NextYearForecastNetSales", latest.NextYearForecastNetSales)
+		validateFinancialValue(t, "NextYearForecastOperatingProfit", latest.NextYearForecastOperatingProfit)
+		validateFinancialValue(t, "NextYearForecastOrdinaryProfit", latest.NextYearForecastOrdinaryProfit)
+		validateFinancialValue(t, "NextYearForecastProfit", latest.NextYearForecastProfit)
+		validateFinancialValue(t, "NextYearForecastEarningsPerShare", latest.NextYearForecastEarningsPerShare)
+		
 		// 修正情報の検証（bool型フィールド）
 		t.Logf("MaterialChangesInSubsidiaries: %v", latest.MaterialChangesInSubsidiaries)
 		t.Logf("SignificantChangesInTheScopeOfConsolidation: %v", latest.SignificantChangesInTheScopeOfConsolidation)
+		t.Logf("ChangesBasedOnRevisionsOfAccountingStandard: %v", latest.ChangesBasedOnRevisionsOfAccountingStandard)
 		t.Logf("ChangesOtherThanOnesBasedOnRevisionsOfAccountingStandard: %v", latest.ChangesOtherThanOnesBasedOnRevisionsOfAccountingStandard)
 		t.Logf("ChangesInAccountingEstimates: %v", latest.ChangesInAccountingEstimates)
 		t.Logf("RetrospectiveRestatement: %v", latest.RetrospectiveRestatement)
@@ -173,6 +212,48 @@ func TestStatementsEndpoint(t *testing.T) {
 			t.Logf("NumberOfTreasuryStockAtTheEndOfFiscalYear: %d", 
 				*latest.NumberOfTreasuryStockAtTheEndOfFiscalYear)
 		}
+		if latest.AverageNumberOfShares != nil {
+			t.Logf("AverageNumberOfShares: %d", *latest.AverageNumberOfShares)
+		}
+		
+		// 単体財務データの検証
+		validateFinancialValue(t, "NonConsolidatedNetSales", latest.NonConsolidatedNetSales)
+		validateFinancialValue(t, "NonConsolidatedOperatingProfit", latest.NonConsolidatedOperatingProfit)
+		validateFinancialValue(t, "NonConsolidatedOrdinaryProfit", latest.NonConsolidatedOrdinaryProfit)
+		validateFinancialValue(t, "NonConsolidatedProfit", latest.NonConsolidatedProfit)
+		validateFinancialValue(t, "NonConsolidatedEarningsPerShare", latest.NonConsolidatedEarningsPerShare)
+		validateFinancialValue(t, "NonConsolidatedTotalAssets", latest.NonConsolidatedTotalAssets)
+		validateFinancialValue(t, "NonConsolidatedEquity", latest.NonConsolidatedEquity)
+		validateFinancialValue(t, "NonConsolidatedEquityToAssetRatio", latest.NonConsolidatedEquityToAssetRatio)
+		validateFinancialValue(t, "NonConsolidatedBookValuePerShare", latest.NonConsolidatedBookValuePerShare)
+		
+		// 単体予想（第2四半期）
+		validateFinancialValue(t, "ForecastNonConsolidatedNetSales2ndQuarter", latest.ForecastNonConsolidatedNetSales2ndQuarter)
+		validateFinancialValue(t, "ForecastNonConsolidatedOperatingProfit2ndQuarter", latest.ForecastNonConsolidatedOperatingProfit2ndQuarter)
+		validateFinancialValue(t, "ForecastNonConsolidatedOrdinaryProfit2ndQuarter", latest.ForecastNonConsolidatedOrdinaryProfit2ndQuarter)
+		validateFinancialValue(t, "ForecastNonConsolidatedProfit2ndQuarter", latest.ForecastNonConsolidatedProfit2ndQuarter)
+		validateFinancialValue(t, "ForecastNonConsolidatedEarningsPerShare2ndQuarter", latest.ForecastNonConsolidatedEarningsPerShare2ndQuarter)
+		
+		// 単体翌期予想（第2四半期）
+		validateFinancialValue(t, "NextYearForecastNonConsolidatedNetSales2ndQuarter", latest.NextYearForecastNonConsolidatedNetSales2ndQuarter)
+		validateFinancialValue(t, "NextYearForecastNonConsolidatedOperatingProfit2ndQuarter", latest.NextYearForecastNonConsolidatedOperatingProfit2ndQuarter)
+		validateFinancialValue(t, "NextYearForecastNonConsolidatedOrdinaryProfit2ndQuarter", latest.NextYearForecastNonConsolidatedOrdinaryProfit2ndQuarter)
+		validateFinancialValue(t, "NextYearForecastNonConsolidatedProfit2ndQuarter", latest.NextYearForecastNonConsolidatedProfit2ndQuarter)
+		validateFinancialValue(t, "NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter", latest.NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter)
+		
+		// 単体予想（期末）
+		validateFinancialValue(t, "ForecastNonConsolidatedNetSales", latest.ForecastNonConsolidatedNetSales)
+		validateFinancialValue(t, "ForecastNonConsolidatedOperatingProfit", latest.ForecastNonConsolidatedOperatingProfit)
+		validateFinancialValue(t, "ForecastNonConsolidatedOrdinaryProfit", latest.ForecastNonConsolidatedOrdinaryProfit)
+		validateFinancialValue(t, "ForecastNonConsolidatedProfit", latest.ForecastNonConsolidatedProfit)
+		validateFinancialValue(t, "ForecastNonConsolidatedEarningsPerShare", latest.ForecastNonConsolidatedEarningsPerShare)
+		
+		// 単体翌期予想（期末）
+		validateFinancialValue(t, "NextYearForecastNonConsolidatedNetSales", latest.NextYearForecastNonConsolidatedNetSales)
+		validateFinancialValue(t, "NextYearForecastNonConsolidatedOperatingProfit", latest.NextYearForecastNonConsolidatedOperatingProfit)
+		validateFinancialValue(t, "NextYearForecastNonConsolidatedOrdinaryProfit", latest.NextYearForecastNonConsolidatedOrdinaryProfit)
+		validateFinancialValue(t, "NextYearForecastNonConsolidatedProfit", latest.NextYearForecastNonConsolidatedProfit)
+		validateFinancialValue(t, "NextYearForecastNonConsolidatedEarningsPerShare", latest.NextYearForecastNonConsolidatedEarningsPerShare)
 		
 		t.Logf("Successfully validated all fields for statement: %s", latest.DisclosedDate)
 	})
@@ -212,7 +293,8 @@ func TestStatementsEndpoint(t *testing.T) {
 		// 特定日の財務諸表を取得（過去の営業日を使用）
 		date := getTestDate()
 		
-		statements, err := jq.Statements.GetStatements("", date)
+		// GetStatementsByDateメソッドを使用
+		statements, err := jq.Statements.GetStatementsByDate(date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")

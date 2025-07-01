@@ -10,6 +10,7 @@ import (
 
 // StatementsService は財務諸表データを取得するサービスです。
 // 売上高、利益、資産、ROE/ROAなどの財務指標を提供します。
+// 財務諸表API(/fins/statements)から四半期毎の決算短信サマリーデータを取得します。
 type StatementsService struct {
 	client client.HTTPClient
 }
@@ -62,6 +63,8 @@ type Statement struct {
 	ResultDividendPerShare3rdQuarter    *float64 `json:"ResultDividendPerShare3rdQuarter"`
 	ResultDividendPerShareFiscalYearEnd *float64 `json:"ResultDividendPerShareFiscalYearEnd"`
 	ResultDividendPerShareAnnual        *float64 `json:"ResultDividendPerShareAnnual"`
+	DistributionsPerUnitREIT            *float64 `json:"DistributionsPerUnit(REIT)"`
+	ResultTotalDividendPaidAnnual       *float64 `json:"ResultTotalDividendPaidAnnual"`
 	ResultPayoutRatioAnnual             *float64 `json:"ResultPayoutRatioAnnual"`
 
 	// 配当予想
@@ -70,8 +73,9 @@ type Statement struct {
 	ForecastDividendPerShare3rdQuarter    *float64 `json:"ForecastDividendPerShare3rdQuarter"`
 	ForecastDividendPerShareFiscalYearEnd *float64 `json:"ForecastDividendPerShareFiscalYearEnd"`
 	ForecastDividendPerShareAnnual        *float64 `json:"ForecastDividendPerShareAnnual"`
-	ForecastPayoutRatioAnnual             *float64 `json:"ForecastPayoutRatioAnnual"`
 	ForecastDistributionsPerUnitREIT      *float64 `json:"ForecastDistributionsPerUnit(REIT)"`
+	ForecastTotalDividendPaidAnnual       *float64 `json:"ForecastTotalDividendPaidAnnual"`
+	ForecastPayoutRatioAnnual             *float64 `json:"ForecastPayoutRatioAnnual"`
 
 	// 当期業績予想
 	ForecastNetSales         *float64 `json:"ForecastNetSales"`
@@ -88,22 +92,34 @@ type Statement struct {
 	ForecastEarningsPerShare2ndQuarter *float64 `json:"ForecastEarningsPerShare2ndQuarter"`
 
 	// 翌期業績予想
-	NextYearForecastDividendPerShareAnnual *float64 `json:"NextYearForecastDividendPerShareAnnual"`
-	NextYearForecastPayoutRatioAnnual      *float64 `json:"NextYearForecastPayoutRatioAnnual"`
-	NextYearForecastNetSales               *float64 `json:"NextYearForecastNetSales"`
-	NextYearForecastOperatingProfit        *float64 `json:"NextYearForecastOperatingProfit"`
-	NextYearForecastOrdinaryProfit         *float64 `json:"NextYearForecastOrdinaryProfit"`
-	NextYearForecastProfit                 *float64 `json:"NextYearForecastProfit"`
-	NextYearForecastEarningsPerShare       *float64 `json:"NextYearForecastEarningsPerShare"`
+	NextYearForecastDividendPerShare1stQuarter    *float64 `json:"NextYearForecastDividendPerShare1stQuarter"`
+	NextYearForecastDividendPerShare2ndQuarter    *float64 `json:"NextYearForecastDividendPerShare2ndQuarter"`
+	NextYearForecastDividendPerShare3rdQuarter    *float64 `json:"NextYearForecastDividendPerShare3rdQuarter"`
+	NextYearForecastDividendPerShareFiscalYearEnd *float64 `json:"NextYearForecastDividendPerShareFiscalYearEnd"`
+	NextYearForecastDividendPerShareAnnual        *float64 `json:"NextYearForecastDividendPerShareAnnual"`
+	NextYearForecastDistributionsPerUnitREIT       *float64 `json:"NextYearForecastDistributionsPerUnit(REIT)"`
+	NextYearForecastPayoutRatioAnnual              *float64 `json:"NextYearForecastPayoutRatioAnnual"`
+	NextYearForecastNetSales2ndQuarter            *float64 `json:"NextYearForecastNetSales2ndQuarter"`
+	NextYearForecastOperatingProfit2ndQuarter     *float64 `json:"NextYearForecastOperatingProfit2ndQuarter"`
+	NextYearForecastOrdinaryProfit2ndQuarter      *float64 `json:"NextYearForecastOrdinaryProfit2ndQuarter"`
+	NextYearForecastProfit2ndQuarter              *float64 `json:"NextYearForecastProfit2ndQuarter"`
+	NextYearForecastEarningsPerShare2ndQuarter    *float64 `json:"NextYearForecastEarningsPerShare2ndQuarter"`
+	NextYearForecastNetSales                       *float64 `json:"NextYearForecastNetSales"`
+	NextYearForecastOperatingProfit                *float64 `json:"NextYearForecastOperatingProfit"`
+	NextYearForecastOrdinaryProfit                 *float64 `json:"NextYearForecastOrdinaryProfit"`
+	NextYearForecastProfit                         *float64 `json:"NextYearForecastProfit"`
+	NextYearForecastEarningsPerShare               *float64 `json:"NextYearForecastEarningsPerShare"`
 
 	// その他
 	MaterialChangesInSubsidiaries                                                bool   `json:"MaterialChangesInSubsidiaries"`
 	SignificantChangesInTheScopeOfConsolidation                                  bool   `json:"SignificantChangesInTheScopeOfConsolidation"`
-	ChangesInAccountingEstimates                                                 bool   `json:"ChangesInAccountingEstimates"`
+	ChangesBasedOnRevisionsOfAccountingStandard                                  bool   `json:"ChangesBasedOnRevisionsOfAccountingStandard"`
 	ChangesOtherThanOnesBasedOnRevisionsOfAccountingStandard                     bool   `json:"ChangesOtherThanOnesBasedOnRevisionsOfAccountingStandard"`
+	ChangesInAccountingEstimates                                                 bool   `json:"ChangesInAccountingEstimates"`
 	RetrospectiveRestatement                                                     bool   `json:"RetrospectiveRestatement"`
 	NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock *int64 `json:"NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock"`
 	NumberOfTreasuryStockAtTheEndOfFiscalYear                                    *int64 `json:"NumberOfTreasuryStockAtTheEndOfFiscalYear"`
+	AverageNumberOfShares                                                        *int64 `json:"AverageNumberOfShares"`
 
 	// 単体財務数値
 	NonConsolidatedNetSales           *float64 `json:"NonConsolidatedNetSales"`
@@ -115,6 +131,34 @@ type Statement struct {
 	NonConsolidatedEquity             *float64 `json:"NonConsolidatedEquity"`
 	NonConsolidatedEquityToAssetRatio *float64 `json:"NonConsolidatedEquityToAssetRatio"`
 	NonConsolidatedBookValuePerShare  *float64 `json:"NonConsolidatedBookValuePerShare"`
+
+	// 単体予想（第2四半期）
+	ForecastNonConsolidatedNetSales2ndQuarter         *float64 `json:"ForecastNonConsolidatedNetSales2ndQuarter"`
+	ForecastNonConsolidatedOperatingProfit2ndQuarter  *float64 `json:"ForecastNonConsolidatedOperatingProfit2ndQuarter"`
+	ForecastNonConsolidatedOrdinaryProfit2ndQuarter   *float64 `json:"ForecastNonConsolidatedOrdinaryProfit2ndQuarter"`
+	ForecastNonConsolidatedProfit2ndQuarter           *float64 `json:"ForecastNonConsolidatedProfit2ndQuarter"`
+	ForecastNonConsolidatedEarningsPerShare2ndQuarter *float64 `json:"ForecastNonConsolidatedEarningsPerShare2ndQuarter"`
+
+	// 単体翌期予想（第2四半期）
+	NextYearForecastNonConsolidatedNetSales2ndQuarter         *float64 `json:"NextYearForecastNonConsolidatedNetSales2ndQuarter"`
+	NextYearForecastNonConsolidatedOperatingProfit2ndQuarter  *float64 `json:"NextYearForecastNonConsolidatedOperatingProfit2ndQuarter"`
+	NextYearForecastNonConsolidatedOrdinaryProfit2ndQuarter   *float64 `json:"NextYearForecastNonConsolidatedOrdinaryProfit2ndQuarter"`
+	NextYearForecastNonConsolidatedProfit2ndQuarter           *float64 `json:"NextYearForecastNonConsolidatedProfit2ndQuarter"`
+	NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter *float64 `json:"NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter"`
+
+	// 単体予想（期末）
+	ForecastNonConsolidatedNetSales         *float64 `json:"ForecastNonConsolidatedNetSales"`
+	ForecastNonConsolidatedOperatingProfit  *float64 `json:"ForecastNonConsolidatedOperatingProfit"`
+	ForecastNonConsolidatedOrdinaryProfit   *float64 `json:"ForecastNonConsolidatedOrdinaryProfit"`
+	ForecastNonConsolidatedProfit           *float64 `json:"ForecastNonConsolidatedProfit"`
+	ForecastNonConsolidatedEarningsPerShare *float64 `json:"ForecastNonConsolidatedEarningsPerShare"`
+
+	// 単体翌期予想（期末）
+	NextYearForecastNonConsolidatedNetSales         *float64 `json:"NextYearForecastNonConsolidatedNetSales"`
+	NextYearForecastNonConsolidatedOperatingProfit  *float64 `json:"NextYearForecastNonConsolidatedOperatingProfit"`
+	NextYearForecastNonConsolidatedOrdinaryProfit   *float64 `json:"NextYearForecastNonConsolidatedOrdinaryProfit"`
+	NextYearForecastNonConsolidatedProfit           *float64 `json:"NextYearForecastNonConsolidatedProfit"`
+	NextYearForecastNonConsolidatedEarningsPerShare *float64 `json:"NextYearForecastNonConsolidatedEarningsPerShare"`
 }
 
 // RawStatement is used for unmarshaling JSON response with mixed types
@@ -157,6 +201,8 @@ type RawStatement struct {
 	ResultDividendPerShare3rdQuarter    *types.Float64String `json:"ResultDividendPerShare3rdQuarter"`
 	ResultDividendPerShareFiscalYearEnd *types.Float64String `json:"ResultDividendPerShareFiscalYearEnd"`
 	ResultDividendPerShareAnnual        *types.Float64String `json:"ResultDividendPerShareAnnual"`
+	DistributionsPerUnitREIT            *types.Float64String `json:"DistributionsPerUnit(REIT)"`
+	ResultTotalDividendPaidAnnual       *types.Float64String `json:"ResultTotalDividendPaidAnnual"`
 	ResultPayoutRatioAnnual             *types.Float64String `json:"ResultPayoutRatioAnnual"`
 
 	// 配当予想
@@ -165,8 +211,9 @@ type RawStatement struct {
 	ForecastDividendPerShare3rdQuarter    *types.Float64String `json:"ForecastDividendPerShare3rdQuarter"`
 	ForecastDividendPerShareFiscalYearEnd *types.Float64String `json:"ForecastDividendPerShareFiscalYearEnd"`
 	ForecastDividendPerShareAnnual        *types.Float64String `json:"ForecastDividendPerShareAnnual"`
-	ForecastPayoutRatioAnnual             *types.Float64String `json:"ForecastPayoutRatioAnnual"`
 	ForecastDistributionsPerUnitREIT      *types.Float64String `json:"ForecastDistributionsPerUnit(REIT)"`
+	ForecastTotalDividendPaidAnnual       *types.Float64String `json:"ForecastTotalDividendPaidAnnual"`
+	ForecastPayoutRatioAnnual             *types.Float64String `json:"ForecastPayoutRatioAnnual"`
 
 	// 当期業績予想
 	ForecastNetSales         *types.Float64String `json:"ForecastNetSales"`
@@ -183,22 +230,34 @@ type RawStatement struct {
 	ForecastEarningsPerShare2ndQuarter *types.Float64String `json:"ForecastEarningsPerShare2ndQuarter"`
 
 	// 翌期業績予想
-	NextYearForecastDividendPerShareAnnual *types.Float64String `json:"NextYearForecastDividendPerShareAnnual"`
-	NextYearForecastPayoutRatioAnnual      *types.Float64String `json:"NextYearForecastPayoutRatioAnnual"`
-	NextYearForecastNetSales               *types.Float64String `json:"NextYearForecastNetSales"`
-	NextYearForecastOperatingProfit        *types.Float64String `json:"NextYearForecastOperatingProfit"`
-	NextYearForecastOrdinaryProfit         *types.Float64String `json:"NextYearForecastOrdinaryProfit"`
-	NextYearForecastProfit                 *types.Float64String `json:"NextYearForecastProfit"`
-	NextYearForecastEarningsPerShare       *types.Float64String `json:"NextYearForecastEarningsPerShare"`
+	NextYearForecastDividendPerShare1stQuarter    *types.Float64String `json:"NextYearForecastDividendPerShare1stQuarter"`
+	NextYearForecastDividendPerShare2ndQuarter    *types.Float64String `json:"NextYearForecastDividendPerShare2ndQuarter"`
+	NextYearForecastDividendPerShare3rdQuarter    *types.Float64String `json:"NextYearForecastDividendPerShare3rdQuarter"`
+	NextYearForecastDividendPerShareFiscalYearEnd *types.Float64String `json:"NextYearForecastDividendPerShareFiscalYearEnd"`
+	NextYearForecastDividendPerShareAnnual        *types.Float64String `json:"NextYearForecastDividendPerShareAnnual"`
+	NextYearForecastDistributionsPerUnitREIT       *types.Float64String `json:"NextYearForecastDistributionsPerUnit(REIT)"`
+	NextYearForecastPayoutRatioAnnual              *types.Float64String `json:"NextYearForecastPayoutRatioAnnual"`
+	NextYearForecastNetSales2ndQuarter            *types.Float64String `json:"NextYearForecastNetSales2ndQuarter"`
+	NextYearForecastOperatingProfit2ndQuarter     *types.Float64String `json:"NextYearForecastOperatingProfit2ndQuarter"`
+	NextYearForecastOrdinaryProfit2ndQuarter      *types.Float64String `json:"NextYearForecastOrdinaryProfit2ndQuarter"`
+	NextYearForecastProfit2ndQuarter              *types.Float64String `json:"NextYearForecastProfit2ndQuarter"`
+	NextYearForecastEarningsPerShare2ndQuarter    *types.Float64String `json:"NextYearForecastEarningsPerShare2ndQuarter"`
+	NextYearForecastNetSales                       *types.Float64String `json:"NextYearForecastNetSales"`
+	NextYearForecastOperatingProfit                *types.Float64String `json:"NextYearForecastOperatingProfit"`
+	NextYearForecastOrdinaryProfit                 *types.Float64String `json:"NextYearForecastOrdinaryProfit"`
+	NextYearForecastProfit                         *types.Float64String `json:"NextYearForecastProfit"`
+	NextYearForecastEarningsPerShare               *types.Float64String `json:"NextYearForecastEarningsPerShare"`
 
 	// その他
 	MaterialChangesInSubsidiaries                                                types.BoolString     `json:"MaterialChangesInSubsidiaries"`
 	SignificantChangesInTheScopeOfConsolidation                                  types.BoolString     `json:"SignificantChangesInTheScopeOfConsolidation"`
-	ChangesInAccountingEstimates                                                 types.BoolString     `json:"ChangesInAccountingEstimates"`
+	ChangesBasedOnRevisionsOfAccountingStandard                                  types.BoolString     `json:"ChangesBasedOnRevisionsOfAccountingStandard"`
 	ChangesOtherThanOnesBasedOnRevisionsOfAccountingStandard                     types.BoolString     `json:"ChangesOtherThanOnesBasedOnRevisionsOfAccountingStandard"`
+	ChangesInAccountingEstimates                                                 types.BoolString     `json:"ChangesInAccountingEstimates"`
 	RetrospectiveRestatement                                                     types.BoolString     `json:"RetrospectiveRestatement"`
 	NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock *types.Float64String `json:"NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock"`
 	NumberOfTreasuryStockAtTheEndOfFiscalYear                                    *types.Float64String `json:"NumberOfTreasuryStockAtTheEndOfFiscalYear"`
+	AverageNumberOfShares                                                        *types.Float64String `json:"AverageNumberOfShares"`
 
 	// 単体財務数値
 	NonConsolidatedNetSales           *types.Float64String `json:"NonConsolidatedNetSales"`
@@ -210,6 +269,34 @@ type RawStatement struct {
 	NonConsolidatedEquity             *types.Float64String `json:"NonConsolidatedEquity"`
 	NonConsolidatedEquityToAssetRatio *types.Float64String `json:"NonConsolidatedEquityToAssetRatio"`
 	NonConsolidatedBookValuePerShare  *types.Float64String `json:"NonConsolidatedBookValuePerShare"`
+
+	// 単体予想（第2四半期）
+	ForecastNonConsolidatedNetSales2ndQuarter         *types.Float64String `json:"ForecastNonConsolidatedNetSales2ndQuarter"`
+	ForecastNonConsolidatedOperatingProfit2ndQuarter  *types.Float64String `json:"ForecastNonConsolidatedOperatingProfit2ndQuarter"`
+	ForecastNonConsolidatedOrdinaryProfit2ndQuarter   *types.Float64String `json:"ForecastNonConsolidatedOrdinaryProfit2ndQuarter"`
+	ForecastNonConsolidatedProfit2ndQuarter           *types.Float64String `json:"ForecastNonConsolidatedProfit2ndQuarter"`
+	ForecastNonConsolidatedEarningsPerShare2ndQuarter *types.Float64String `json:"ForecastNonConsolidatedEarningsPerShare2ndQuarter"`
+
+	// 単体翌期予想（第2四半期）
+	NextYearForecastNonConsolidatedNetSales2ndQuarter         *types.Float64String `json:"NextYearForecastNonConsolidatedNetSales2ndQuarter"`
+	NextYearForecastNonConsolidatedOperatingProfit2ndQuarter  *types.Float64String `json:"NextYearForecastNonConsolidatedOperatingProfit2ndQuarter"`
+	NextYearForecastNonConsolidatedOrdinaryProfit2ndQuarter   *types.Float64String `json:"NextYearForecastNonConsolidatedOrdinaryProfit2ndQuarter"`
+	NextYearForecastNonConsolidatedProfit2ndQuarter           *types.Float64String `json:"NextYearForecastNonConsolidatedProfit2ndQuarter"`
+	NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter *types.Float64String `json:"NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter"`
+
+	// 単体予想（期末）
+	ForecastNonConsolidatedNetSales         *types.Float64String `json:"ForecastNonConsolidatedNetSales"`
+	ForecastNonConsolidatedOperatingProfit  *types.Float64String `json:"ForecastNonConsolidatedOperatingProfit"`
+	ForecastNonConsolidatedOrdinaryProfit   *types.Float64String `json:"ForecastNonConsolidatedOrdinaryProfit"`
+	ForecastNonConsolidatedProfit           *types.Float64String `json:"ForecastNonConsolidatedProfit"`
+	ForecastNonConsolidatedEarningsPerShare *types.Float64String `json:"ForecastNonConsolidatedEarningsPerShare"`
+
+	// 単体翌期予想（期末）
+	NextYearForecastNonConsolidatedNetSales         *types.Float64String `json:"NextYearForecastNonConsolidatedNetSales"`
+	NextYearForecastNonConsolidatedOperatingProfit  *types.Float64String `json:"NextYearForecastNonConsolidatedOperatingProfit"`
+	NextYearForecastNonConsolidatedOrdinaryProfit   *types.Float64String `json:"NextYearForecastNonConsolidatedOrdinaryProfit"`
+	NextYearForecastNonConsolidatedProfit           *types.Float64String `json:"NextYearForecastNonConsolidatedProfit"`
+	NextYearForecastNonConsolidatedEarningsPerShare *types.Float64String `json:"NextYearForecastNonConsolidatedEarningsPerShare"`
 }
 
 type StatementsResponse struct {
@@ -270,6 +357,8 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 			ResultDividendPerShare3rdQuarter:    types.ToFloat64Ptr(rs.ResultDividendPerShare3rdQuarter),
 			ResultDividendPerShareFiscalYearEnd: types.ToFloat64Ptr(rs.ResultDividendPerShareFiscalYearEnd),
 			ResultDividendPerShareAnnual:        types.ToFloat64Ptr(rs.ResultDividendPerShareAnnual),
+			DistributionsPerUnitREIT:            types.ToFloat64Ptr(rs.DistributionsPerUnitREIT),
+			ResultTotalDividendPaidAnnual:       types.ToFloat64Ptr(rs.ResultTotalDividendPaidAnnual),
 			ResultPayoutRatioAnnual:             types.ToFloat64Ptr(rs.ResultPayoutRatioAnnual),
 
 			// 配当予想
@@ -278,8 +367,9 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 			ForecastDividendPerShare3rdQuarter:    types.ToFloat64Ptr(rs.ForecastDividendPerShare3rdQuarter),
 			ForecastDividendPerShareFiscalYearEnd: types.ToFloat64Ptr(rs.ForecastDividendPerShareFiscalYearEnd),
 			ForecastDividendPerShareAnnual:        types.ToFloat64Ptr(rs.ForecastDividendPerShareAnnual),
-			ForecastPayoutRatioAnnual:             types.ToFloat64Ptr(rs.ForecastPayoutRatioAnnual),
 			ForecastDistributionsPerUnitREIT:      types.ToFloat64Ptr(rs.ForecastDistributionsPerUnitREIT),
+			ForecastTotalDividendPaidAnnual:       types.ToFloat64Ptr(rs.ForecastTotalDividendPaidAnnual),
+			ForecastPayoutRatioAnnual:             types.ToFloat64Ptr(rs.ForecastPayoutRatioAnnual),
 
 			// 当期業績予想
 			ForecastNetSales:         types.ToFloat64Ptr(rs.ForecastNetSales),
@@ -296,22 +386,34 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 			ForecastEarningsPerShare2ndQuarter: types.ToFloat64Ptr(rs.ForecastEarningsPerShare2ndQuarter),
 
 			// 翌期業績予想
-			NextYearForecastDividendPerShareAnnual: types.ToFloat64Ptr(rs.NextYearForecastDividendPerShareAnnual),
-			NextYearForecastPayoutRatioAnnual:      types.ToFloat64Ptr(rs.NextYearForecastPayoutRatioAnnual),
-			NextYearForecastNetSales:               types.ToFloat64Ptr(rs.NextYearForecastNetSales),
-			NextYearForecastOperatingProfit:        types.ToFloat64Ptr(rs.NextYearForecastOperatingProfit),
-			NextYearForecastOrdinaryProfit:         types.ToFloat64Ptr(rs.NextYearForecastOrdinaryProfit),
-			NextYearForecastProfit:                 types.ToFloat64Ptr(rs.NextYearForecastProfit),
-			NextYearForecastEarningsPerShare:       types.ToFloat64Ptr(rs.NextYearForecastEarningsPerShare),
+			NextYearForecastDividendPerShare1stQuarter:    types.ToFloat64Ptr(rs.NextYearForecastDividendPerShare1stQuarter),
+			NextYearForecastDividendPerShare2ndQuarter:    types.ToFloat64Ptr(rs.NextYearForecastDividendPerShare2ndQuarter),
+			NextYearForecastDividendPerShare3rdQuarter:    types.ToFloat64Ptr(rs.NextYearForecastDividendPerShare3rdQuarter),
+			NextYearForecastDividendPerShareFiscalYearEnd: types.ToFloat64Ptr(rs.NextYearForecastDividendPerShareFiscalYearEnd),
+			NextYearForecastDividendPerShareAnnual:        types.ToFloat64Ptr(rs.NextYearForecastDividendPerShareAnnual),
+			NextYearForecastDistributionsPerUnitREIT:       types.ToFloat64Ptr(rs.NextYearForecastDistributionsPerUnitREIT),
+			NextYearForecastPayoutRatioAnnual:              types.ToFloat64Ptr(rs.NextYearForecastPayoutRatioAnnual),
+			NextYearForecastNetSales2ndQuarter:            types.ToFloat64Ptr(rs.NextYearForecastNetSales2ndQuarter),
+			NextYearForecastOperatingProfit2ndQuarter:     types.ToFloat64Ptr(rs.NextYearForecastOperatingProfit2ndQuarter),
+			NextYearForecastOrdinaryProfit2ndQuarter:      types.ToFloat64Ptr(rs.NextYearForecastOrdinaryProfit2ndQuarter),
+			NextYearForecastProfit2ndQuarter:              types.ToFloat64Ptr(rs.NextYearForecastProfit2ndQuarter),
+			NextYearForecastEarningsPerShare2ndQuarter:    types.ToFloat64Ptr(rs.NextYearForecastEarningsPerShare2ndQuarter),
+			NextYearForecastNetSales:                       types.ToFloat64Ptr(rs.NextYearForecastNetSales),
+			NextYearForecastOperatingProfit:                types.ToFloat64Ptr(rs.NextYearForecastOperatingProfit),
+			NextYearForecastOrdinaryProfit:                 types.ToFloat64Ptr(rs.NextYearForecastOrdinaryProfit),
+			NextYearForecastProfit:                         types.ToFloat64Ptr(rs.NextYearForecastProfit),
+			NextYearForecastEarningsPerShare:               types.ToFloat64Ptr(rs.NextYearForecastEarningsPerShare),
 
 			// その他
 			MaterialChangesInSubsidiaries:                                                types.ToBool(rs.MaterialChangesInSubsidiaries),
 			SignificantChangesInTheScopeOfConsolidation:                                  types.ToBool(rs.SignificantChangesInTheScopeOfConsolidation),
-			ChangesInAccountingEstimates:                                                 types.ToBool(rs.ChangesInAccountingEstimates),
+			ChangesBasedOnRevisionsOfAccountingStandard:                                  types.ToBool(rs.ChangesBasedOnRevisionsOfAccountingStandard),
 			ChangesOtherThanOnesBasedOnRevisionsOfAccountingStandard:                     types.ToBool(rs.ChangesOtherThanOnesBasedOnRevisionsOfAccountingStandard),
+			ChangesInAccountingEstimates:                                                 types.ToBool(rs.ChangesInAccountingEstimates),
 			RetrospectiveRestatement:                                                     types.ToBool(rs.RetrospectiveRestatement),
 			NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock: types.ToInt64Ptr(rs.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock),
 			NumberOfTreasuryStockAtTheEndOfFiscalYear:                                    types.ToInt64Ptr(rs.NumberOfTreasuryStockAtTheEndOfFiscalYear),
+			AverageNumberOfShares:                                                        types.ToInt64Ptr(rs.AverageNumberOfShares),
 
 			// 単体財務数値
 			NonConsolidatedNetSales:           types.ToFloat64Ptr(rs.NonConsolidatedNetSales),
@@ -323,6 +425,34 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 			NonConsolidatedEquity:             types.ToFloat64Ptr(rs.NonConsolidatedEquity),
 			NonConsolidatedEquityToAssetRatio: types.ToFloat64Ptr(rs.NonConsolidatedEquityToAssetRatio),
 			NonConsolidatedBookValuePerShare:  types.ToFloat64Ptr(rs.NonConsolidatedBookValuePerShare),
+
+			// 単体予想（第2四半期）
+			ForecastNonConsolidatedNetSales2ndQuarter:         types.ToFloat64Ptr(rs.ForecastNonConsolidatedNetSales2ndQuarter),
+			ForecastNonConsolidatedOperatingProfit2ndQuarter:  types.ToFloat64Ptr(rs.ForecastNonConsolidatedOperatingProfit2ndQuarter),
+			ForecastNonConsolidatedOrdinaryProfit2ndQuarter:   types.ToFloat64Ptr(rs.ForecastNonConsolidatedOrdinaryProfit2ndQuarter),
+			ForecastNonConsolidatedProfit2ndQuarter:           types.ToFloat64Ptr(rs.ForecastNonConsolidatedProfit2ndQuarter),
+			ForecastNonConsolidatedEarningsPerShare2ndQuarter: types.ToFloat64Ptr(rs.ForecastNonConsolidatedEarningsPerShare2ndQuarter),
+
+			// 単体翌期予想（第2四半期）
+			NextYearForecastNonConsolidatedNetSales2ndQuarter:         types.ToFloat64Ptr(rs.NextYearForecastNonConsolidatedNetSales2ndQuarter),
+			NextYearForecastNonConsolidatedOperatingProfit2ndQuarter:  types.ToFloat64Ptr(rs.NextYearForecastNonConsolidatedOperatingProfit2ndQuarter),
+			NextYearForecastNonConsolidatedOrdinaryProfit2ndQuarter:   types.ToFloat64Ptr(rs.NextYearForecastNonConsolidatedOrdinaryProfit2ndQuarter),
+			NextYearForecastNonConsolidatedProfit2ndQuarter:           types.ToFloat64Ptr(rs.NextYearForecastNonConsolidatedProfit2ndQuarter),
+			NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter: types.ToFloat64Ptr(rs.NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter),
+
+			// 単体予想（期末）
+			ForecastNonConsolidatedNetSales:         types.ToFloat64Ptr(rs.ForecastNonConsolidatedNetSales),
+			ForecastNonConsolidatedOperatingProfit:  types.ToFloat64Ptr(rs.ForecastNonConsolidatedOperatingProfit),
+			ForecastNonConsolidatedOrdinaryProfit:   types.ToFloat64Ptr(rs.ForecastNonConsolidatedOrdinaryProfit),
+			ForecastNonConsolidatedProfit:           types.ToFloat64Ptr(rs.ForecastNonConsolidatedProfit),
+			ForecastNonConsolidatedEarningsPerShare: types.ToFloat64Ptr(rs.ForecastNonConsolidatedEarningsPerShare),
+
+			// 単体翌期予想（期末）
+			NextYearForecastNonConsolidatedNetSales:         types.ToFloat64Ptr(rs.NextYearForecastNonConsolidatedNetSales),
+			NextYearForecastNonConsolidatedOperatingProfit:  types.ToFloat64Ptr(rs.NextYearForecastNonConsolidatedOperatingProfit),
+			NextYearForecastNonConsolidatedOrdinaryProfit:   types.ToFloat64Ptr(rs.NextYearForecastNonConsolidatedOrdinaryProfit),
+			NextYearForecastNonConsolidatedProfit:           types.ToFloat64Ptr(rs.NextYearForecastNonConsolidatedProfit),
+			NextYearForecastNonConsolidatedEarningsPerShare: types.ToFloat64Ptr(rs.NextYearForecastNonConsolidatedEarningsPerShare),
 		}
 	}
 
@@ -378,4 +508,10 @@ func (s *StatementsService) GetLatestStatements(code string) (*Statement, error)
 	}
 
 	return &latestStmt, nil
+}
+
+// GetStatementsByDate は指定日の財務諸表データを取得します。
+// 例: GetStatementsByDate("2024-01-15") で特定日に開示された全銘柄の決算データを取得
+func (s *StatementsService) GetStatementsByDate(date string) ([]Statement, error) {
+	return s.GetStatements("", date)
 }

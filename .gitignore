@@ -23,7 +23,7 @@ go.work.sum
 .env
 
 # Project specific
-
+tmp/
 
 # IDE specific files
 .idea/

@@ -195,6 +195,46 @@ func TestStatementsService_GetStatements_Error(t *testing.T) {
 	}
 }
 
+func TestStatementsService_GetStatementsByDate(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewStatementsService(mockClient)
+
+	// Mock response
+	mockResponse := StatementsResponse{
+		Statements: []Statement{
+			{
+				DisclosedDate:    "2024-01-15",
+				LocalCode:        "72030",
+				NetSales:         floatPtr(10000000000),
+				OperatingProfit:  floatPtr(2000000000),
+			},
+			{
+				DisclosedDate:    "2024-01-15",
+				LocalCode:        "86970",
+				NetSales:         floatPtr(5000000000),
+				OperatingProfit:  floatPtr(1000000000),
+			},
+		},
+	}
+	mockClient.SetResponse("GET", "/fins/statements?date=2024-01-15", mockResponse)
+
+	// Test
+	statements, err := service.GetStatementsByDate("2024-01-15")
+	if err != nil {
+		t.Errorf("GetStatementsByDate failed: %v", err)
+	}
+
+	// Verify
+	if len(statements) != 2 {
+		t.Errorf("Expected 2 statements, got %d", len(statements))
+	}
+
+	if mockClient.LastPath != "/fins/statements?date=2024-01-15" {
+		t.Errorf("Expected path /fins/statements?date=2024-01-15, got %s", mockClient.LastPath)
+	}
+}
+
 func TestStatementsResponse_UnmarshalJSON(t *testing.T) {
 	// Test JSON with mixed types (strings that should be converted to float64/int64/bool)
 	jsonData := `{
@@ -231,21 +271,57 @@ func TestStatementsResponse_UnmarshalJSON(t *testing.T) {
 				"RetrospectiveRestatement": "false",
 				"NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": "1000000000",
 				"NumberOfTreasuryStockAtTheEndOfFiscalYear": "50000000",
+				"AverageNumberOfShares": "975000000",
 				"ResultDividendPerShareAnnual": "60.0",
 				"ResultPayoutRatioAnnual": "39.9",
+				"DistributionsPerUnit(REIT)": "1000.0",
+				"ResultTotalDividendPaidAnnual": "58500000000",
 				"ForecastDividendPerShareAnnual": "65.0",
 				"ForecastPayoutRatioAnnual": "40.0",
+				"ForecastDistributionsPerUnit(REIT)": "1100.0",
+				"ForecastTotalDividendPaidAnnual": "63375000000",
 				"ForecastNetSales": "15000000000",
 				"ForecastOperatingProfit": "3000000000",
 				"ForecastEarningsPerShare": "220.0",
+				"NextYearForecastDividendPerShare1stQuarter": "15.0",
+				"NextYearForecastDividendPerShare2ndQuarter": "17.5",
+				"NextYearForecastDividendPerShare3rdQuarter": "17.5",
+				"NextYearForecastDividendPerShareFiscalYearEnd": "20.0",
 				"NextYearForecastDividendPerShareAnnual": "70.0",
+				"NextYearForecastDistributionsPerUnit(REIT)": "1200.0",
 				"NextYearForecastPayoutRatioAnnual": "35.0",
+				"NextYearForecastNetSales2ndQuarter": "8000000000",
+				"NextYearForecastOperatingProfit2ndQuarter": "1600000000",
+				"NextYearForecastOrdinaryProfit2ndQuarter": "1650000000",
+				"NextYearForecastProfit2ndQuarter": "1200000000",
+				"NextYearForecastEarningsPerShare2ndQuarter": "125.0",
 				"NextYearForecastNetSales": "16000000000",
 				"NextYearForecastEarningsPerShare": "250.0",
+				"ChangesBasedOnRevisionsOfAccountingStandard": "true",
 				"NonConsolidatedNetSales": "8000000000",
 				"NonConsolidatedOperatingProfit": "1600000000",
 				"NonConsolidatedProfit": "1200000000",
-				"NonConsolidatedEarningsPerShare": "120.0"
+				"NonConsolidatedEarningsPerShare": "120.0",
+				"ForecastNonConsolidatedNetSales2ndQuarter": "4000000000",
+				"ForecastNonConsolidatedOperatingProfit2ndQuarter": "800000000",
+				"ForecastNonConsolidatedOrdinaryProfit2ndQuarter": "820000000",
+				"ForecastNonConsolidatedProfit2ndQuarter": "600000000",
+				"ForecastNonConsolidatedEarningsPerShare2ndQuarter": "60.0",
+				"NextYearForecastNonConsolidatedNetSales2ndQuarter": "4200000000",
+				"NextYearForecastNonConsolidatedOperatingProfit2ndQuarter": "840000000",
+				"NextYearForecastNonConsolidatedOrdinaryProfit2ndQuarter": "860000000",
+				"NextYearForecastNonConsolidatedProfit2ndQuarter": "630000000",
+				"NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter": "63.0",
+				"ForecastNonConsolidatedNetSales": "8500000000",
+				"ForecastNonConsolidatedOperatingProfit": "1700000000",
+				"ForecastNonConsolidatedOrdinaryProfit": "1750000000",
+				"ForecastNonConsolidatedProfit": "1300000000",
+				"ForecastNonConsolidatedEarningsPerShare": "130.0",
+				"NextYearForecastNonConsolidatedNetSales": "9000000000",
+				"NextYearForecastNonConsolidatedOperatingProfit": "1800000000",
+				"NextYearForecastNonConsolidatedOrdinaryProfit": "1850000000",
+				"NextYearForecastNonConsolidatedProfit": "1400000000",
+				"NextYearForecastNonConsolidatedEarningsPerShare": "140.0"
 			}
 		]
 	}`
@@ -296,6 +372,112 @@ func TestStatementsResponse_UnmarshalJSON(t *testing.T) {
 	// Check int64 conversions
 	if s.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock == nil || *s.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock != 1000000000 {
 		t.Errorf("Expected NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock 1000000000, got %v", s.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock)
+	}
+	if s.AverageNumberOfShares == nil || *s.AverageNumberOfShares != 975000000 {
+		t.Errorf("Expected AverageNumberOfShares 975000000, got %v", s.AverageNumberOfShares)
+	}
+
+	// Check new REIT fields
+	if s.DistributionsPerUnitREIT == nil || *s.DistributionsPerUnitREIT != 1000.0 {
+		t.Errorf("Expected DistributionsPerUnitREIT 1000.0, got %v", s.DistributionsPerUnitREIT)
+	}
+	if s.ResultTotalDividendPaidAnnual == nil || *s.ResultTotalDividendPaidAnnual != 58500000000 {
+		t.Errorf("Expected ResultTotalDividendPaidAnnual 58500000000, got %v", s.ResultTotalDividendPaidAnnual)
+	}
+	if s.ForecastDistributionsPerUnitREIT == nil || *s.ForecastDistributionsPerUnitREIT != 1100.0 {
+		t.Errorf("Expected ForecastDistributionsPerUnitREIT 1100.0, got %v", s.ForecastDistributionsPerUnitREIT)
+	}
+	if s.ForecastTotalDividendPaidAnnual == nil || *s.ForecastTotalDividendPaidAnnual != 63375000000 {
+		t.Errorf("Expected ForecastTotalDividendPaidAnnual 63375000000, got %v", s.ForecastTotalDividendPaidAnnual)
+	}
+
+	// Check new NextYear quarterly dividend fields
+	if s.NextYearForecastDividendPerShare1stQuarter == nil || *s.NextYearForecastDividendPerShare1stQuarter != 15.0 {
+		t.Errorf("Expected NextYearForecastDividendPerShare1stQuarter 15.0, got %v", s.NextYearForecastDividendPerShare1stQuarter)
+	}
+	if s.NextYearForecastDividendPerShare2ndQuarter == nil || *s.NextYearForecastDividendPerShare2ndQuarter != 17.5 {
+		t.Errorf("Expected NextYearForecastDividendPerShare2ndQuarter 17.5, got %v", s.NextYearForecastDividendPerShare2ndQuarter)
+	}
+	if s.NextYearForecastDividendPerShare3rdQuarter == nil || *s.NextYearForecastDividendPerShare3rdQuarter != 17.5 {
+		t.Errorf("Expected NextYearForecastDividendPerShare3rdQuarter 17.5, got %v", s.NextYearForecastDividendPerShare3rdQuarter)
+	}
+	if s.NextYearForecastDividendPerShareFiscalYearEnd == nil || *s.NextYearForecastDividendPerShareFiscalYearEnd != 20.0 {
+		t.Errorf("Expected NextYearForecastDividendPerShareFiscalYearEnd 20.0, got %v", s.NextYearForecastDividendPerShareFiscalYearEnd)
+	}
+	if s.NextYearForecastDistributionsPerUnitREIT == nil || *s.NextYearForecastDistributionsPerUnitREIT != 1200.0 {
+		t.Errorf("Expected NextYearForecastDistributionsPerUnitREIT 1200.0, got %v", s.NextYearForecastDistributionsPerUnitREIT)
+	}
+
+	// Check new NextYear quarterly forecast fields
+	if s.NextYearForecastNetSales2ndQuarter == nil || *s.NextYearForecastNetSales2ndQuarter != 8000000000 {
+		t.Errorf("Expected NextYearForecastNetSales2ndQuarter 8000000000, got %v", s.NextYearForecastNetSales2ndQuarter)
+	}
+	if s.NextYearForecastOperatingProfit2ndQuarter == nil || *s.NextYearForecastOperatingProfit2ndQuarter != 1600000000 {
+		t.Errorf("Expected NextYearForecastOperatingProfit2ndQuarter 1600000000, got %v", s.NextYearForecastOperatingProfit2ndQuarter)
+	}
+	if s.NextYearForecastOrdinaryProfit2ndQuarter == nil || *s.NextYearForecastOrdinaryProfit2ndQuarter != 1650000000 {
+		t.Errorf("Expected NextYearForecastOrdinaryProfit2ndQuarter 1650000000, got %v", s.NextYearForecastOrdinaryProfit2ndQuarter)
+	}
+	if s.NextYearForecastProfit2ndQuarter == nil || *s.NextYearForecastProfit2ndQuarter != 1200000000 {
+		t.Errorf("Expected NextYearForecastProfit2ndQuarter 1200000000, got %v", s.NextYearForecastProfit2ndQuarter)
+	}
+	if s.NextYearForecastEarningsPerShare2ndQuarter == nil || *s.NextYearForecastEarningsPerShare2ndQuarter != 125.0 {
+		t.Errorf("Expected NextYearForecastEarningsPerShare2ndQuarter 125.0, got %v", s.NextYearForecastEarningsPerShare2ndQuarter)
+	}
+
+	// Check new accounting standard field
+	if s.ChangesBasedOnRevisionsOfAccountingStandard != true {
+		t.Errorf("Expected ChangesBasedOnRevisionsOfAccountingStandard true, got %v", s.ChangesBasedOnRevisionsOfAccountingStandard)
+	}
+
+	// Check NonConsolidated forecast fields
+	if s.ForecastNonConsolidatedNetSales2ndQuarter == nil || *s.ForecastNonConsolidatedNetSales2ndQuarter != 4000000000 {
+		t.Errorf("Expected ForecastNonConsolidatedNetSales2ndQuarter 4000000000, got %v", s.ForecastNonConsolidatedNetSales2ndQuarter)
+	}
+	if s.ForecastNonConsolidatedOperatingProfit2ndQuarter == nil || *s.ForecastNonConsolidatedOperatingProfit2ndQuarter != 800000000 {
+		t.Errorf("Expected ForecastNonConsolidatedOperatingProfit2ndQuarter 800000000, got %v", s.ForecastNonConsolidatedOperatingProfit2ndQuarter)
+	}
+	if s.ForecastNonConsolidatedOrdinaryProfit2ndQuarter == nil || *s.ForecastNonConsolidatedOrdinaryProfit2ndQuarter != 820000000 {
+		t.Errorf("Expected ForecastNonConsolidatedOrdinaryProfit2ndQuarter 820000000, got %v", s.ForecastNonConsolidatedOrdinaryProfit2ndQuarter)
+	}
+	if s.ForecastNonConsolidatedProfit2ndQuarter == nil || *s.ForecastNonConsolidatedProfit2ndQuarter != 600000000 {
+		t.Errorf("Expected ForecastNonConsolidatedProfit2ndQuarter 600000000, got %v", s.ForecastNonConsolidatedProfit2ndQuarter)
+	}
+	if s.ForecastNonConsolidatedEarningsPerShare2ndQuarter == nil || *s.ForecastNonConsolidatedEarningsPerShare2ndQuarter != 60.0 {
+		t.Errorf("Expected ForecastNonConsolidatedEarningsPerShare2ndQuarter 60.0, got %v", s.ForecastNonConsolidatedEarningsPerShare2ndQuarter)
+	}
+
+	// Check NextYear NonConsolidated forecast fields
+	if s.NextYearForecastNonConsolidatedNetSales2ndQuarter == nil || *s.NextYearForecastNonConsolidatedNetSales2ndQuarter != 4200000000 {
+		t.Errorf("Expected NextYearForecastNonConsolidatedNetSales2ndQuarter 4200000000, got %v", s.NextYearForecastNonConsolidatedNetSales2ndQuarter)
+	}
+	if s.NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter == nil || *s.NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter != 63.0 {
+		t.Errorf("Expected NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter 63.0, got %v", s.NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter)
+	}
+
+	// Check NonConsolidated annual forecast fields
+	if s.ForecastNonConsolidatedNetSales == nil || *s.ForecastNonConsolidatedNetSales != 8500000000 {
+		t.Errorf("Expected ForecastNonConsolidatedNetSales 8500000000, got %v", s.ForecastNonConsolidatedNetSales)
+	}
+	if s.ForecastNonConsolidatedOperatingProfit == nil || *s.ForecastNonConsolidatedOperatingProfit != 1700000000 {
+		t.Errorf("Expected ForecastNonConsolidatedOperatingProfit 1700000000, got %v", s.ForecastNonConsolidatedOperatingProfit)
+	}
+	if s.ForecastNonConsolidatedOrdinaryProfit == nil || *s.ForecastNonConsolidatedOrdinaryProfit != 1750000000 {
+		t.Errorf("Expected ForecastNonConsolidatedOrdinaryProfit 1750000000, got %v", s.ForecastNonConsolidatedOrdinaryProfit)
+	}
+	if s.ForecastNonConsolidatedProfit == nil || *s.ForecastNonConsolidatedProfit != 1300000000 {
+		t.Errorf("Expected ForecastNonConsolidatedProfit 1300000000, got %v", s.ForecastNonConsolidatedProfit)
+	}
+	if s.ForecastNonConsolidatedEarningsPerShare == nil || *s.ForecastNonConsolidatedEarningsPerShare != 130.0 {
+		t.Errorf("Expected ForecastNonConsolidatedEarningsPerShare 130.0, got %v", s.ForecastNonConsolidatedEarningsPerShare)
+	}
+
+	// Check NextYear NonConsolidated annual forecast fields
+	if s.NextYearForecastNonConsolidatedNetSales == nil || *s.NextYearForecastNonConsolidatedNetSales != 9000000000 {
+		t.Errorf("Expected NextYearForecastNonConsolidatedNetSales 9000000000, got %v", s.NextYearForecastNonConsolidatedNetSales)
+	}
+	if s.NextYearForecastNonConsolidatedEarningsPerShare == nil || *s.NextYearForecastNonConsolidatedEarningsPerShare != 140.0 {
+		t.Errorf("Expected NextYearForecastNonConsolidatedEarningsPerShare 140.0, got %v", s.NextYearForecastNonConsolidatedEarningsPerShare)
 	}
 
 	// Check empty string handling
