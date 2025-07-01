@@ -201,8 +201,37 @@ jquants/
 ├── types/         # カスタム型定義
 ├── docs/          # APIドキュメント
 ├── test/e2e/      # E2Eテスト
+├── cmd/           # コマンドラインツール
+│   └── gitbook2md/  # GitBook→Markdown変換ツール
 ├── *.go           # 各APIサービス実装
 └── Makefile       # ビルドタスク
+```
+
+## ツール
+
+### gitbook2md
+
+GitBookのドキュメントをMarkdown形式に変換するツールです。J-Quants APIの公式ドキュメントをローカルで参照する際に便利です。
+
+```bash
+# ビルド
+cd cmd/gitbook2md && go build
+
+# 使用方法1: HTMLファイルから変換
+./gitbook2md input.html output.md
+
+# 使用方法2: URLから直接変換（推奨）
+./gitbook2md --url https://jpx.gitbook.io/j-quants-ja/api-reference/statements --output statements.md
+```
+
+#### 使用例
+
+```bash
+# 財務情報APIのドキュメントを取得
+./gitbook2md --url https://jpx.gitbook.io/j-quants-ja/api-reference/statements --output docs/api/statements.md
+
+# 上場銘柄一覧APIのドキュメントを取得
+./gitbook2md --url https://jpx.gitbook.io/j-quants-ja/api-reference/listed_info --output docs/api/listed_info.md
 ```
 
 ## エラーハンドリング

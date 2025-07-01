@@ -82,6 +82,11 @@ func (a *Auth) GetRefreshToken() string {
 	return a.refreshToken
 }
 
+// GetIDToken returns the current ID token
+func (a *Auth) GetIDToken() string {
+	return a.idToken
+}
+
 // SetRefreshToken sets the refresh token
 func (a *Auth) SetRefreshToken(token string) {
 	a.refreshToken = token

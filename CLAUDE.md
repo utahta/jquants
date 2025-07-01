@@ -42,6 +42,22 @@ make test-run TEST=TestQuotesService_GetDailyQuotes
 make install-tools
 ```
 
+### ツール
+
+#### gitbook2md
+GitBookのドキュメントをMarkdownに変換するツール。J-Quants APIの公式ドキュメントをローカルで参照する際に便利。
+
+```bash
+# ビルド
+cd cmd/gitbook2md && go build
+
+# 使用方法1: HTMLファイルから変換
+./gitbook2md input.html output.md
+
+# 使用方法2: URLから直接変換
+./gitbook2md --url https://jpx.gitbook.io/j-quants-ja/api-reference/statements --output statements.md
+```
+
 ### 直接実行する場合
 ```bash
 # 依存関係の取得

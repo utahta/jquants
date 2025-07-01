@@ -2,6 +2,22 @@
 
 このドキュメントは、J-Quants APIの財務諸表エンドポイント (`/fins/statements`) のレスポンスデータ項目について説明します。
 
+## APIエンドポイント
+
+- **URL**: `https://api.jquants.com/v1/fins/statements`
+- **メソッド**: GET
+- **認証**: Authorization ヘッダーにBearer トークンが必要
+
+## リクエストパラメータ
+
+| パラメータ名 | 型 | 必須 | 説明 | 例 |
+|------------|-----|------|------|-----|
+| code | String | いずれか必須 | 4桁または5桁の銘柄コード | 86970 or 8697 |
+| date | String | いずれか必須 | 開示日 | 2022-01-05 or 20220105 |
+| pagination_key | String | いいえ | 検索の先頭を指定する文字列（過去の検索で返却されたpagination_keyを設定） | - |
+
+※ codeまたはdateのいずれかのパラメータが必須
+
 ## データ型について
 - すべてのフィールドは `String` 型で返されます
 - 数値データも文字列として格納されています
@@ -70,6 +86,8 @@
 | ResultDividendPerShare3rdQuarter | 第3四半期配当金（実績） | 単位：円 |
 | ResultDividendPerShareFiscalYearEnd | 期末配当金（実績） | 単位：円 |
 | ResultDividendPerShareAnnual | 年間配当金（実績） | 単位：円 |
+| DistributionsPerUnit(REIT) | 1口当たり分配金 | 単位：円 |
+| ResultTotalDividendPaidAnnual | 配当金総額 | 単位：円 |
 | ResultPayoutRatioAnnual | 配当性向（実績） | パーセント |
 
 #### 配当予想
@@ -80,8 +98,9 @@
 | ForecastDividendPerShare3rdQuarter | 第3四半期配当金（予想） | 単位：円 |
 | ForecastDividendPerShareFiscalYearEnd | 期末配当金（予想） | 単位：円 |
 | ForecastDividendPerShareAnnual | 年間配当金（予想） | 単位：円 |
-| ForecastPayoutRatioAnnual | 配当性向（予想） | パーセント |
 | ForecastDistributionsPerUnit(REIT) | 分配金（REIT）（予想） | 単位：円 |
+| ForecastTotalDividendPaidAnnual | 予想配当金総額 | 単位：円 |
+| ForecastPayoutRatioAnnual | 配当性向（予想） | パーセント |
 
 ### 5. 業績予想
 
@@ -106,8 +125,18 @@
 #### 翌期業績予想
 | フィールド名 | 日本語説明 | 備考 |
 |------------|----------|------|
+| NextYearForecastDividendPerShare1stQuarter | 翌期第1四半期配当金（予想） | 単位：円 |
+| NextYearForecastDividendPerShare2ndQuarter | 翌期第2四半期配当金（予想） | 単位：円 |
+| NextYearForecastDividendPerShare3rdQuarter | 翌期第3四半期配当金（予想） | 単位：円 |
+| NextYearForecastDividendPerShareFiscalYearEnd | 翌期期末配当金（予想） | 単位：円 |
 | NextYearForecastDividendPerShareAnnual | 翌期年間配当金（予想） | 単位：円 |
+| NextYearForecastDistributionsPerUnit(REIT) | 翌期分配金（REIT）（予想） | 単位：円 |
 | NextYearForecastPayoutRatioAnnual | 翌期配当性向（予想） | パーセント |
+| NextYearForecastNetSales2ndQuarter | 翌期第2四半期売上高（予想） | 単位：円 |
+| NextYearForecastOperatingProfit2ndQuarter | 翌期第2四半期営業利益（予想） | 単位：円 |
+| NextYearForecastOrdinaryProfit2ndQuarter | 翌期第2四半期経常利益（予想） | 単位：円 |
+| NextYearForecastProfit2ndQuarter | 翌期第2四半期純利益（予想） | 単位：円 |
+| NextYearForecastEarningsPerShare2ndQuarter | 翌期第2四半期1株当たり純利益（予想） | 単位：円 |
 | NextYearForecastNetSales | 翌期売上高（予想） | 単位：円 |
 | NextYearForecastOperatingProfit | 翌期営業利益（予想） | 単位：円 |
 | NextYearForecastOrdinaryProfit | 翌期経常利益（予想） | 単位：円 |
@@ -119,10 +148,14 @@
 | フィールド名 | 日本語説明 | 備考 |
 |------------|----------|------|
 | MaterialChangesInSubsidiaries | 重要な子会社の異動 | true/false |
-| SignificantChangesInTheScopeOfConsolidation | 連結範囲の重要な変更 | |
+| SignificantChangesInTheScopeOfConsolidation | 連結範囲の重要な変更 | 2024/7/22より追加 ※1 |
+| ChangesBasedOnRevisionsOfAccountingStandard | 会計基準等の改正に伴う会計方針の変更 | true/false |
 | ChangesOtherThanOnesBasedOnRevisionsOfAccountingStandard | 会計基準改正以外の変更 | true/false |
+| ChangesInAccountingEstimates | 会計上の見積りの変更 | true/false |
+| RetrospectiveRestatement | 修正再表示 | |
 | NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock | 期末発行済株式数（自己株式を含む） | |
 | NumberOfTreasuryStockAtTheEndOfFiscalYear | 期末自己株式数 | |
+| AverageNumberOfShares | 期中平均株式数 | |
 
 ### 7. 単体財務数値
 
@@ -135,6 +168,23 @@
 - `NonConsolidatedProfit`: 単体当期純利益
 - など
 
+## 会計基準について
+
+APIから出力される各項目名は日本基準（JGAAP）の開示項目が基準となっています。そのため：
+
+- **IFRS**や**米国基準（USGAAP）**の開示データでは、経常利益（OrdinaryProfit）の概念が存在しないため、データが空欄となります
+- 各企業の採用する会計基準は`TypeOfDocument`フィールドで確認できます
+
+## 四半期開示見直し対応について
+
+2024/7/22より、決算短信サマリー様式の記載事項変更に伴い、以下の項目が追加されました：
+
+- **変更前**: 重要な子会社の異動（連結範囲の変更を伴う特定子会社の異動）
+- **変更後**: 連結範囲の重要な変更
+
+新項目: `SignificantChangesInTheScopeOfConsolidation`（期中における連結範囲の重要な変更）
+※1: 2024-07-21以前のデータには値が含まれません
+
 ## 使用上の注意
 
 1. **データ型の変換**: すべてのフィールドは文字列型で返されるため、数値計算を行う場合は適切な型変換が必要です。
@@ -146,6 +196,54 @@
 4. **会計期間の種類**: `TypeOfCurrentPeriod`は四半期（1Q-4Q）または通期（FY）を示します。5Qは特殊な場合に使用されます。
 
 5. **開示書類種別**: `TypeOfDocument`は会計基準（IFRS/JGAAP）や連結/単体の区別を含みます。
+
+## エラーレスポンス
+
+### 400 Bad Request
+```json
+{
+    "message": "This API requires at least 1 parameter as follows; 'date','code'."
+}
+```
+
+### 401 Unauthorized
+```json
+{
+    "message": "The incoming token is invalid or expired."
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+    "message": "Unexpected error. Please try again later."
+}
+```
+
+### データサイズエラー
+```json
+{
+    "message": "Response data is too large. Specify parameters to reduce the acquired data range."
+}
+```
+
+## APIコールサンプル
+
+### cURL
+```bash
+idToken=<YOUR idToken> && curl https://api.jquants.com/v1/fins/statements?code=86970&date=20230130 -H "Authorization: Bearer $idToken"
+```
+
+### Python
+```python
+import requests
+import json
+
+idToken = "YOUR idToken"
+headers = {'Authorization': 'Bearer {}'.format(idToken)}
+r = requests.get("https://api.jquants.com/v1/fins/statements?code=86970&date=20230130", headers=headers)
+r.json()
+```
 
 ## 関連ドキュメント
 
