@@ -30,7 +30,7 @@ type Statement struct {
 	DisclosedTime              string `json:"DisclosedTime"`
 	LocalCode                  string `json:"LocalCode"`
 	DisclosureNumber           string `json:"DisclosureNumber"`
-	TypeOfDocument             string `json:"TypeOfDocument"`
+	TypeOfDocument             TypeOfDocument `json:"TypeOfDocument"`
 	TypeOfCurrentPeriod        string `json:"TypeOfCurrentPeriod"`
 	CurrentPeriodStartDate     string `json:"CurrentPeriodStartDate"`
 	CurrentPeriodEndDate       string `json:"CurrentPeriodEndDate"`
@@ -160,6 +160,7 @@ type Statement struct {
 	NextYearForecastNonConsolidatedProfit           *float64 `json:"NextYearForecastNonConsolidatedProfit"`
 	NextYearForecastNonConsolidatedEarningsPerShare *float64 `json:"NextYearForecastNonConsolidatedEarningsPerShare"`
 }
+
 
 // RawStatement is used for unmarshaling JSON response with mixed types
 type RawStatement struct {
@@ -324,7 +325,7 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 			DisclosedTime:              rs.DisclosedTime,
 			LocalCode:                  rs.LocalCode,
 			DisclosureNumber:           rs.DisclosureNumber,
-			TypeOfDocument:             rs.TypeOfDocument,
+			TypeOfDocument:             ParseTypeOfDocument(rs.TypeOfDocument),
 			TypeOfCurrentPeriod:        rs.TypeOfCurrentPeriod,
 			CurrentPeriodStartDate:     rs.CurrentPeriodStartDate,
 			CurrentPeriodEndDate:       rs.CurrentPeriodEndDate,

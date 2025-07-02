@@ -136,10 +136,23 @@ growthCompanies, err := jq.Listed.GetListedByMarket(jquants.MarketGrowth, "")
 ```go
 // 最新の財務情報
 statement, err := jq.Statements.GetLatestStatements("7203")
-fmt.Printf("売上高: %.0f円\n", *statement.NetSales)
+if statement.NetSales != nil {
+    fmt.Printf("売上高: %.0f円\n", *statement.NetSales)
+}
 
 // 特定日の財務情報
 statements, err := jq.Statements.GetStatementsByDate("2024-01-15")
+
+// 開示書類種別での絞り込み
+for _, stmt := range statements {
+    // 連結決算のみ処理
+    if stmt.TypeOfDocument.IsConsolidated() {
+        // IFRS採用企業のみ
+        if stmt.TypeOfDocument.GetAccountingStandard() == "IFRS" {
+            fmt.Printf("%s: IFRS採用企業\n", stmt.LocalCode)
+        }
+    }
+}
 ```
 
 ### ページネーション対応

@@ -34,7 +34,7 @@
 | DisclosedTime | 開示時刻 | HH:MM:SS形式 |
 | LocalCode | 銘柄コード（5桁） | |
 | DisclosureNumber | 開示番号 | APIから出力されるjsonは開示番号で昇順に並んでいる |
-| TypeOfDocument | 開示書類種別 | 例: 3QFinancialStatements_Consolidated_IFRS |
+| TypeOfDocument | 開示書類種別 | 詳細は[開示書類種別一覧](#開示書類種別一覧)を参照 |
 | TypeOfCurrentPeriod | 当会計期間の種類 | [1Q, 2Q, 3Q, 4Q, 5Q, FY] |
 | CurrentPeriodStartDate | 当会計期間開始日 | |
 | CurrentPeriodEndDate | 当会計期間終了日 | |
@@ -244,6 +244,88 @@ headers = {'Authorization': 'Bearer {}'.format(idToken)}
 r = requests.get("https://api.jquants.com/v1/fins/statements?code=86970&date=20230130", headers=headers)
 r.json()
 ```
+
+## 開示書類種別一覧
+
+財務情報APIのTypeOfDocumentフィールドに格納される値の一覧です。
+
+### 決算短信（通期）
+| 書類種別 | 概要 |
+|---------|------|
+| FYFinancialStatements_Consolidated_JP | 決算短信（連結・日本基準） |
+| FYFinancialStatements_Consolidated_US | 決算短信（連結・米国基準） |
+| FYFinancialStatements_NonConsolidated_JP | 決算短信（非連結・日本基準） |
+| FYFinancialStatements_Consolidated_JMIS | 決算短信（連結・ＪＭＩＳ） |
+| FYFinancialStatements_NonConsolidated_IFRS | 決算短信（非連結・ＩＦＲＳ） |
+| FYFinancialStatements_Consolidated_IFRS | 決算短信（連結・ＩＦＲＳ） |
+| FYFinancialStatements_NonConsolidated_Foreign | 決算短信（非連結・外国株） |
+| FYFinancialStatements_Consolidated_Foreign | 決算短信（連結・外国株） |
+| FYFinancialStatements_Consolidated_REIT | 決算短信（REIT） |
+
+### 四半期決算短信
+#### 第1四半期
+| 書類種別 | 概要 |
+|---------|------|
+| 1QFinancialStatements_Consolidated_JP | 第1四半期決算短信（連結・日本基準） |
+| 1QFinancialStatements_Consolidated_US | 第1四半期決算短信（連結・米国基準） |
+| 1QFinancialStatements_NonConsolidated_JP | 第1四半期決算短信（非連結・日本基準） |
+| 1QFinancialStatements_Consolidated_JMIS | 第1四半期決算短信（連結・ＪＭＩＳ） |
+| 1QFinancialStatements_NonConsolidated_IFRS | 第1四半期決算短信（非連結・ＩＦＲＳ） |
+| 1QFinancialStatements_Consolidated_IFRS | 第1四半期決算短信（連結・ＩＦＲＳ） |
+| 1QFinancialStatements_NonConsolidated_Foreign | 第1四半期決算短信（非連結・外国株） |
+| 1QFinancialStatements_Consolidated_Foreign | 第1四半期決算短信（連結・外国株） |
+
+#### 第2四半期
+| 書類種別 | 概要 |
+|---------|------|
+| 2QFinancialStatements_Consolidated_JP | 第2四半期決算短信（連結・日本基準） |
+| 2QFinancialStatements_Consolidated_US | 第2四半期決算短信（連結・米国基準） |
+| 2QFinancialStatements_NonConsolidated_JP | 第2四半期決算短信（非連結・日本基準） |
+| 2QFinancialStatements_Consolidated_JMIS | 第2四半期決算短信（連結・ＪＭＩＳ） |
+| 2QFinancialStatements_NonConsolidated_IFRS | 第2四半期決算短信（非連結・ＩＦＲＳ） |
+| 2QFinancialStatements_Consolidated_IFRS | 第2四半期決算短信（連結・ＩＦＲＳ） |
+| 2QFinancialStatements_NonConsolidated_Foreign | 第2四半期決算短信（非連結・外国株） |
+| 2QFinancialStatements_Consolidated_Foreign | 第2四半期決算短信（連結・外国株） |
+
+#### 第3四半期
+| 書類種別 | 概要 |
+|---------|------|
+| 3QFinancialStatements_Consolidated_JP | 第3四半期決算短信（連結・日本基準） |
+| 3QFinancialStatements_Consolidated_US | 第3四半期決算短信（連結・米国基準） |
+| 3QFinancialStatements_NonConsolidated_JP | 第3四半期決算短信（非連結・日本基準） |
+| 3QFinancialStatements_Consolidated_JMIS | 第3四半期決算短信（連結・ＪＭＩＳ） |
+| 3QFinancialStatements_NonConsolidated_IFRS | 第3四半期決算短信（非連結・ＩＦＲＳ） |
+| 3QFinancialStatements_Consolidated_IFRS | 第3四半期決算短信（連結・ＩＦＲＳ） |
+| 3QFinancialStatements_NonConsolidated_Foreign | 第3四半期決算短信（非連結・外国株） |
+| 3QFinancialStatements_Consolidated_Foreign | 第3四半期決算短信（連結・外国株） |
+
+#### その他の四半期
+| 書類種別 | 概要 |
+|---------|------|
+| OtherPeriodFinancialStatements_Consolidated_JP | その他四半期決算短信（連結・日本基準） |
+| OtherPeriodFinancialStatements_Consolidated_US | その他四半期決算短信（連結・米国基準） |
+| OtherPeriodFinancialStatements_NonConsolidated_JP | その他四半期決算短信（非連結・日本基準） |
+| OtherPeriodFinancialStatements_Consolidated_JMIS | その他四半期決算短信（連結・ＪＭＩＳ） |
+| OtherPeriodFinancialStatements_NonConsolidated_IFRS | その他四半期決算短信（非連結・ＩＦＲＳ） |
+| OtherPeriodFinancialStatements_Consolidated_IFRS | その他四半期決算短信（連結・ＩＦＲＳ） |
+| OtherPeriodFinancialStatements_NonConsolidated_Foreign | その他四半期決算短信（非連結・外国株） |
+| OtherPeriodFinancialStatements_Consolidated_Foreign | その他四半期決算短信（連結・外国株） |
+
+### 予想修正
+| 書類種別 | 概要 |
+|---------|------|
+| DividendForecastRevision | 配当予想の修正 |
+| EarnForecastRevision | 業績予想の修正 |
+| REITDividendForecastRevision | 分配予想の修正（REIT） |
+| REITEarnForecastRevision | 利益予想の修正（REIT） |
+
+### 注記
+- **JP**: 日本基準（JGAAP）
+- **US**: 米国基準（USGAAP）
+- **IFRS**: 国際財務報告基準
+- **JMIS**: 修正国際基準
+- **REIT**: 不動産投資信託
+- **Foreign**: 外国株
 
 ## 関連ドキュメント
 
