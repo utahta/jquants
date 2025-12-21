@@ -191,7 +191,7 @@ if response.PaginationKey != "" {
 
 ### 必要な環境
 
-- Go 1.23.0以上
+- Go 1.24.0以上
 - Make（オプション）
 
 ### ビルドとテスト
