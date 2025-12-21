@@ -93,6 +93,7 @@ func (a *Auth) SetRefreshToken(token string) {
 }
 
 // InitFromEnv initializes auth with refresh token from environment variable or config file
+// If no refresh token is found, it will attempt to login with JQUANTS_EMAIL and JQUANTS_PASSWORD
 func (a *Auth) InitFromEnv() error {
 	// 1. まず環境変数から取得を試みる
 	refreshToken := os.Getenv("JQUANTS_REFRESH_TOKEN")
@@ -102,8 +103,14 @@ func (a *Auth) InitFromEnv() error {
 		var err error
 		refreshToken, err = a.loadRefreshToken()
 		if err != nil {
-			// 設定ファイルもなければエラー
-			return fmt.Errorf("no refresh token found: set JQUANTS_REFRESH_TOKEN environment variable")
+			// 3. 設定ファイルもなければ、Email/Passwordでログインを試みる
+			email := os.Getenv("JQUANTS_EMAIL")
+			password := os.Getenv("JQUANTS_PASSWORD")
+			if email != "" && password != "" {
+				return a.Login(email, password)
+			}
+			// Email/Passwordもなければエラー
+			return fmt.Errorf("no refresh token found: set JQUANTS_REFRESH_TOKEN environment variable, or set JQUANTS_EMAIL and JQUANTS_PASSWORD")
 		}
 	}
 
