@@ -57,20 +57,31 @@ func main() {
 
 ## 認証設定
 
-### 環境変数による設定
+`InitFromEnv()` は以下の優先順位で認証情報を取得します：
+
+1. 環境変数 `JQUANTS_REFRESH_TOKEN`
+2. 設定ファイル `~/.jquants/refresh_token`
+3. 環境変数 `JQUANTS_EMAIL` と `JQUANTS_PASSWORD`（自動ログイン）
+
+### 推奨: Email/Passwordによる自動認証
 
 ```bash
-# Email/Passwordログイン
 export JQUANTS_EMAIL="your-email@example.com"
 export JQUANTS_PASSWORD="your-password"
+```
 
-# または リフレッシュトークン
+この設定により、リフレッシュトークンがない場合でも自動的にログインします。
+ログイン成功時、リフレッシュトークンは `~/.jquants/refresh_token` に自動保存されます。
+
+### リフレッシュトークンによる認証
+
+```bash
 export JQUANTS_REFRESH_TOKEN="your-refresh-token"
 ```
 
-### 設定ファイルによる設定
+### 設定ファイルによる認証
 
-リフレッシュトークンを `~/.jquants/refresh_token` に保存することもできます。
+リフレッシュトークンを `~/.jquants/refresh_token` に直接保存することもできます。
 
 ## 利用可能なAPI
 
@@ -180,7 +191,7 @@ if response.PaginationKey != "" {
 
 ### 必要な環境
 
-- Go 1.23.0以上
+- Go 1.24.0以上
 - Make（オプション）
 
 ### ビルドとテスト
