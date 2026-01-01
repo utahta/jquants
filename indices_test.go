@@ -86,6 +86,7 @@ func TestIndicesService_GetIndices(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetIndices() returned nil response")
+				return
 			}
 			if len(resp.Indices) == 0 {
 				t.Error("GetIndices() returned empty data")

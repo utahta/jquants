@@ -32,7 +32,7 @@ func (p *GitBookParser) ParseFile(filename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	doc, err := html.Parse(file)
 	if err != nil {
@@ -307,7 +307,7 @@ func (p *GitBookParser) extractList(n *html.Node, content *strings.Builder, orde
 			text := p.extractText(c)
 			if text != "" {
 				if ordered {
-					content.WriteString(fmt.Sprintf("%d. %s\n", counter, text))
+					fmt.Fprintf(content, "%d. %s\n", counter, text)
 					counter++
 				} else {
 					content.WriteString("- " + text + "\n")
@@ -540,7 +540,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to fetch URL:", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		log.Fatal("HTTP error:", resp.StatusCode)
@@ -551,8 +551,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to create temp file:", err)
 	}
-	defer os.Remove(tmpFile.Name())
-	defer tmpFile.Close()
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
+	defer func() { _ = tmpFile.Close() }()
 
 	// Copy content to temp file
 	_, err = io.Copy(tmpFile, resp.Body)

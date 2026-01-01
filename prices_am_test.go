@@ -75,6 +75,7 @@ func TestPricesAMService_GetPricesAM(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetPricesAM() returned nil response")
+				return
 			}
 			if len(resp.PricesAM) == 0 {
 				t.Error("GetPricesAM() returned empty data")

@@ -103,6 +103,7 @@ func TestTradesSpecService_GetTradesSpec(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetTradesSpec() returned nil response")
+				return
 			}
 			if len(resp.TradesSpec) == 0 {
 				t.Error("GetTradesSpec() returned empty data")

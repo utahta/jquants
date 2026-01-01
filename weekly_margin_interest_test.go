@@ -80,6 +80,7 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterest(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetWeeklyMarginInterest() returned nil response")
+				return
 			}
 			if len(resp.WeeklyMarginInterest) == 0 {
 				t.Error("GetWeeklyMarginInterest() returned empty data")

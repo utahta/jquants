@@ -76,6 +76,7 @@ func TestShortSellingService_GetShortSelling(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetShortSelling() returned nil response")
+				return
 			}
 			if len(resp.ShortSelling) == 0 {
 				t.Error("GetShortSelling() returned empty data")

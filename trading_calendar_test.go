@@ -74,6 +74,7 @@ func TestTradingCalendarService_GetTradingCalendar(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetTradingCalendar() returned nil response")
+				return
 			}
 			if len(resp.TradingCalendar) != 2 {
 				t.Errorf("GetTradingCalendar() returned %d items, want 2", len(resp.TradingCalendar))
