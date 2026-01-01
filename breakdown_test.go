@@ -96,6 +96,7 @@ func TestBreakdownService_GetBreakdown(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetBreakdown() returned nil response")
+				return
 			}
 			if mockClient.LastPath != tt.wantPath {
 				t.Errorf("GetBreakdown() path = %v, want %v", mockClient.LastPath, tt.wantPath)

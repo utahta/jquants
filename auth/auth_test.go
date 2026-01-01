@@ -69,15 +69,21 @@ func TestAuth_InitFromEnv(t *testing.T) {
 	auth := NewAuth(mockClient)
 
 	// Test with no env variable
-	os.Unsetenv("JQUANTS_REFRESH_TOKEN")
+	if err := os.Unsetenv("JQUANTS_REFRESH_TOKEN"); err != nil {
+		t.Fatalf("failed to unset env: %v", err)
+	}
 	err := auth.InitFromEnv()
 	if err == nil {
 		t.Errorf("Expected error when env variable not set, got nil")
 	}
 
 	// Test with env variable set
-	os.Setenv("JQUANTS_REFRESH_TOKEN", "test-refresh-token-from-env")
-	defer os.Unsetenv("JQUANTS_REFRESH_TOKEN")
+	if err := os.Setenv("JQUANTS_REFRESH_TOKEN", "test-refresh-token-from-env"); err != nil {
+		t.Fatalf("failed to set env: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = os.Unsetenv("JQUANTS_REFRESH_TOKEN")
+	})
 
 	// Mock response（クエリパラメータを含むパスで設定）
 	mockClient.SetResponse("POST", "/token/auth_refresh?refreshtoken=test-refresh-token-from-env", TokenResponse{

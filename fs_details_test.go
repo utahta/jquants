@@ -113,6 +113,7 @@ func TestFSDetailsService_GetFSDetails(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetFSDetails() returned nil response")
+				return
 			}
 			if len(resp.FSDetails) == 0 {
 				t.Error("GetFSDetails() returned empty data")
@@ -458,6 +459,7 @@ func TestFSDetail_FinancialRatios(t *testing.T) {
 	}
 	if roe == nil {
 		t.Fatal("GetROE() returned nil")
+		return
 	}
 	expectedROE := (35175000000.0 / 311103000000.0) * 100
 	if *roe != expectedROE {
@@ -471,6 +473,7 @@ func TestFSDetail_FinancialRatios(t *testing.T) {
 	}
 	if currentRatio == nil {
 		t.Fatal("GetCurrentRatio() returned nil")
+		return
 	}
 	expectedRatio := 100000000000.0 / 78852363000000.0
 	if *currentRatio != expectedRatio {
@@ -484,6 +487,7 @@ func TestFSDetail_FinancialRatios(t *testing.T) {
 	}
 	if equityRatio == nil {
 		t.Fatal("GetEquityRatio() returned nil")
+		return
 	}
 	expectedEquityRatio := (320021000000.0 / 79205861000000.0) * 100
 	if diff := *equityRatio - expectedEquityRatio; diff > 0.0000001 || diff < -0.0000001 {
@@ -497,6 +501,7 @@ func TestFSDetail_FinancialRatios(t *testing.T) {
 	}
 	if eps == nil {
 		t.Fatal("GetBasicEPS() returned nil")
+		return
 	}
 	if *eps != 66.76 {
 		t.Errorf("GetBasicEPS() = %v, want %v", *eps, 66.76)

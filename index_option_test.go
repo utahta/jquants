@@ -85,6 +85,7 @@ func TestIndexOptionService_GetIndexOptions(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetIndexOptions() returned nil response")
+				return
 			}
 			if len(resp.IndexOptions) == 0 {
 				t.Error("GetIndexOptions() returned empty data")

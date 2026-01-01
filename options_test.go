@@ -127,6 +127,7 @@ func TestOptionsService_GetOptions(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetOptions() returned nil response")
+				return
 			}
 			if len(resp.Options) == 0 {
 				t.Error("GetOptions() returned empty data")

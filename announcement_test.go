@@ -68,6 +68,7 @@ func TestAnnouncementService_GetAnnouncement(t *testing.T) {
 			// Verify
 			if resp == nil {
 				t.Fatal("Expected response, got nil")
+				return
 			}
 			if len(resp.Announcement) != 2 {
 				t.Errorf("Expected 2 announcements, got %d", len(resp.Announcement))

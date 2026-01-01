@@ -74,6 +74,7 @@ func TestTOPIXService_GetTOPIXData(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetTOPIXData() returned nil response")
+				return
 			}
 			if len(resp.TOPIX) == 0 {
 				t.Error("GetTOPIXData() returned empty data")
@@ -171,6 +172,7 @@ func TestTOPIXService_GetLatestTOPIX(t *testing.T) {
 	}
 	if latest == nil {
 		t.Fatal("GetLatestTOPIX() returned nil")
+		return
 	}
 	if latest.Date != "2024-02-01" {
 		t.Errorf("GetLatestTOPIX() returned date %v, want 2024-02-01", latest.Date)

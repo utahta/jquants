@@ -116,6 +116,7 @@ func TestShortSellingPositionsService_GetShortSellingPositions(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetShortSellingPositions() returned nil response")
+				return
 			}
 			if len(resp.ShortSellingPositions) == 0 {
 				t.Error("GetShortSellingPositions() returned empty data")

@@ -93,29 +93,34 @@ func (a *Auth) SetRefreshToken(token string) {
 }
 
 // InitFromEnv initializes auth with refresh token from environment variable or config file
-// If no refresh token is found, it will attempt to login with JQUANTS_EMAIL and JQUANTS_PASSWORD
+// If no refresh token is found or token is invalid, it will attempt to login with JQUANTS_EMAIL and JQUANTS_PASSWORD
 func (a *Auth) InitFromEnv() error {
-	// 1. まず環境変数から取得を試みる
+	// 1. refreshToken を取得（環境変数 → ファイル）
 	refreshToken := os.Getenv("JQUANTS_REFRESH_TOKEN")
-
-	// 2. 環境変数になければ設定ファイルから読み込む
 	if refreshToken == "" {
 		var err error
 		refreshToken, err = a.loadRefreshToken()
 		if err != nil {
-			// 3. 設定ファイルもなければ、Email/Passwordでログインを試みる
-			email := os.Getenv("JQUANTS_EMAIL")
-			password := os.Getenv("JQUANTS_PASSWORD")
-			if email != "" && password != "" {
-				return a.Login(email, password)
-			}
-			// Email/Passwordもなければエラー
-			return fmt.Errorf("no refresh token found: set JQUANTS_REFRESH_TOKEN environment variable, or set JQUANTS_EMAIL and JQUANTS_PASSWORD")
+			return err // ファイル読み取りエラー（権限など）
 		}
 	}
 
-	a.refreshToken = refreshToken
-	return a.GetAccessToken()
+	// 2. refreshToken があれば GetAccessToken を試行
+	if refreshToken != "" {
+		a.refreshToken = refreshToken
+		if err := a.GetAccessToken(); err == nil {
+			return nil // 成功
+		}
+	}
+
+	// 3. refreshToken がない or GetAccessToken 失敗 → Email/Password でログイン
+	email := os.Getenv("JQUANTS_EMAIL")
+	password := os.Getenv("JQUANTS_PASSWORD")
+	if email != "" && password != "" {
+		return a.Login(email, password)
+	}
+
+	return fmt.Errorf("no authentication method available: set JQUANTS_REFRESH_TOKEN or JQUANTS_EMAIL/JQUANTS_PASSWORD")
 }
 
 // getConfigPath returns the path to the config file
@@ -128,13 +133,13 @@ func (a *Auth) getConfigPath() (string, error) {
 	// セキュリティ: パスを構築して正規化
 	configDir := filepath.Join(home, ".jquants")
 	configPath := filepath.Join(configDir, "refresh_token")
-	
+
 	// パスが適切なディレクトリ内にあることを確認
 	cleanPath := filepath.Clean(configPath)
 	if !strings.HasPrefix(cleanPath, filepath.Clean(home)) {
 		return "", fmt.Errorf("invalid config path")
 	}
-	
+
 	return cleanPath, nil
 }
 
@@ -144,7 +149,7 @@ func (a *Auth) saveRefreshToken(token string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// ディレクトリを作成
 	// #nosec G301 -- directory permissions are appropriately restrictive (0700)
 	if err := os.MkdirAll(filepath.Dir(configPath), 0700); err != nil {
@@ -161,17 +166,18 @@ func (a *Auth) saveRefreshToken(token string) error {
 }
 
 // loadRefreshToken loads the refresh token from config file
+// Returns ("", nil) if the file does not exist
 func (a *Auth) loadRefreshToken() (string, error) {
 	configPath, err := a.getConfigPath()
 	if err != nil {
 		return "", err
 	}
-	
+
 	// #nosec G304 -- configPath is validated in getConfigPath() to ensure it's within the user's home directory
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return "", fmt.Errorf("refresh token not found")
+			return "", nil // ファイルがない場合は空文字列を返す（エラーではない）
 		}
 		return "", fmt.Errorf("failed to read refresh token: %w", err)
 	}

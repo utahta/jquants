@@ -118,6 +118,7 @@ func TestFuturesService_GetFutures(t *testing.T) {
 			}
 			if resp == nil {
 				t.Fatal("GetFutures() returned nil response")
+				return
 			}
 			if len(resp.Futures) == 0 {
 				t.Error("GetFutures() returned empty data")
