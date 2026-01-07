@@ -20,28 +20,28 @@ func TestShortSellingPositionsService_GetShortSellingPositions(t *testing.T) {
 				Code:          "13660",
 				DisclosedDate: "20240801",
 			},
-			wantPath: "/markets/short_selling_positions?code=13660&disclosed_date=20240801",
+			wantPath: "/markets/short-sale-report?code=13660&disc_date=20240801",
 		},
 		{
 			name: "with code only",
 			params: ShortSellingPositionsParams{
 				Code: "86970",
 			},
-			wantPath: "/markets/short_selling_positions?code=86970",
+			wantPath: "/markets/short-sale-report?code=86970",
 		},
 		{
 			name: "with disclosed date only",
 			params: ShortSellingPositionsParams{
 				DisclosedDate: "2024-08-01",
 			},
-			wantPath: "/markets/short_selling_positions?disclosed_date=2024-08-01",
+			wantPath: "/markets/short-sale-report?disc_date=2024-08-01",
 		},
 		{
 			name: "with calculated date only",
 			params: ShortSellingPositionsParams{
 				CalculatedDate: "20240731",
 			},
-			wantPath: "/markets/short_selling_positions?calculated_date=20240731",
+			wantPath: "/markets/short-sale-report?calc_date=20240731",
 		},
 		{
 			name: "with code and date range",
@@ -50,7 +50,7 @@ func TestShortSellingPositionsService_GetShortSellingPositions(t *testing.T) {
 				DisclosedDateFrom: "20240101",
 				DisclosedDateTo:   "20241231",
 			},
-			wantPath: "/markets/short_selling_positions?code=86970&disclosed_date_from=20240101&disclosed_date_to=20241231",
+			wantPath: "/markets/short-sale-report?code=86970&disc_date_from=20240101&disc_date_to=20241231",
 		},
 		{
 			name: "with pagination key",
@@ -58,7 +58,7 @@ func TestShortSellingPositionsService_GetShortSellingPositions(t *testing.T) {
 				DisclosedDate: "20240801",
 				PaginationKey: "key123",
 			},
-			wantPath: "/markets/short_selling_positions?disclosed_date=20240801&pagination_key=key123",
+			wantPath: "/markets/short-sale-report?disc_date=20240801&pagination_key=key123",
 		},
 		{
 			name:     "with no required parameters",
@@ -76,22 +76,22 @@ func TestShortSellingPositionsService_GetShortSellingPositions(t *testing.T) {
 
 			// Mock response based on documentation sample
 			mockResponse := ShortSellingPositionsResponse{
-				ShortSellingPositions: []ShortSellingPosition{
+				Data: []ShortSellingPosition{
 					{
-						DisclosedDate:                            "2024-08-01",
-						CalculatedDate:                           "2024-07-31",
-						Code:                                     "13660",
-						ShortSellerName:                          "個人",
-						ShortSellerAddress:                       "",
-						DiscretionaryInvestmentContractorName:    "",
-						DiscretionaryInvestmentContractorAddress: "",
-						InvestmentFundName:                       "",
-						ShortPositionsToSharesOutstandingRatio:   0.0053,
-						ShortPositionsInSharesNumber:             140000,
-						ShortPositionsInTradingUnitsNumber:       140000,
-						CalculationInPreviousReportingDate:       "2024-07-22",
-						ShortPositionsInPreviousReportingRatio:   0.0043,
-						Notes:                                    "",
+						DiscDate:      "2024-08-01",
+						CalcDate:      "2024-07-31",
+						Code:          "13660",
+						SSName:        "個人",
+						SSAddr:        "",
+						DICName:       "",
+						DICAddr:       "",
+						FundName:      "",
+						ShrtPosToSO:   0.0053,
+						ShrtPosShares: 140000,
+						ShrtPosUnits:  140000,
+						PrevRptDate:   "2024-07-22",
+						PrevRptRatio:  0.0043,
+						Notes:         "",
 					},
 				},
 				PaginationKey: "",
@@ -118,7 +118,7 @@ func TestShortSellingPositionsService_GetShortSellingPositions(t *testing.T) {
 				t.Fatal("GetShortSellingPositions() returned nil response")
 				return
 			}
-			if len(resp.ShortSellingPositions) == 0 {
+			if len(resp.Data) == 0 {
 				t.Error("GetShortSellingPositions() returned empty data")
 			}
 			if mockClient.LastPath != tt.wantPath {
@@ -140,8 +140,8 @@ func TestShortSellingPositionsService_GetShortSellingPositions_RequiresParameter
 	if err == nil {
 		t.Error("GetShortSellingPositions() expected error for missing parameters but got nil")
 	}
-	if err.Error() != "either code, disclosed_date, or calculated_date parameter is required" {
-		t.Errorf("GetShortSellingPositions() error = %v, want 'either code, disclosed_date, or calculated_date parameter is required'", err)
+	if err.Error() != "either code, disc_date, or calc_date parameter is required" {
+		t.Errorf("GetShortSellingPositions() error = %v, want 'either code, disc_date, or calc_date parameter is required'", err)
 	}
 }
 
@@ -152,23 +152,23 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByCode(t *testing.
 
 	// Mock response - 最初のページ
 	mockResponse1 := ShortSellingPositionsResponse{
-		ShortSellingPositions: []ShortSellingPosition{
+		Data: []ShortSellingPosition{
 			{
-				DisclosedDate:                          "2024-08-01",
-				CalculatedDate:                         "2024-07-31",
-				Code:                                   "86970",
-				ShortSellerName:                        "ABC Investment Management",
-				ShortSellerAddress:                     "123 Main St, New York",
-				ShortPositionsToSharesOutstandingRatio: 0.0153,
-				ShortPositionsInSharesNumber:           520000,
+				DiscDate:      "2024-08-01",
+				CalcDate:      "2024-07-31",
+				Code:          "86970",
+				SSName:        "ABC Investment Management",
+				SSAddr:        "123 Main St, New York",
+				ShrtPosToSO:   0.0153,
+				ShrtPosShares: 520000,
 			},
 			{
-				DisclosedDate:                          "2024-07-25",
-				CalculatedDate:                         "2024-07-24",
-				Code:                                   "86970",
-				ShortSellerName:                        "ABC Investment Management",
-				ShortPositionsToSharesOutstandingRatio: 0.0143,
-				ShortPositionsInSharesNumber:           500000,
+				DiscDate:      "2024-07-25",
+				CalcDate:      "2024-07-24",
+				Code:          "86970",
+				SSName:        "ABC Investment Management",
+				ShrtPosToSO:   0.0143,
+				ShrtPosShares: 500000,
 			},
 		},
 		PaginationKey: "next_page_key",
@@ -176,21 +176,21 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByCode(t *testing.
 
 	// Mock response - 2ページ目
 	mockResponse2 := ShortSellingPositionsResponse{
-		ShortSellingPositions: []ShortSellingPosition{
+		Data: []ShortSellingPosition{
 			{
-				DisclosedDate:                          "2024-07-18",
-				CalculatedDate:                         "2024-07-17",
-				Code:                                   "86970",
-				ShortSellerName:                        "ABC Investment Management",
-				ShortPositionsToSharesOutstandingRatio: 0.0133,
-				ShortPositionsInSharesNumber:           480000,
+				DiscDate:      "2024-07-18",
+				CalcDate:      "2024-07-17",
+				Code:          "86970",
+				SSName:        "ABC Investment Management",
+				ShrtPosToSO:   0.0133,
+				ShrtPosShares: 480000,
 			},
 		},
 		PaginationKey: "", // 最後のページ
 	}
 
-	mockClient.SetResponse("GET", "/markets/short_selling_positions?code=86970", mockResponse1)
-	mockClient.SetResponse("GET", "/markets/short_selling_positions?code=86970&pagination_key=next_page_key", mockResponse2)
+	mockClient.SetResponse("GET", "/markets/short-sale-report?code=86970", mockResponse1)
+	mockClient.SetResponse("GET", "/markets/short-sale-report?code=86970&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
 	data, err := service.GetShortSellingPositionsByCode("86970")
@@ -216,25 +216,25 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByDisclosedDate(t 
 
 	// Mock response
 	mockResponse := ShortSellingPositionsResponse{
-		ShortSellingPositions: []ShortSellingPosition{
+		Data: []ShortSellingPosition{
 			{
-				DisclosedDate:                          "2024-08-01",
-				CalculatedDate:                         "2024-07-31",
-				Code:                                   "13660",
-				ShortSellerName:                        "個人",
-				ShortPositionsToSharesOutstandingRatio: 0.0053,
+				DiscDate:    "2024-08-01",
+				CalcDate:    "2024-07-31",
+				Code:        "13660",
+				SSName:      "個人",
+				ShrtPosToSO: 0.0053,
 			},
 			{
-				DisclosedDate:                          "2024-08-01",
-				CalculatedDate:                         "2024-07-31",
-				Code:                                   "86970",
-				ShortSellerName:                        "XYZ Capital",
-				ShortPositionsToSharesOutstandingRatio: 0.0087,
+				DiscDate:    "2024-08-01",
+				CalcDate:    "2024-07-31",
+				Code:        "86970",
+				SSName:      "XYZ Capital",
+				ShrtPosToSO: 0.0087,
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/markets/short_selling_positions?disclosed_date=20240801", mockResponse)
+	mockClient.SetResponse("GET", "/markets/short-sale-report?disc_date=20240801", mockResponse)
 
 	// Execute
 	data, err := service.GetShortSellingPositionsByDisclosedDate("20240801")
@@ -247,8 +247,8 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByDisclosedDate(t 
 		t.Errorf("GetShortSellingPositionsByDisclosedDate() returned %d items, want 2", len(data))
 	}
 	for _, item := range data {
-		if item.DisclosedDate != "2024-08-01" {
-			t.Errorf("GetShortSellingPositionsByDisclosedDate() returned date %v, want 2024-08-01", item.DisclosedDate)
+		if item.DiscDate != "2024-08-01" {
+			t.Errorf("GetShortSellingPositionsByDisclosedDate() returned date %v, want 2024-08-01", item.DiscDate)
 		}
 	}
 }
@@ -260,18 +260,18 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByCalculatedDate(t
 
 	// Mock response
 	mockResponse := ShortSellingPositionsResponse{
-		ShortSellingPositions: []ShortSellingPosition{
+		Data: []ShortSellingPosition{
 			{
-				DisclosedDate:                          "2024-08-01",
-				CalculatedDate:                         "2024-07-31",
-				Code:                                   "13660",
-				ShortSellerName:                        "個人",
-				ShortPositionsToSharesOutstandingRatio: 0.0053,
+				DiscDate:    "2024-08-01",
+				CalcDate:    "2024-07-31",
+				Code:        "13660",
+				SSName:      "個人",
+				ShrtPosToSO: 0.0053,
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/markets/short_selling_positions?calculated_date=20240731", mockResponse)
+	mockClient.SetResponse("GET", "/markets/short-sale-report?calc_date=20240731", mockResponse)
 
 	// Execute
 	data, err := service.GetShortSellingPositionsByCalculatedDate("20240731")
@@ -283,8 +283,8 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByCalculatedDate(t
 	if len(data) != 1 {
 		t.Errorf("GetShortSellingPositionsByCalculatedDate() returned %d items, want 1", len(data))
 	}
-	if data[0].CalculatedDate != "2024-07-31" {
-		t.Errorf("GetShortSellingPositionsByCalculatedDate() returned date %v, want 2024-07-31", data[0].CalculatedDate)
+	if data[0].CalcDate != "2024-07-31" {
+		t.Errorf("GetShortSellingPositionsByCalculatedDate() returned date %v, want 2024-07-31", data[0].CalcDate)
 	}
 }
 
@@ -295,21 +295,21 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByCodeAndDateRange
 
 	// Mock response
 	mockResponse := ShortSellingPositionsResponse{
-		ShortSellingPositions: []ShortSellingPosition{
+		Data: []ShortSellingPosition{
 			{
-				DisclosedDate:                          "2024-03-01",
-				Code:                                   "86970",
-				ShortPositionsToSharesOutstandingRatio: 0.0087,
+				DiscDate:    "2024-03-01",
+				Code:        "86970",
+				ShrtPosToSO: 0.0087,
 			},
 			{
-				DisclosedDate:                          "2024-02-01",
-				Code:                                   "86970",
-				ShortPositionsToSharesOutstandingRatio: 0.0075,
+				DiscDate:    "2024-02-01",
+				Code:        "86970",
+				ShrtPosToSO: 0.0075,
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/markets/short_selling_positions?code=86970&disclosed_date_from=20240101&disclosed_date_to=20240331", mockResponse)
+	mockClient.SetResponse("GET", "/markets/short-sale-report?code=86970&disc_date_from=20240101&disc_date_to=20240331", mockResponse)
 
 	// Execute
 	data, err := service.GetShortSellingPositionsByCodeAndDateRange("86970", "20240101", "20240331")
@@ -330,9 +330,9 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByCodeAndDateRange
 
 func TestShortSellingPosition_GetPositionChange(t *testing.T) {
 	position := ShortSellingPosition{
-		ShortPositionsToSharesOutstandingRatio: 0.0053,
-		ShortPositionsInSharesNumber:           140000,
-		ShortPositionsInPreviousReportingRatio: 0.0043,
+		ShrtPosToSO:   0.0053,
+		ShrtPosShares: 140000,
+		PrevRptRatio:  0.0043,
 	}
 
 	change := position.GetPositionChange()
@@ -345,8 +345,8 @@ func TestShortSellingPosition_GetPositionChange(t *testing.T) {
 
 func TestShortSellingPosition_GetPositionChangeRatio(t *testing.T) {
 	position := ShortSellingPosition{
-		ShortPositionsToSharesOutstandingRatio: 0.0053,
-		ShortPositionsInPreviousReportingRatio: 0.0043,
+		ShrtPosToSO:  0.0053,
+		PrevRptRatio: 0.0043,
 	}
 
 	expected := ((0.0053 - 0.0043) / 0.0043) * 100
@@ -359,8 +359,8 @@ func TestShortSellingPosition_GetPositionChangeRatio(t *testing.T) {
 
 func TestShortSellingPosition_GetPositionChangeRatio_ZeroPrevious(t *testing.T) {
 	position := ShortSellingPosition{
-		ShortPositionsToSharesOutstandingRatio: 0.0053,
-		ShortPositionsInPreviousReportingRatio: 0,
+		ShrtPosToSO:  0.0053,
+		PrevRptRatio: 0,
 	}
 
 	got := position.GetPositionChangeRatio()
@@ -379,24 +379,24 @@ func TestShortSellingPosition_IsIncrease(t *testing.T) {
 		{
 			name: "increase",
 			position: ShortSellingPosition{
-				ShortPositionsToSharesOutstandingRatio: 0.0053,
-				ShortPositionsInPreviousReportingRatio: 0.0043,
+				ShrtPosToSO:  0.0053,
+				PrevRptRatio: 0.0043,
 			},
 			want: true,
 		},
 		{
 			name: "decrease",
 			position: ShortSellingPosition{
-				ShortPositionsToSharesOutstandingRatio: 0.0043,
-				ShortPositionsInPreviousReportingRatio: 0.0053,
+				ShrtPosToSO:  0.0043,
+				PrevRptRatio: 0.0053,
 			},
 			want: false,
 		},
 		{
 			name: "no change",
 			position: ShortSellingPosition{
-				ShortPositionsToSharesOutstandingRatio: 0.0053,
-				ShortPositionsInPreviousReportingRatio: 0.0053,
+				ShrtPosToSO:  0.0053,
+				PrevRptRatio: 0.0053,
 			},
 			want: false,
 		},
@@ -420,23 +420,23 @@ func TestShortSellingPosition_HasDiscretionaryInvestment(t *testing.T) {
 		{
 			name: "has discretionary investment",
 			position: ShortSellingPosition{
-				DiscretionaryInvestmentContractorName: "ABC Management",
+				DICName: "ABC Management",
 			},
 			want: true,
 		},
 		{
 			name: "has investment fund name",
 			position: ShortSellingPosition{
-				InvestmentFundName: "XYZ Fund",
+				FundName: "XYZ Fund",
 			},
 			want: true,
 		},
 		{
 			name: "no discretionary investment",
 			position: ShortSellingPosition{
-				DiscretionaryInvestmentContractorName:    "",
-				DiscretionaryInvestmentContractorAddress: "",
-				InvestmentFundName:                       "",
+				DICName:  "",
+				DICAddr:  "",
+				FundName: "",
 			},
 			want: false,
 		},
@@ -460,14 +460,14 @@ func TestShortSellingPosition_IsIndividual(t *testing.T) {
 		{
 			name: "individual",
 			position: ShortSellingPosition{
-				ShortSellerName: "個人",
+				SSName: "個人",
 			},
 			want: true,
 		},
 		{
 			name: "institution",
 			position: ShortSellingPosition{
-				ShortSellerName: "ABC Investment",
+				SSName: "ABC Investment",
 			},
 			want: false,
 		},
@@ -484,7 +484,7 @@ func TestShortSellingPosition_IsIndividual(t *testing.T) {
 
 func TestShortSellingPosition_GetPositionPercentage(t *testing.T) {
 	position := ShortSellingPosition{
-		ShortPositionsToSharesOutstandingRatio: 0.0053,
+		ShrtPosToSO: 0.0053,
 	}
 
 	expected := 0.53
@@ -497,7 +497,7 @@ func TestShortSellingPosition_GetPositionPercentage(t *testing.T) {
 
 func TestShortSellingPosition_GetPreviousPositionPercentage(t *testing.T) {
 	position := ShortSellingPosition{
-		ShortPositionsInPreviousReportingRatio: 0.0043,
+		PrevRptRatio: 0.0043,
 	}
 
 	expected := 0.43
@@ -514,7 +514,7 @@ func TestShortSellingPositionsService_GetShortSellingPositions_Error(t *testing.
 	service := NewShortSellingPositionsService(mockClient)
 
 	// Set error response
-	mockClient.SetError("GET", "/markets/short_selling_positions?code=86970", fmt.Errorf("unauthorized"))
+	mockClient.SetError("GET", "/markets/short-sale-report?code=86970", fmt.Errorf("unauthorized"))
 
 	// Execute
 	_, err := service.GetShortSellingPositions(ShortSellingPositionsParams{Code: "86970"})

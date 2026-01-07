@@ -22,7 +22,7 @@ func TestFuturesService_GetFutures(t *testing.T) {
 				ContractFlag:  "1",
 				PaginationKey: "key123",
 			},
-			wantPath: "/derivatives/futures?date=20240723&category=TOPIXF&contract_flag=1&pagination_key=key123",
+			wantPath: "/derivatives/bars/daily/futures?date=20240723&category=TOPIXF&contract_flag=1&pagination_key=key123",
 		},
 		{
 			name: "with date and category",
@@ -30,14 +30,14 @@ func TestFuturesService_GetFutures(t *testing.T) {
 				Date:     "20240723",
 				Category: "NK225F",
 			},
-			wantPath: "/derivatives/futures?date=20240723&category=NK225F",
+			wantPath: "/derivatives/bars/daily/futures?date=20240723&category=NK225F",
 		},
 		{
 			name: "with date only",
 			params: FuturesParams{
 				Date: "2024-07-23",
 			},
-			wantPath: "/derivatives/futures?date=2024-07-23",
+			wantPath: "/derivatives/bars/daily/futures?date=2024-07-23",
 		},
 		{
 			name: "with date and central contract flag",
@@ -45,7 +45,7 @@ func TestFuturesService_GetFutures(t *testing.T) {
 				Date:         "20240723",
 				ContractFlag: "1",
 			},
-			wantPath: "/derivatives/futures?date=20240723&contract_flag=1",
+			wantPath: "/derivatives/bars/daily/futures?date=20240723&contract_flag=1",
 		},
 		{
 			name:     "without date (should error)",
@@ -63,37 +63,37 @@ func TestFuturesService_GetFutures(t *testing.T) {
 
 			// Mock response based on documentation sample
 			mockResponse := FuturesResponse{
-				Futures: []Futures{
+				Data: []Futures{
 					{
-						Code:                           "169090005",
-						DerivativesProductCategory:     "TOPIXF",
-						Date:                           "2024-07-23",
-						ContractMonth:                  "2024-09",
-						EmergencyMarginTriggerDivision: "002",
-						WholeDayOpen:                   2825.5,
-						WholeDayHigh:                   2853.0,
-						WholeDayLow:                    2825.5,
-						WholeDayClose:                  2829.0,
-						NightSessionOpen:               2825.5,
-						NightSessionHigh:               2850.0,
-						NightSessionLow:                2825.5,
-						NightSessionClose:              2845.0,
-						DaySessionOpen:                 2850.5,
-						DaySessionHigh:                 2853.0,
-						DaySessionLow:                  2826.0,
-						DaySessionClose:                2829.0,
-						MorningSessionOpen:             "",
-						MorningSessionHigh:             "",
-						MorningSessionLow:              "",
-						MorningSessionClose:            "",
-						Volume:                         42910.0,
-						OpenInterest:                   479812.0,
-						TurnoverValue:                  1217918971856.0,
-						VolumeOnlyAuction:              floatPtr(40405.0),
-						SettlementPrice:                floatPtr(2829.0),
-						LastTradingDay:                 stringPtr("2024-09-12"),
-						SpecialQuotationDay:            stringPtr("2024-09-13"),
-						CentralContractMonthFlag:       stringPtr("1"),
+						Code:         "169090005",
+						ProdCat:      "TOPIXF",
+						Date:         "2024-07-23",
+						CM:           "2024-09",
+						EmMrgnTrgDiv: "002",
+						O:            2825.5,
+						H:            2853.0,
+						L:            2825.5,
+						C:            2829.0,
+						EO:           2825.5,
+						EH:           2850.0,
+						EL:           2825.5,
+						EC:           2845.0,
+						AO:           2850.5,
+						AH:           2853.0,
+						AL:           2826.0,
+						AC:           2829.0,
+						MO:           "",
+						MH:           "",
+						ML:           "",
+						MC:           "",
+						Vo:           42910.0,
+						OI:           479812.0,
+						Va:           1217918971856.0,
+						VoOA:         floatPtr(40405.0),
+						Settle:       floatPtr(2829.0),
+						LTD:          stringPtr("2024-09-12"),
+						SQD:          stringPtr("2024-09-13"),
+						CCMFlag:      stringPtr("1"),
 					},
 				},
 				PaginationKey: "",
@@ -120,7 +120,7 @@ func TestFuturesService_GetFutures(t *testing.T) {
 				t.Fatal("GetFutures() returned nil response")
 				return
 			}
-			if len(resp.Futures) == 0 {
+			if len(resp.Data) == 0 {
 				t.Error("GetFutures() returned empty data")
 			}
 			if mockClient.LastPath != tt.wantPath {
@@ -154,18 +154,18 @@ func TestFuturesService_GetFuturesByDate(t *testing.T) {
 
 	// Mock response - 最初のページ
 	mockResponse1 := FuturesResponse{
-		Futures: []Futures{
+		Data: []Futures{
 			{
-				Code:                       "169090005",
-				DerivativesProductCategory: "TOPIXF",
-				Date:                       "2024-07-23",
-				ContractMonth:              "2024-09",
+				Code:    "169090005",
+				ProdCat: "TOPIXF",
+				Date:    "2024-07-23",
+				CM:      "2024-09",
 			},
 			{
-				Code:                       "169120005",
-				DerivativesProductCategory: "TOPIXF",
-				Date:                       "2024-07-23",
-				ContractMonth:              "2024-12",
+				Code:    "169120005",
+				ProdCat: "TOPIXF",
+				Date:    "2024-07-23",
+				CM:      "2024-12",
 			},
 		},
 		PaginationKey: "next_page_key",
@@ -173,19 +173,19 @@ func TestFuturesService_GetFuturesByDate(t *testing.T) {
 
 	// Mock response - 2ページ目
 	mockResponse2 := FuturesResponse{
-		Futures: []Futures{
+		Data: []Futures{
 			{
-				Code:                       "167090018",
-				DerivativesProductCategory: "NK225F",
-				Date:                       "2024-07-23",
-				ContractMonth:              "2024-09",
+				Code:    "167090018",
+				ProdCat: "NK225F",
+				Date:    "2024-07-23",
+				CM:      "2024-09",
 			},
 		},
 		PaginationKey: "", // 最後のページ
 	}
 
-	mockClient.SetResponse("GET", "/derivatives/futures?date=20240723", mockResponse1)
-	mockClient.SetResponse("GET", "/derivatives/futures?date=20240723&pagination_key=next_page_key", mockResponse2)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/futures?date=20240723", mockResponse1)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/futures?date=20240723&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
 	data, err := service.GetFuturesByDate("20240723")
@@ -211,23 +211,23 @@ func TestFuturesService_GetFuturesByCategory(t *testing.T) {
 
 	// Mock response
 	mockResponse := FuturesResponse{
-		Futures: []Futures{
+		Data: []Futures{
 			{
-				Code:                       "167090018",
-				DerivativesProductCategory: "NK225F",
-				Date:                       "2024-07-23",
-				ContractMonth:              "2024-09",
+				Code:    "167090018",
+				ProdCat: "NK225F",
+				Date:    "2024-07-23",
+				CM:      "2024-09",
 			},
 			{
-				Code:                       "167120018",
-				DerivativesProductCategory: "NK225F",
-				Date:                       "2024-07-23",
-				ContractMonth:              "2024-12",
+				Code:    "167120018",
+				ProdCat: "NK225F",
+				Date:    "2024-07-23",
+				CM:      "2024-12",
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/derivatives/futures?date=20240723&category=NK225F", mockResponse)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/futures?date=20240723&category=NK225F", mockResponse)
 
 	// Execute
 	data, err := service.GetFuturesByCategory("20240723", "NK225F")
@@ -240,8 +240,8 @@ func TestFuturesService_GetFuturesByCategory(t *testing.T) {
 		t.Errorf("GetFuturesByCategory() returned %d items, want 2", len(data))
 	}
 	for _, item := range data {
-		if item.DerivativesProductCategory != "NK225F" {
-			t.Errorf("GetFuturesByCategory() returned category %v, want NK225F", item.DerivativesProductCategory)
+		if item.ProdCat != "NK225F" {
+			t.Errorf("GetFuturesByCategory() returned category %v, want NK225F", item.ProdCat)
 		}
 	}
 }
@@ -253,25 +253,25 @@ func TestFuturesService_GetCentralContractMonthFutures(t *testing.T) {
 
 	// Mock response
 	mockResponse := FuturesResponse{
-		Futures: []Futures{
+		Data: []Futures{
 			{
-				Code:                       "167090018",
-				DerivativesProductCategory: "NK225F",
-				Date:                       "2024-07-23",
-				ContractMonth:              "2024-09",
-				CentralContractMonthFlag:   stringPtr("1"),
+				Code:    "167090018",
+				ProdCat: "NK225F",
+				Date:    "2024-07-23",
+				CM:      "2024-09",
+				CCMFlag: stringPtr("1"),
 			},
 			{
-				Code:                       "169090005",
-				DerivativesProductCategory: "TOPIXF",
-				Date:                       "2024-07-23",
-				ContractMonth:              "2024-09",
-				CentralContractMonthFlag:   stringPtr("1"),
+				Code:    "169090005",
+				ProdCat: "TOPIXF",
+				Date:    "2024-07-23",
+				CM:      "2024-09",
+				CCMFlag: stringPtr("1"),
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/derivatives/futures?date=20240723&contract_flag=1", mockResponse)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/futures?date=20240723&contract_flag=1", mockResponse)
 
 	// Execute
 	data, err := service.GetCentralContractMonthFutures("20240723")
@@ -302,7 +302,7 @@ func TestFutures_HelperMethods(t *testing.T) {
 		{
 			name: "emergency margin triggered",
 			futures: Futures{
-				EmergencyMarginTriggerDivision: "001",
+				EmMrgnTrgDiv: "001",
 			},
 			isEmergencyMarginTriggered: true,
 			isCentralContractMonth:     false,
@@ -312,10 +312,10 @@ func TestFutures_HelperMethods(t *testing.T) {
 		{
 			name: "normal settlement price",
 			futures: Futures{
-				EmergencyMarginTriggerDivision: "002",
-				CentralContractMonthFlag:       stringPtr("1"),
-				NightSessionOpen:               2825.5,
-				MorningSessionOpen:             "",
+				EmMrgnTrgDiv: "002",
+				CCMFlag:      stringPtr("1"),
+				EO:           2825.5,
+				MO:           "",
 			},
 			isEmergencyMarginTriggered: false,
 			isCentralContractMonth:     true,
@@ -325,10 +325,10 @@ func TestFutures_HelperMethods(t *testing.T) {
 		{
 			name: "no night session on first day",
 			futures: Futures{
-				EmergencyMarginTriggerDivision: "002",
-				CentralContractMonthFlag:       stringPtr("0"),
-				NightSessionOpen:               "",
-				MorningSessionOpen:             2500.0,
+				EmMrgnTrgDiv: "002",
+				CCMFlag:      stringPtr("0"),
+				EO:           "",
+				MO:           2500.0,
 			},
 			isEmergencyMarginTriggered: false,
 			isCentralContractMonth:     false,
@@ -358,14 +358,14 @@ func TestFutures_HelperMethods(t *testing.T) {
 func TestFutures_SessionGetters(t *testing.T) {
 	// Setup
 	futures := Futures{
-		NightSessionOpen:    2825.5,
-		NightSessionHigh:    2850.0,
-		NightSessionLow:     2825.5,
-		NightSessionClose:   2845.0,
-		MorningSessionOpen:  "",
-		MorningSessionHigh:  "",
-		MorningSessionLow:   "",
-		MorningSessionClose: "",
+		EO: 2825.5,
+		EH: 2850.0,
+		EL: 2825.5,
+		EC: 2845.0,
+		MO: "",
+		MH: "",
+		ML: "",
+		MC: "",
 	}
 
 	// Test night session getters
@@ -406,24 +406,24 @@ func TestFutures_GetDayNightGap(t *testing.T) {
 		{
 			name: "positive gap",
 			futures: Futures{
-				NightSessionClose: 2845.0,
-				DaySessionOpen:    2850.5,
+				EC: 2845.0,
+				AO: 2850.5,
 			},
 			want: floatPtr(5.5),
 		},
 		{
 			name: "negative gap",
 			futures: Futures{
-				NightSessionClose: 2850.0,
-				DaySessionOpen:    2845.0,
+				EC: 2850.0,
+				AO: 2845.0,
 			},
 			want: floatPtr(-5.0),
 		},
 		{
 			name: "no night session",
 			futures: Futures{
-				NightSessionClose: "",
-				DaySessionOpen:    2850.5,
+				EC: "",
+				AO: 2850.5,
 			},
 			want: nil,
 		},
@@ -444,8 +444,8 @@ func TestFutures_GetDayNightGap(t *testing.T) {
 func TestFutures_GetWholeDayRange(t *testing.T) {
 	// Setup
 	futures := Futures{
-		WholeDayHigh: 2853.0,
-		WholeDayLow:  2825.5,
+		H: 2853.0,
+		L: 2825.5,
 	}
 
 	// Execute
@@ -461,37 +461,37 @@ func TestFutures_GetWholeDayRange(t *testing.T) {
 func TestFuturesResponse_UnmarshalJSON(t *testing.T) {
 	// Test JSON with mixed types
 	jsonData := `{
-		"futures": [
+		"data": [
 			{
 				"Code": "169090005",
-				"DerivativesProductCategory": "TOPIXF",
+				"ProdCat": "TOPIXF",
 				"Date": "2024-07-23",
-				"ContractMonth": "2024-09",
-				"EmergencyMarginTriggerDivision": "002",
-				"WholeDayOpen": 2825.5,
-				"WholeDayHigh": 2853.0,
-				"WholeDayLow": 2825.5,
-				"WholeDayClose": 2829.0,
-				"NightSessionOpen": 2825.5,
-				"NightSessionHigh": 2850.0,
-				"NightSessionLow": 2825.5,
-				"NightSessionClose": 2845.0,
-				"DaySessionOpen": 2850.5,
-				"DaySessionHigh": 2853.0,
-				"DaySessionLow": 2826.0,
-				"DaySessionClose": 2829.0,
-				"MorningSessionOpen": "",
-				"MorningSessionHigh": "",
-				"MorningSessionLow": "",
-				"MorningSessionClose": "",
-				"Volume": 42910.0,
-				"OpenInterest": 479812.0,
-				"TurnoverValue": 1217918971856.0,
-				"Volume(OnlyAuction)": 40405.0,
-				"SettlementPrice": 2829.0,
-				"LastTradingDay": "2024-09-12",
-				"SpecialQuotationDay": "2024-09-13",
-				"CentralContractMonthFlag": "1"
+				"CM": "2024-09",
+				"EmMrgnTrgDiv": "002",
+				"O": 2825.5,
+				"H": 2853.0,
+				"L": 2825.5,
+				"C": 2829.0,
+				"EO": 2825.5,
+				"EH": 2850.0,
+				"EL": 2825.5,
+				"EC": 2845.0,
+				"AO": 2850.5,
+				"AH": 2853.0,
+				"AL": 2826.0,
+				"AC": 2829.0,
+				"MO": "",
+				"MH": "",
+				"ML": "",
+				"MC": "",
+				"Vo": 42910.0,
+				"OI": 479812.0,
+				"Va": 1217918971856.0,
+				"VoOA": 40405.0,
+				"Settle": 2829.0,
+				"LTD": "2024-09-12",
+				"SQD": "2024-09-13",
+				"CCMFlag": "1"
 			}
 		],
 		"pagination_key": "next_key"
@@ -505,16 +505,16 @@ func TestFuturesResponse_UnmarshalJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("UnmarshalJSON() error = %v", err)
 	}
-	if len(resp.Futures) != 1 {
-		t.Fatalf("UnmarshalJSON() returned %d items, want 1", len(resp.Futures))
+	if len(resp.Data) != 1 {
+		t.Fatalf("UnmarshalJSON() returned %d items, want 1", len(resp.Data))
 	}
 
-	f := resp.Futures[0]
+	f := resp.Data[0]
 	if f.Code != "169090005" {
 		t.Errorf("Code = %v, want 169090005", f.Code)
 	}
-	if f.WholeDayOpen != 2825.5 {
-		t.Errorf("WholeDayOpen = %v, want 2825.5", f.WholeDayOpen)
+	if f.O != 2825.5 {
+		t.Errorf("O = %v, want 2825.5", f.O)
 	}
 	if !f.HasNightSession() {
 		t.Error("HasNightSession() = false, want true")
@@ -522,11 +522,11 @@ func TestFuturesResponse_UnmarshalJSON(t *testing.T) {
 	if f.HasMorningSession() {
 		t.Error("HasMorningSession() = true, want false")
 	}
-	if f.VolumeOnlyAuction == nil || *f.VolumeOnlyAuction != 40405.0 {
-		t.Errorf("VolumeOnlyAuction = %v, want 40405.0", f.VolumeOnlyAuction)
+	if f.VoOA == nil || *f.VoOA != 40405.0 {
+		t.Errorf("VoOA = %v, want 40405.0", f.VoOA)
 	}
-	if f.CentralContractMonthFlag == nil || *f.CentralContractMonthFlag != "1" {
-		t.Errorf("CentralContractMonthFlag = %v, want 1", f.CentralContractMonthFlag)
+	if f.CCMFlag == nil || *f.CCMFlag != "1" {
+		t.Errorf("CCMFlag = %v, want 1", f.CCMFlag)
 	}
 }
 
@@ -536,7 +536,7 @@ func TestFuturesService_GetFutures_Error(t *testing.T) {
 	service := NewFuturesService(mockClient)
 
 	// Set error response
-	mockClient.SetError("GET", "/derivatives/futures?date=20240723", fmt.Errorf("unauthorized"))
+	mockClient.SetError("GET", "/derivatives/bars/daily/futures?date=20240723", fmt.Errorf("unauthorized"))
 
 	// Execute
 	_, err := service.GetFutures(FuturesParams{Date: "20240723"})

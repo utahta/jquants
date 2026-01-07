@@ -20,21 +20,21 @@ func TestShortSellingService_GetShortSelling(t *testing.T) {
 				From:         "20220101",
 				To:           "20221231",
 			},
-			wantPath: "/markets/short_selling?sector33code=0050&from=20220101&to=20221231",
+			wantPath: "/markets/short-ratio?s33=0050&from=20220101&to=20221231",
 		},
 		{
 			name: "with sector only",
 			params: ShortSellingParams{
 				Sector33Code: "0050",
 			},
-			wantPath: "/markets/short_selling?sector33code=0050",
+			wantPath: "/markets/short-ratio?s33=0050",
 		},
 		{
 			name: "with date only",
 			params: ShortSellingParams{
 				Date: "20221025",
 			},
-			wantPath: "/markets/short_selling?date=20221025",
+			wantPath: "/markets/short-ratio?date=20221025",
 		},
 		{
 			name: "with date and pagination key",
@@ -42,7 +42,7 @@ func TestShortSellingService_GetShortSelling(t *testing.T) {
 				Date:          "20221025",
 				PaginationKey: "key123",
 			},
-			wantPath: "/markets/short_selling?date=20221025&pagination_key=key123",
+			wantPath: "/markets/short-ratio?date=20221025&pagination_key=key123",
 		},
 	}
 
@@ -54,13 +54,13 @@ func TestShortSellingService_GetShortSelling(t *testing.T) {
 
 			// Mock response based on documentation sample
 			mockResponse := ShortSellingResponse{
-				ShortSelling: []ShortSelling{
+				Data: []ShortSelling{
 					{
-						Date:         "2022-10-25",
-						Sector33Code: "0050",
-						SellingExcludingShortSellingTurnoverValue:    1333126400.0,
-						ShortSellingWithRestrictionsTurnoverValue:    787355200.0,
-						ShortSellingWithoutRestrictionsTurnoverValue: 149084300.0,
+						Date:          "2022-10-25",
+						S33:           "0050",
+						SellExShortVa: 1333126400.0,
+						ShrtWithResVa: 787355200.0,
+						ShrtNoResVa:   149084300.0,
 					},
 				},
 				PaginationKey: "",
@@ -78,7 +78,7 @@ func TestShortSellingService_GetShortSelling(t *testing.T) {
 				t.Fatal("GetShortSelling() returned nil response")
 				return
 			}
-			if len(resp.ShortSelling) == 0 {
+			if len(resp.Data) == 0 {
 				t.Error("GetShortSelling() returned empty data")
 			}
 			if mockClient.LastPath != tt.wantPath {
@@ -100,8 +100,8 @@ func TestShortSellingService_GetShortSelling_RequiresSectorOrDate(t *testing.T) 
 	if err == nil {
 		t.Error("GetShortSelling() expected error for missing sector and date but got nil")
 	}
-	if err.Error() != "either sector33code or date parameter is required" {
-		t.Errorf("GetShortSelling() error = %v, want 'either sector33code or date parameter is required'", err)
+	if err.Error() != "either s33 or date parameter is required" {
+		t.Errorf("GetShortSelling() error = %v, want 'either s33 or date parameter is required'", err)
 	}
 }
 
@@ -112,20 +112,20 @@ func TestShortSellingService_GetShortSellingBySector(t *testing.T) {
 
 	// Mock response - 最初のページ
 	mockResponse1 := ShortSellingResponse{
-		ShortSelling: []ShortSelling{
+		Data: []ShortSelling{
 			{
-				Date:         "2022-10-25",
-				Sector33Code: "0050",
-				SellingExcludingShortSellingTurnoverValue:    1333126400.0,
-				ShortSellingWithRestrictionsTurnoverValue:    787355200.0,
-				ShortSellingWithoutRestrictionsTurnoverValue: 149084300.0,
+				Date:          "2022-10-25",
+				S33:           "0050",
+				SellExShortVa: 1333126400.0,
+				ShrtWithResVa: 787355200.0,
+				ShrtNoResVa:   149084300.0,
 			},
 			{
-				Date:         "2022-10-24",
-				Sector33Code: "0050",
-				SellingExcludingShortSellingTurnoverValue:    1200000000.0,
-				ShortSellingWithRestrictionsTurnoverValue:    750000000.0,
-				ShortSellingWithoutRestrictionsTurnoverValue: 140000000.0,
+				Date:          "2022-10-24",
+				S33:           "0050",
+				SellExShortVa: 1200000000.0,
+				ShrtWithResVa: 750000000.0,
+				ShrtNoResVa:   140000000.0,
 			},
 		},
 		PaginationKey: "next_page_key",
@@ -133,20 +133,20 @@ func TestShortSellingService_GetShortSellingBySector(t *testing.T) {
 
 	// Mock response - 2ページ目
 	mockResponse2 := ShortSellingResponse{
-		ShortSelling: []ShortSelling{
+		Data: []ShortSelling{
 			{
-				Date:         "2022-10-21",
-				Sector33Code: "0050",
-				SellingExcludingShortSellingTurnoverValue:    1100000000.0,
-				ShortSellingWithRestrictionsTurnoverValue:    700000000.0,
-				ShortSellingWithoutRestrictionsTurnoverValue: 130000000.0,
+				Date:          "2022-10-21",
+				S33:           "0050",
+				SellExShortVa: 1100000000.0,
+				ShrtWithResVa: 700000000.0,
+				ShrtNoResVa:   130000000.0,
 			},
 		},
 		PaginationKey: "", // 最後のページ
 	}
 
-	mockClient.SetResponse("GET", "/markets/short_selling?sector33code=0050", mockResponse1)
-	mockClient.SetResponse("GET", "/markets/short_selling?sector33code=0050&pagination_key=next_page_key", mockResponse2)
+	mockClient.SetResponse("GET", "/markets/short-ratio?s33=0050", mockResponse1)
+	mockClient.SetResponse("GET", "/markets/short-ratio?s33=0050&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
 	data, err := service.GetShortSellingBySector("0050")
@@ -159,8 +159,8 @@ func TestShortSellingService_GetShortSellingBySector(t *testing.T) {
 		t.Errorf("GetShortSellingBySector() returned %d items, want 3", len(data))
 	}
 	for _, item := range data {
-		if item.Sector33Code != "0050" {
-			t.Errorf("GetShortSellingBySector() returned sector33code %v, want 0050", item.Sector33Code)
+		if item.S33 != "0050" {
+			t.Errorf("GetShortSellingBySector() returned s33 %v, want 0050", item.S33)
 		}
 	}
 }
@@ -172,25 +172,25 @@ func TestShortSellingService_GetShortSellingByDate(t *testing.T) {
 
 	// Mock response
 	mockResponse := ShortSellingResponse{
-		ShortSelling: []ShortSelling{
+		Data: []ShortSelling{
 			{
-				Date:         "2022-10-25",
-				Sector33Code: "0050",
-				SellingExcludingShortSellingTurnoverValue:    1333126400.0,
-				ShortSellingWithRestrictionsTurnoverValue:    787355200.0,
-				ShortSellingWithoutRestrictionsTurnoverValue: 149084300.0,
+				Date:          "2022-10-25",
+				S33:           "0050",
+				SellExShortVa: 1333126400.0,
+				ShrtWithResVa: 787355200.0,
+				ShrtNoResVa:   149084300.0,
 			},
 			{
-				Date:         "2022-10-25",
-				Sector33Code: "1050",
-				SellingExcludingShortSellingTurnoverValue:    500000000.0,
-				ShortSellingWithRestrictionsTurnoverValue:    300000000.0,
-				ShortSellingWithoutRestrictionsTurnoverValue: 50000000.0,
+				Date:          "2022-10-25",
+				S33:           "1050",
+				SellExShortVa: 500000000.0,
+				ShrtWithResVa: 300000000.0,
+				ShrtNoResVa:   50000000.0,
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/markets/short_selling?date=20221025", mockResponse)
+	mockClient.SetResponse("GET", "/markets/short-ratio?date=20221025", mockResponse)
 
 	// Execute
 	data, err := service.GetShortSellingByDate("20221025")
@@ -216,25 +216,25 @@ func TestShortSellingService_GetShortSellingBySectorAndDateRange(t *testing.T) {
 
 	// Mock response
 	mockResponse := ShortSellingResponse{
-		ShortSelling: []ShortSelling{
+		Data: []ShortSelling{
 			{
-				Date:         "2022-10-25",
-				Sector33Code: "0050",
-				SellingExcludingShortSellingTurnoverValue:    1333126400.0,
-				ShortSellingWithRestrictionsTurnoverValue:    787355200.0,
-				ShortSellingWithoutRestrictionsTurnoverValue: 149084300.0,
+				Date:          "2022-10-25",
+				S33:           "0050",
+				SellExShortVa: 1333126400.0,
+				ShrtWithResVa: 787355200.0,
+				ShrtNoResVa:   149084300.0,
 			},
 			{
-				Date:         "2022-10-24",
-				Sector33Code: "0050",
-				SellingExcludingShortSellingTurnoverValue:    1200000000.0,
-				ShortSellingWithRestrictionsTurnoverValue:    750000000.0,
-				ShortSellingWithoutRestrictionsTurnoverValue: 140000000.0,
+				Date:          "2022-10-24",
+				S33:           "0050",
+				SellExShortVa: 1200000000.0,
+				ShrtWithResVa: 750000000.0,
+				ShrtNoResVa:   140000000.0,
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/markets/short_selling?sector33code=0050&from=20220101&to=20221231", mockResponse)
+	mockClient.SetResponse("GET", "/markets/short-ratio?s33=0050&from=20220101&to=20221231", mockResponse)
 
 	// Execute
 	data, err := service.GetShortSellingBySectorAndDateRange("0050", "20220101", "20221231")
@@ -247,16 +247,16 @@ func TestShortSellingService_GetShortSellingBySectorAndDateRange(t *testing.T) {
 		t.Errorf("GetShortSellingBySectorAndDateRange() returned %d items, want 2", len(data))
 	}
 	for _, item := range data {
-		if item.Sector33Code != "0050" {
-			t.Errorf("GetShortSellingBySectorAndDateRange() returned sector33code %v, want 0050", item.Sector33Code)
+		if item.S33 != "0050" {
+			t.Errorf("GetShortSellingBySectorAndDateRange() returned s33 %v, want 0050", item.S33)
 		}
 	}
 }
 
 func TestShortSelling_GetTotalShortSellingValue(t *testing.T) {
 	data := ShortSelling{
-		ShortSellingWithRestrictionsTurnoverValue:    787355200.0,
-		ShortSellingWithoutRestrictionsTurnoverValue: 149084300.0,
+		ShrtWithResVa: 787355200.0,
+		ShrtNoResVa:   149084300.0,
 	}
 
 	expected := 787355200.0 + 149084300.0
@@ -269,9 +269,9 @@ func TestShortSelling_GetTotalShortSellingValue(t *testing.T) {
 
 func TestShortSelling_GetTotalTurnoverValue(t *testing.T) {
 	data := ShortSelling{
-		SellingExcludingShortSellingTurnoverValue:    1333126400.0,
-		ShortSellingWithRestrictionsTurnoverValue:    787355200.0,
-		ShortSellingWithoutRestrictionsTurnoverValue: 149084300.0,
+		SellExShortVa: 1333126400.0,
+		ShrtWithResVa: 787355200.0,
+		ShrtNoResVa:   149084300.0,
 	}
 
 	expected := 1333126400.0 + 787355200.0 + 149084300.0
@@ -284,9 +284,9 @@ func TestShortSelling_GetTotalTurnoverValue(t *testing.T) {
 
 func TestShortSelling_GetShortSellingRatio(t *testing.T) {
 	data := ShortSelling{
-		SellingExcludingShortSellingTurnoverValue:    1333126400.0,
-		ShortSellingWithRestrictionsTurnoverValue:    787355200.0,
-		ShortSellingWithoutRestrictionsTurnoverValue: 149084300.0,
+		SellExShortVa: 1333126400.0,
+		ShrtWithResVa: 787355200.0,
+		ShrtNoResVa:   149084300.0,
 	}
 
 	totalShortSelling := 787355200.0 + 149084300.0
@@ -302,9 +302,9 @@ func TestShortSelling_GetShortSellingRatio(t *testing.T) {
 
 func TestShortSelling_GetShortSellingRatio_ZeroTurnover(t *testing.T) {
 	data := ShortSelling{
-		SellingExcludingShortSellingTurnoverValue:    0.0,
-		ShortSellingWithRestrictionsTurnoverValue:    0.0,
-		ShortSellingWithoutRestrictionsTurnoverValue: 0.0,
+		SellExShortVa: 0.0,
+		ShrtWithResVa: 0.0,
+		ShrtNoResVa:   0.0,
 	}
 
 	got := data.GetShortSellingRatio()
@@ -316,8 +316,8 @@ func TestShortSelling_GetShortSellingRatio_ZeroTurnover(t *testing.T) {
 
 func TestShortSelling_GetRestrictedShortSellingRatio(t *testing.T) {
 	data := ShortSelling{
-		ShortSellingWithRestrictionsTurnoverValue:    787355200.0,
-		ShortSellingWithoutRestrictionsTurnoverValue: 149084300.0,
+		ShrtWithResVa: 787355200.0,
+		ShrtNoResVa:   149084300.0,
 	}
 
 	totalShortSelling := 787355200.0 + 149084300.0
@@ -332,8 +332,8 @@ func TestShortSelling_GetRestrictedShortSellingRatio(t *testing.T) {
 
 func TestShortSelling_GetUnrestrictedShortSellingRatio(t *testing.T) {
 	data := ShortSelling{
-		ShortSellingWithRestrictionsTurnoverValue:    787355200.0,
-		ShortSellingWithoutRestrictionsTurnoverValue: 149084300.0,
+		ShrtWithResVa: 787355200.0,
+		ShrtNoResVa:   149084300.0,
 	}
 
 	totalShortSelling := 787355200.0 + 149084300.0
@@ -348,8 +348,8 @@ func TestShortSelling_GetUnrestrictedShortSellingRatio(t *testing.T) {
 
 func TestShortSelling_GetRestrictedShortSellingRatio_ZeroShortSelling(t *testing.T) {
 	data := ShortSelling{
-		ShortSellingWithRestrictionsTurnoverValue:    0.0,
-		ShortSellingWithoutRestrictionsTurnoverValue: 0.0,
+		ShrtWithResVa: 0.0,
+		ShrtNoResVa:   0.0,
 	}
 
 	got := data.GetRestrictedShortSellingRatio()
@@ -361,8 +361,8 @@ func TestShortSelling_GetRestrictedShortSellingRatio_ZeroShortSelling(t *testing
 
 func TestShortSelling_GetUnrestrictedShortSellingRatio_ZeroShortSelling(t *testing.T) {
 	data := ShortSelling{
-		ShortSellingWithRestrictionsTurnoverValue:    0.0,
-		ShortSellingWithoutRestrictionsTurnoverValue: 0.0,
+		ShrtWithResVa: 0.0,
+		ShrtNoResVa:   0.0,
 	}
 
 	got := data.GetUnrestrictedShortSellingRatio()
@@ -378,7 +378,7 @@ func TestShortSellingService_GetShortSelling_Error(t *testing.T) {
 	service := NewShortSellingService(mockClient)
 
 	// Set error response
-	mockClient.SetError("GET", "/markets/short_selling?sector33code=0050", fmt.Errorf("unauthorized"))
+	mockClient.SetError("GET", "/markets/short-ratio?s33=0050", fmt.Errorf("unauthorized"))
 
 	// Execute
 	_, err := service.GetShortSelling(ShortSellingParams{Sector33Code: "0050"})

@@ -20,21 +20,21 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterest(t *testing.T) {
 				From: "20230101",
 				To:   "20230331",
 			},
-			wantPath: "/markets/weekly_margin_interest?code=13010&from=20230101&to=20230331",
+			wantPath: "/markets/margin-interest?code=13010&from=20230101&to=20230331",
 		},
 		{
 			name: "with code only",
 			params: WeeklyMarginInterestParams{
 				Code: "13010",
 			},
-			wantPath: "/markets/weekly_margin_interest?code=13010",
+			wantPath: "/markets/margin-interest?code=13010",
 		},
 		{
 			name: "with date only",
 			params: WeeklyMarginInterestParams{
 				Date: "20230217",
 			},
-			wantPath: "/markets/weekly_margin_interest?date=20230217",
+			wantPath: "/markets/margin-interest?date=20230217",
 		},
 		{
 			name: "with date and pagination key",
@@ -42,7 +42,7 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterest(t *testing.T) {
 				Date:          "20230217",
 				PaginationKey: "key123",
 			},
-			wantPath: "/markets/weekly_margin_interest?date=20230217&pagination_key=key123",
+			wantPath: "/markets/margin-interest?date=20230217&pagination_key=key123",
 		},
 	}
 
@@ -54,17 +54,17 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterest(t *testing.T) {
 
 			// Mock response based on documentation sample
 			mockResponse := WeeklyMarginInterestResponse{
-				WeeklyMarginInterest: []WeeklyMarginInterest{
+				Data: []WeeklyMarginInterest{
 					{
-						Date:                               "2023-02-17",
-						Code:                               "13010",
-						IssueType:                          "2",
-						ShortMarginTradeVolume:             4100.0,
-						LongMarginTradeVolume:              27600.0,
-						ShortNegotiableMarginTradeVolume:   1300.0,
-						LongNegotiableMarginTradeVolume:    7600.0,
-						ShortStandardizedMarginTradeVolume: 2800.0,
-						LongStandardizedMarginTradeVolume:  20000.0,
+						Date:       "2023-02-17",
+						Code:       "13010",
+						IssType:    "2",
+						ShrtVol:    4100.0,
+						LongVol:    27600.0,
+						ShrtNegVol: 1300.0,
+						LongNegVol: 7600.0,
+						ShrtStdVol: 2800.0,
+						LongStdVol: 20000.0,
 					},
 				},
 				PaginationKey: "",
@@ -82,7 +82,7 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterest(t *testing.T) {
 				t.Fatal("GetWeeklyMarginInterest() returned nil response")
 				return
 			}
-			if len(resp.WeeklyMarginInterest) == 0 {
+			if len(resp.Data) == 0 {
 				t.Error("GetWeeklyMarginInterest() returned empty data")
 			}
 			if mockClient.LastPath != tt.wantPath {
@@ -116,20 +116,20 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterestByCode(t *testing.T)
 
 	// Mock response - 最初のページ
 	mockResponse1 := WeeklyMarginInterestResponse{
-		WeeklyMarginInterest: []WeeklyMarginInterest{
+		Data: []WeeklyMarginInterest{
 			{
-				Date:                   "2023-02-17",
-				Code:                   "13010",
-				IssueType:              "2",
-				ShortMarginTradeVolume: 4100.0,
-				LongMarginTradeVolume:  27600.0,
+				Date:    "2023-02-17",
+				Code:    "13010",
+				IssType: "2",
+				ShrtVol: 4100.0,
+				LongVol: 27600.0,
 			},
 			{
-				Date:                   "2023-02-10",
-				Code:                   "13010",
-				IssueType:              "2",
-				ShortMarginTradeVolume: 3900.0,
-				LongMarginTradeVolume:  26800.0,
+				Date:    "2023-02-10",
+				Code:    "13010",
+				IssType: "2",
+				ShrtVol: 3900.0,
+				LongVol: 26800.0,
 			},
 		},
 		PaginationKey: "next_page_key",
@@ -137,20 +137,20 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterestByCode(t *testing.T)
 
 	// Mock response - 2ページ目
 	mockResponse2 := WeeklyMarginInterestResponse{
-		WeeklyMarginInterest: []WeeklyMarginInterest{
+		Data: []WeeklyMarginInterest{
 			{
-				Date:                   "2023-02-03",
-				Code:                   "13010",
-				IssueType:              "2",
-				ShortMarginTradeVolume: 3800.0,
-				LongMarginTradeVolume:  25900.0,
+				Date:    "2023-02-03",
+				Code:    "13010",
+				IssType: "2",
+				ShrtVol: 3800.0,
+				LongVol: 25900.0,
 			},
 		},
 		PaginationKey: "", // 最後のページ
 	}
 
-	mockClient.SetResponse("GET", "/markets/weekly_margin_interest?code=13010", mockResponse1)
-	mockClient.SetResponse("GET", "/markets/weekly_margin_interest?code=13010&pagination_key=next_page_key", mockResponse2)
+	mockClient.SetResponse("GET", "/markets/margin-interest?code=13010", mockResponse1)
+	mockClient.SetResponse("GET", "/markets/margin-interest?code=13010&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
 	data, err := service.GetWeeklyMarginInterestByCode("13010")
@@ -176,25 +176,25 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterestByDate(t *testing.T)
 
 	// Mock response
 	mockResponse := WeeklyMarginInterestResponse{
-		WeeklyMarginInterest: []WeeklyMarginInterest{
+		Data: []WeeklyMarginInterest{
 			{
-				Date:                   "2023-02-17",
-				Code:                   "13010",
-				IssueType:              "2",
-				ShortMarginTradeVolume: 4100.0,
-				LongMarginTradeVolume:  27600.0,
+				Date:    "2023-02-17",
+				Code:    "13010",
+				IssType: "2",
+				ShrtVol: 4100.0,
+				LongVol: 27600.0,
 			},
 			{
-				Date:                   "2023-02-17",
-				Code:                   "86970",
-				IssueType:              "1",
-				ShortMarginTradeVolume: 2300.0,
-				LongMarginTradeVolume:  15400.0,
+				Date:    "2023-02-17",
+				Code:    "86970",
+				IssType: "1",
+				ShrtVol: 2300.0,
+				LongVol: 15400.0,
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/markets/weekly_margin_interest?date=20230217", mockResponse)
+	mockClient.SetResponse("GET", "/markets/margin-interest?date=20230217", mockResponse)
 
 	// Execute
 	data, err := service.GetWeeklyMarginInterestByDate("20230217")
@@ -220,25 +220,25 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterestByCodeAndDateRange(t
 
 	// Mock response
 	mockResponse := WeeklyMarginInterestResponse{
-		WeeklyMarginInterest: []WeeklyMarginInterest{
+		Data: []WeeklyMarginInterest{
 			{
-				Date:                   "2023-02-17",
-				Code:                   "86970",
-				IssueType:              "1",
-				ShortMarginTradeVolume: 2300.0,
-				LongMarginTradeVolume:  15400.0,
+				Date:    "2023-02-17",
+				Code:    "86970",
+				IssType: "1",
+				ShrtVol: 2300.0,
+				LongVol: 15400.0,
 			},
 			{
-				Date:                   "2023-02-10",
-				Code:                   "86970",
-				IssueType:              "1",
-				ShortMarginTradeVolume: 2200.0,
-				LongMarginTradeVolume:  15100.0,
+				Date:    "2023-02-10",
+				Code:    "86970",
+				IssType: "1",
+				ShrtVol: 2200.0,
+				LongVol: 15100.0,
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/markets/weekly_margin_interest?code=86970&from=20230101&to=20230331", mockResponse)
+	mockClient.SetResponse("GET", "/markets/margin-interest?code=86970&from=20230101&to=20230331", mockResponse)
 
 	// Execute
 	data, err := service.GetWeeklyMarginInterestByCodeAndDateRange("86970", "20230101", "20230331")
@@ -266,21 +266,21 @@ func TestWeeklyMarginInterest_IsCredit(t *testing.T) {
 		{
 			name: "credit issue",
 			data: WeeklyMarginInterest{
-				IssueType: IssueTypeCredit,
+				IssType: IssueTypeCredit,
 			},
 			want: true,
 		},
 		{
 			name: "lendable issue",
 			data: WeeklyMarginInterest{
-				IssueType: IssueTypeLendable,
+				IssType: IssueTypeLendable,
 			},
 			want: false,
 		},
 		{
 			name: "other issue",
 			data: WeeklyMarginInterest{
-				IssueType: IssueTypeOther,
+				IssType: IssueTypeOther,
 			},
 			want: false,
 		},
@@ -305,21 +305,21 @@ func TestWeeklyMarginInterest_IsLendable(t *testing.T) {
 		{
 			name: "lendable issue",
 			data: WeeklyMarginInterest{
-				IssueType: IssueTypeLendable,
+				IssType: IssueTypeLendable,
 			},
 			want: true,
 		},
 		{
 			name: "credit issue",
 			data: WeeklyMarginInterest{
-				IssueType: IssueTypeCredit,
+				IssType: IssueTypeCredit,
 			},
 			want: false,
 		},
 		{
 			name: "other issue",
 			data: WeeklyMarginInterest{
-				IssueType: IssueTypeOther,
+				IssType: IssueTypeOther,
 			},
 			want: false,
 		},
@@ -344,24 +344,24 @@ func TestWeeklyMarginInterest_GetShortLongRatio(t *testing.T) {
 		{
 			name: "normal ratio",
 			data: WeeklyMarginInterest{
-				ShortMarginTradeVolume: 4100.0,
-				LongMarginTradeVolume:  27600.0,
+				ShrtVol: 4100.0,
+				LongVol: 27600.0,
 			},
 			want: 4100.0 / 27600.0,
 		},
 		{
 			name: "zero long margin",
 			data: WeeklyMarginInterest{
-				ShortMarginTradeVolume: 4100.0,
-				LongMarginTradeVolume:  0.0,
+				ShrtVol: 4100.0,
+				LongVol: 0.0,
 			},
 			want: 0.0,
 		},
 		{
 			name: "zero short margin",
 			data: WeeklyMarginInterest{
-				ShortMarginTradeVolume: 0.0,
-				LongMarginTradeVolume:  27600.0,
+				ShrtVol: 0.0,
+				LongVol: 27600.0,
 			},
 			want: 0.0,
 		},
@@ -379,10 +379,10 @@ func TestWeeklyMarginInterest_GetShortLongRatio(t *testing.T) {
 
 func TestWeeklyMarginInterest_GetStandardizedRatio(t *testing.T) {
 	data := WeeklyMarginInterest{
-		ShortMarginTradeVolume:             4100.0,
-		LongMarginTradeVolume:              27600.0,
-		ShortStandardizedMarginTradeVolume: 2800.0,
-		LongStandardizedMarginTradeVolume:  20000.0,
+		ShrtVol:    4100.0,
+		LongVol:    27600.0,
+		ShrtStdVol: 2800.0,
+		LongStdVol: 20000.0,
 	}
 
 	shortRatio, longRatio := data.GetStandardizedRatio()
@@ -400,10 +400,10 @@ func TestWeeklyMarginInterest_GetStandardizedRatio(t *testing.T) {
 
 func TestWeeklyMarginInterest_GetStandardizedRatio_ZeroTotal(t *testing.T) {
 	data := WeeklyMarginInterest{
-		ShortMarginTradeVolume:             0.0,
-		LongMarginTradeVolume:              0.0,
-		ShortStandardizedMarginTradeVolume: 1000.0,
-		LongStandardizedMarginTradeVolume:  2000.0,
+		ShrtVol:    0.0,
+		LongVol:    0.0,
+		ShrtStdVol: 1000.0,
+		LongStdVol: 2000.0,
 	}
 
 	shortRatio, longRatio := data.GetStandardizedRatio()
@@ -422,7 +422,7 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterest_Error(t *testing.T)
 	service := NewWeeklyMarginInterestService(mockClient)
 
 	// Set error response
-	mockClient.SetError("GET", "/markets/weekly_margin_interest?code=13010", fmt.Errorf("unauthorized"))
+	mockClient.SetError("GET", "/markets/margin-interest?code=13010", fmt.Errorf("unauthorized"))
 
 	// Execute
 	_, err := service.GetWeeklyMarginInterest(WeeklyMarginInterestParams{Code: "13010"})

@@ -12,6 +12,7 @@ import "github.com/utahta/jquants/client"
 // - Announcement: 決算発表予定（発表日、発表時刻）
 // - TradesSpec: 投資部門別売買状況（機関投資家、個人投資家等の売買動向）
 // - WeeklyMarginInterest: 信用取引週末残高（信用買い/売り残高）
+// - DailyMarginInterest: 日々公表信用取引残高（日々公表銘柄の信用残高）
 // - ShortSelling: 業種別空売り比率（業種ごとの空売り状況）
 // - ShortSellingPositions: 空売り残高報告（大口の空売りポジション）
 // - Breakdown: 売買内訳データ（売買の詳細な内訳）
@@ -32,6 +33,7 @@ type JQuantsAPI struct {
 	Announcement          *AnnouncementService
 	TradesSpec            *TradesSpecService
 	WeeklyMarginInterest  *WeeklyMarginInterestService
+	DailyMarginInterest   *DailyMarginInterestService
 	ShortSelling          *ShortSellingService
 	ShortSellingPositions *ShortSellingPositionsService
 	Breakdown             *BreakdownService
@@ -55,6 +57,7 @@ func NewJQuantsAPI(c client.HTTPClient) *JQuantsAPI {
 		Announcement:          NewAnnouncementService(c),
 		TradesSpec:            NewTradesSpecService(c),
 		WeeklyMarginInterest:  NewWeeklyMarginInterestService(c),
+		DailyMarginInterest:   NewDailyMarginInterestService(c),
 		ShortSelling:          NewShortSellingService(c),
 		ShortSellingPositions: NewShortSellingPositionsService(c),
 		Breakdown:             NewBreakdownService(c),

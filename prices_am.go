@@ -30,12 +30,12 @@ type PricesAMParams struct {
 
 // PricesAMResponse は前場四本値のレスポンスです。
 type PricesAMResponse struct {
-	PricesAM      []PriceAM `json:"prices_am"`
+	Data          []PriceAM `json:"data"`
 	PaginationKey string    `json:"pagination_key"` // ページネーションキー
 }
 
 // PriceAM は前場四本値データを表します。
-// J-Quants API /prices/prices_am エンドポイントのレスポンスデータ。
+// J-Quants API /equities/bars/daily/am エンドポイントのレスポンスデータ。
 // 前場終了後に当日の前場データを取得可能（翌日6:00頃まで）。
 //
 // 注意: このデータはプレミアムプラン専用APIで取得されます。
@@ -45,14 +45,14 @@ type PriceAM struct {
 	Code string `json:"Code"` // 銘柄コード
 
 	// 前場四本値データ
-	MorningOpen  *float64 `json:"MorningOpen"`  // 前場始値（前場最初の約定価格）
-	MorningHigh  *float64 `json:"MorningHigh"`  // 前場高値（前場中の最高約定価格）
-	MorningLow   *float64 `json:"MorningLow"`   // 前場安値（前場中の最低約定価格）
-	MorningClose *float64 `json:"MorningClose"` // 前場終値（前場最後の約定価格、前引け）
+	MO *float64 `json:"MO"` // 前場始値（前場最初の約定価格）
+	MH *float64 `json:"MH"` // 前場高値（前場中の最高約定価格）
+	ML *float64 `json:"ML"` // 前場安値（前場中の最低約定価格）
+	MC *float64 `json:"MC"` // 前場終値（前場最後の約定価格、前引け）
 
 	// 前場取引情報
-	MorningVolume        *float64 `json:"MorningVolume"`        // 前場売買高（前場中の総売買株数）
-	MorningTurnoverValue *float64 `json:"MorningTurnoverValue"` // 前場取引代金（前場中の総取引代金）
+	MVo *float64 `json:"MVo"` // 前場売買高（前場中の総売買株数）
+	MVa *float64 `json:"MVa"` // 前場取引代金（前場中の総取引代金）
 }
 
 // RawPriceAM is used for unmarshaling JSON response with mixed types
@@ -62,21 +62,21 @@ type RawPriceAM struct {
 	Code string `json:"Code"`
 
 	// 前場四本値データ
-	MorningOpen  *types.Float64String `json:"MorningOpen"`
-	MorningHigh  *types.Float64String `json:"MorningHigh"`
-	MorningLow   *types.Float64String `json:"MorningLow"`
-	MorningClose *types.Float64String `json:"MorningClose"`
+	MO *types.Float64String `json:"MO"`
+	MH *types.Float64String `json:"MH"`
+	ML *types.Float64String `json:"ML"`
+	MC *types.Float64String `json:"MC"`
 
 	// 前場取引情報
-	MorningVolume        *types.Float64String `json:"MorningVolume"`
-	MorningTurnoverValue *types.Float64String `json:"MorningTurnoverValue"`
+	MVo *types.Float64String `json:"MVo"`
+	MVa *types.Float64String `json:"MVa"`
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling for PricesAMResponse
 func (r *PricesAMResponse) UnmarshalJSON(data []byte) error {
 	// First unmarshal into RawPriceAM
 	type rawResponse struct {
-		PricesAM      []RawPriceAM `json:"prices_am"`
+		Data          []RawPriceAM `json:"data"`
 		PaginationKey string       `json:"pagination_key"`
 	}
 
@@ -89,22 +89,22 @@ func (r *PricesAMResponse) UnmarshalJSON(data []byte) error {
 	r.PaginationKey = raw.PaginationKey
 
 	// Convert RawPriceAM to PriceAM
-	r.PricesAM = make([]PriceAM, len(raw.PricesAM))
-	for idx, rpa := range raw.PricesAM {
-		r.PricesAM[idx] = PriceAM{
+	r.Data = make([]PriceAM, len(raw.Data))
+	for idx, rpa := range raw.Data {
+		r.Data[idx] = PriceAM{
 			// 基本情報
 			Date: rpa.Date,
 			Code: rpa.Code,
 
 			// 前場四本値データ
-			MorningOpen:  types.ToFloat64Ptr(rpa.MorningOpen),
-			MorningHigh:  types.ToFloat64Ptr(rpa.MorningHigh),
-			MorningLow:   types.ToFloat64Ptr(rpa.MorningLow),
-			MorningClose: types.ToFloat64Ptr(rpa.MorningClose),
+			MO: types.ToFloat64Ptr(rpa.MO),
+			MH: types.ToFloat64Ptr(rpa.MH),
+			ML: types.ToFloat64Ptr(rpa.ML),
+			MC: types.ToFloat64Ptr(rpa.MC),
 
 			// 前場取引情報
-			MorningVolume:        types.ToFloat64Ptr(rpa.MorningVolume),
-			MorningTurnoverValue: types.ToFloat64Ptr(rpa.MorningTurnoverValue),
+			MVo: types.ToFloat64Ptr(rpa.MVo),
+			MVa: types.ToFloat64Ptr(rpa.MVa),
 		}
 	}
 
@@ -116,7 +116,7 @@ func (r *PricesAMResponse) UnmarshalJSON(data []byte) error {
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
 func (s *PricesAMService) GetPricesAM(params PricesAMParams) (*PricesAMResponse, error) {
-	path := "/prices/prices_am"
+	path := "/equities/bars/daily/am"
 
 	query := "?"
 	if params.Code != "" {
@@ -165,7 +165,7 @@ func (s *PricesAMService) GetAllPricesAM() ([]PriceAM, error) {
 			return nil, err
 		}
 
-		allData = append(allData, resp.PricesAM...)
+		allData = append(allData, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -179,63 +179,63 @@ func (s *PricesAMService) GetAllPricesAM() ([]PriceAM, error) {
 
 // GetMorningRange は前場の値幅を計算します。
 func (pa *PriceAM) GetMorningRange() *float64 {
-	if pa.MorningHigh == nil || pa.MorningLow == nil {
+	if pa.MH == nil || pa.ML == nil {
 		return nil
 	}
 
-	result := *pa.MorningHigh - *pa.MorningLow
+	result := *pa.MH - *pa.ML
 	return &result
 }
 
 // GetMorningChangeFromOpen は前場の始値からの変動幅を計算します。
 func (pa *PriceAM) GetMorningChangeFromOpen() *float64 {
-	if pa.MorningClose == nil || pa.MorningOpen == nil {
+	if pa.MC == nil || pa.MO == nil {
 		return nil
 	}
 
-	result := *pa.MorningClose - *pa.MorningOpen
+	result := *pa.MC - *pa.MO
 	return &result
 }
 
 // GetMorningChangeRate は前場の始値からの変動率を計算します（パーセント）。
 func (pa *PriceAM) GetMorningChangeRate() *float64 {
-	if pa.MorningClose == nil || pa.MorningOpen == nil || *pa.MorningOpen == 0 {
+	if pa.MC == nil || pa.MO == nil || *pa.MO == 0 {
 		return nil
 	}
 
-	result := ((*pa.MorningClose - *pa.MorningOpen) / *pa.MorningOpen) * 100
+	result := ((*pa.MC - *pa.MO) / *pa.MO) * 100
 	return &result
 }
 
 // HasMorningTrade は前場に取引があったかを判定します。
 func (pa *PriceAM) HasMorningTrade() bool {
-	return pa.MorningVolume != nil && *pa.MorningVolume > 0
+	return pa.MVo != nil && *pa.MVo > 0
 }
 
 // IsActiveTrading は前場に活発な取引があったかを判定します（売買代金1億円以上）。
 func (pa *PriceAM) IsActiveTrading() bool {
-	return pa.MorningTurnoverValue != nil && *pa.MorningTurnoverValue >= 100000000
+	return pa.MVa != nil && *pa.MVa >= 100000000
 }
 
 // GetAveragePrice は前場の平均約定価格を計算します（概算）。
 func (pa *PriceAM) GetAveragePrice() *float64 {
-	if pa.MorningTurnoverValue == nil || pa.MorningVolume == nil || *pa.MorningVolume == 0 {
+	if pa.MVa == nil || pa.MVo == nil || *pa.MVo == 0 {
 		return nil
 	}
 
-	result := *pa.MorningTurnoverValue / *pa.MorningVolume
+	result := *pa.MVa / *pa.MVo
 	return &result
 }
 
 // IsUpperLimit は前場にストップ高だったかを判定します（始値=高値=安値=終値）。
 func (pa *PriceAM) IsUpperLimit() bool {
-	if pa.MorningOpen == nil || pa.MorningHigh == nil || pa.MorningLow == nil || pa.MorningClose == nil {
+	if pa.MO == nil || pa.MH == nil || pa.ML == nil || pa.MC == nil {
 		return false
 	}
 
-	return *pa.MorningOpen == *pa.MorningHigh &&
-		*pa.MorningHigh == *pa.MorningLow &&
-		*pa.MorningLow == *pa.MorningClose
+	return *pa.MO == *pa.MH &&
+		*pa.MH == *pa.ML &&
+		*pa.ML == *pa.MC
 }
 
 // IsLowerLimit は前場にストップ安だったかを判定します（始値=高値=安値=終値）。

@@ -27,13 +27,13 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			t.Fatalf("Failed to get index options: %v", err)
 		}
 
-		if resp == nil || len(resp.IndexOptions) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No index options data available")
 		}
 
 		// 各オプションデータを詳細に検証
 		expectedDate := getTestDateFormatted() // YYYY-MM-DD形式
-		for i, option := range resp.IndexOptions {
+		for i, option := range resp.Data {
 			// 基本情報の検証
 			if option.Date == "" {
 				t.Errorf("Option[%d]: Date is empty", i)
@@ -52,151 +52,151 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			}
 
 			// 限月の検証
-			if option.ContractMonth == "" {
+			if option.CM == "" {
 				t.Errorf("Option[%d]: ContractMonth is empty", i)
 			} else {
 				// 限月フォーマットの検証（YYYY-MM形式）
-				if len(option.ContractMonth) != 7 || option.ContractMonth[4] != '-' {
-					t.Errorf("Option[%d]: ContractMonth format invalid = %v, want YYYY-MM", i, option.ContractMonth)
+				if len(option.CM) != 7 || option.CM[4] != '-' {
+					t.Errorf("Option[%d]: ContractMonth format invalid = %v, want YYYY-MM", i, option.CM)
 				}
 			}
 
 			// 権利行使価格の妥当性チェック
-			if option.StrikePrice <= 0 {
-				t.Errorf("Option[%d]: StrikePrice = %v, want > 0", i, option.StrikePrice)
+			if option.Strike <= 0 {
+				t.Errorf("Option[%d]: StrikePrice = %v, want > 0", i, option.Strike)
 			}
 
 			// プットコール区分の検証
-			if option.PutCallDivision != "1" && option.PutCallDivision != "2" {
-				t.Errorf("Option[%d]: PutCallDivision = %v, want 1 or 2", i, option.PutCallDivision)
+			if option.PCDiv != "1" && option.PCDiv != "2" {
+				t.Errorf("Option[%d]: PutCallDivision = %v, want 1 or 2", i, option.PCDiv)
 			}
 
 			// 緊急取引証拠金発動区分の検証
-			if option.EmergencyMarginTriggerDivision != "001" && option.EmergencyMarginTriggerDivision != "002" {
-				t.Errorf("Option[%d]: EmergencyMarginTriggerDivision = %v, want 001 or 002", i, option.EmergencyMarginTriggerDivision)
+			if option.EmMrgnTrgDiv != "001" && option.EmMrgnTrgDiv != "002" {
+				t.Errorf("Option[%d]: EmergencyMarginTriggerDivision = %v, want 001 or 002", i, option.EmMrgnTrgDiv)
 			}
 
 			// 日通し四本値の論理的整合性チェック
-			if option.WholeDayHigh < option.WholeDayLow {
-				t.Errorf("Option[%d]: WholeDayHigh (%v) < WholeDayLow (%v)", i, option.WholeDayHigh, option.WholeDayLow)
+			if option.H < option.L {
+				t.Errorf("Option[%d]: WholeDayHigh (%v) < WholeDayLow (%v)", i, option.H, option.L)
 			}
-			if option.WholeDayOpen > 0 && option.WholeDayHigh > 0 && option.WholeDayOpen > option.WholeDayHigh {
-				t.Errorf("Option[%d]: WholeDayOpen (%v) > WholeDayHigh (%v)", i, option.WholeDayOpen, option.WholeDayHigh)
+			if option.O > 0 && option.H > 0 && option.O > option.H {
+				t.Errorf("Option[%d]: WholeDayOpen (%v) > WholeDayHigh (%v)", i, option.O, option.H)
 			}
 
 			// 日中四本値の論理的整合性チェック
-			if option.DaySessionHigh < option.DaySessionLow {
-				t.Errorf("Option[%d]: DaySessionHigh (%v) < DaySessionLow (%v)", i, option.DaySessionHigh, option.DaySessionLow)
+			if option.AH < option.AL {
+				t.Errorf("Option[%d]: DaySessionHigh (%v) < DaySessionLow (%v)", i, option.AH, option.AL)
 			}
 
 			// 価格の妥当性チェック（負の値は通常ありえない）
-			if option.WholeDayOpen < 0 {
-				t.Errorf("Option[%d]: WholeDayOpen = %v, want >= 0", i, option.WholeDayOpen)
+			if option.O < 0 {
+				t.Errorf("Option[%d]: WholeDayOpen = %v, want >= 0", i, option.O)
 			}
-			if option.WholeDayHigh < 0 {
-				t.Errorf("Option[%d]: WholeDayHigh = %v, want >= 0", i, option.WholeDayHigh)
+			if option.H < 0 {
+				t.Errorf("Option[%d]: WholeDayHigh = %v, want >= 0", i, option.H)
 			}
-			if option.WholeDayLow < 0 {
-				t.Errorf("Option[%d]: WholeDayLow = %v, want >= 0", i, option.WholeDayLow)
+			if option.L < 0 {
+				t.Errorf("Option[%d]: WholeDayLow = %v, want >= 0", i, option.L)
 			}
-			if option.WholeDayClose < 0 {
-				t.Errorf("Option[%d]: WholeDayClose = %v, want >= 0", i, option.WholeDayClose)
+			if option.C < 0 {
+				t.Errorf("Option[%d]: WholeDayClose = %v, want >= 0", i, option.C)
 			}
 
 			// 出来高・建玉の妥当性チェック
-			if option.Volume < 0 {
-				t.Errorf("Option[%d]: Volume = %v, want >= 0", i, option.Volume)
+			if option.Vo < 0 {
+				t.Errorf("Option[%d]: Volume = %v, want >= 0", i, option.Vo)
 			}
-			if option.OpenInterest < 0 {
-				t.Errorf("Option[%d]: OpenInterest = %v, want >= 0", i, option.OpenInterest)
+			if option.OI < 0 {
+				t.Errorf("Option[%d]: OpenInterest = %v, want >= 0", i, option.OI)
 			}
-			if option.TurnoverValue < 0 {
-				t.Errorf("Option[%d]: TurnoverValue = %v, want >= 0", i, option.TurnoverValue)
+			if option.Va < 0 {
+				t.Errorf("Option[%d]: TurnoverValue = %v, want >= 0", i, option.Va)
 			}
 
 			// 最初の5件の詳細ログ
 			if i < 5 {
 				optionType := "Call"
-				if option.PutCallDivision == "1" {
+				if option.PCDiv == "1" {
 					optionType = "Put"
 				}
 
 				t.Logf("Option[%d]: Date=%s, Code=%s", i, option.Date, option.Code)
 				t.Logf("  Type: %s, Strike: %.0f, Month: %s",
-					optionType, option.StrikePrice, option.ContractMonth)
+					optionType, option.Strike, option.CM)
 				t.Logf("  WholeDay OHLC: Open=%.1f, High=%.1f, Low=%.1f, Close=%.1f",
-					option.WholeDayOpen, option.WholeDayHigh, option.WholeDayLow, option.WholeDayClose)
+					option.O, option.H, option.L, option.C)
 				t.Logf("  DaySession OHLC: Open=%.1f, High=%.1f, Low=%.1f, Close=%.1f",
-					option.DaySessionOpen, option.DaySessionHigh, option.DaySessionLow, option.DaySessionClose)
+					option.AO, option.AH, option.AL, option.AC)
 				t.Logf("  Volume: %.0f, OpenInterest: %.0f, Turnover: %.0f",
-					option.Volume, option.OpenInterest, option.TurnoverValue)
+					option.Vo, option.OI, option.Va)
 
 				// ナイトセッションデータの表示
 				if option.HasNightSession() {
 					t.Logf("  NightSession OHLC: Open=%.1f, High=%.1f, Low=%.1f, Close=%.1f",
-						*option.NightSessionOpen, *option.NightSessionHigh,
-						*option.NightSessionLow, *option.NightSessionClose)
+						*option.EO, *option.EH,
+						*option.EL, *option.EC)
 				} else {
 					t.Logf("  NightSession: No data")
 				}
 
 				// 価格・リスク情報（2016年7月19日以降）
-				if option.SettlementPrice != nil {
-					t.Logf("  Settlement: %.1f", *option.SettlementPrice)
+				if option.Settle != nil {
+					t.Logf("  Settlement: %.1f", *option.Settle)
 				}
-				if option.TheoreticalPrice != nil {
-					t.Logf("  Theoretical: %.3f", *option.TheoreticalPrice)
+				if option.Theo != nil {
+					t.Logf("  Theoretical: %.3f", *option.Theo)
 				}
-				if option.ImpliedVolatility != nil {
-					t.Logf("  IV: %.2f%%", *option.ImpliedVolatility)
+				if option.IV != nil {
+					t.Logf("  IV: %.2f%%", *option.IV)
 				}
 				// 2016年7月19日以降の追加フィールド
-				if option.LastTradingDay != "" {
+				if option.LTD != "" {
 					// LastTradingDayのフォーマット検証
-					if len(option.LastTradingDay) != 10 || option.LastTradingDay[4] != '-' || option.LastTradingDay[7] != '-' {
-						t.Errorf("Option[%d]: LastTradingDay format invalid = %v, want YYYY-MM-DD", i, option.LastTradingDay)
+					if len(option.LTD) != 10 || option.LTD[4] != '-' || option.LTD[7] != '-' {
+						t.Errorf("Option[%d]: LastTradingDay format invalid = %v, want YYYY-MM-DD", i, option.LTD)
 					}
-					t.Logf("  Last Trading Day: %s", option.LastTradingDay)
+					t.Logf("  Last Trading Day: %s", option.LTD)
 				}
-				if option.SpecialQuotationDay != "" {
+				if option.SQD != "" {
 					// SpecialQuotationDayのフォーマット検証
-					if len(option.SpecialQuotationDay) != 10 || option.SpecialQuotationDay[4] != '-' || option.SpecialQuotationDay[7] != '-' {
-						t.Errorf("Option[%d]: SpecialQuotationDay format invalid = %v, want YYYY-MM-DD", i, option.SpecialQuotationDay)
+					if len(option.SQD) != 10 || option.SQD[4] != '-' || option.SQD[7] != '-' {
+						t.Errorf("Option[%d]: SpecialQuotationDay format invalid = %v, want YYYY-MM-DD", i, option.SQD)
 					}
-					t.Logf("  SQ Day: %s", option.SpecialQuotationDay)
+					t.Logf("  SQ Day: %s", option.SQD)
 				}
-				if option.VolumeOnlyAuction != nil {
+				if option.VoOA != nil {
 					// Volume(OnlyAuction)の妥当性チェック
-					if *option.VolumeOnlyAuction < 0 {
-						t.Errorf("Option[%d]: VolumeOnlyAuction = %v, want >= 0", i, *option.VolumeOnlyAuction)
+					if *option.VoOA < 0 {
+						t.Errorf("Option[%d]: VolumeOnlyAuction = %v, want >= 0", i, *option.VoOA)
 					}
-					t.Logf("  Volume (Only Auction): %.0f", *option.VolumeOnlyAuction)
+					t.Logf("  Volume (Only Auction): %.0f", *option.VoOA)
 				}
-				if option.BaseVolatility != nil {
+				if option.BaseVol != nil {
 					// BaseVolatilityの妥当性チェック
-					if *option.BaseVolatility < 0 || *option.BaseVolatility > 200 {
-						t.Errorf("Option[%d]: BaseVolatility = %v, want 0-200", i, *option.BaseVolatility)
+					if *option.BaseVol < 0 || *option.BaseVol > 200 {
+						t.Errorf("Option[%d]: BaseVolatility = %v, want 0-200", i, *option.BaseVol)
 					}
-					t.Logf("  Base Volatility: %.2f%%", *option.BaseVolatility)
+					t.Logf("  Base Volatility: %.2f%%", *option.BaseVol)
 				}
-				if option.UnderlyingPrice != nil {
+				if option.UnderPx != nil {
 					// UnderlyingPriceの妥当性チェック
-					if *option.UnderlyingPrice <= 0 {
-						t.Errorf("Option[%d]: UnderlyingPrice = %v, want > 0", i, *option.UnderlyingPrice)
+					if *option.UnderPx <= 0 {
+						t.Errorf("Option[%d]: UnderlyingPrice = %v, want > 0", i, *option.UnderPx)
 					}
-					t.Logf("  Underlying Price: %.2f", *option.UnderlyingPrice)
+					t.Logf("  Underlying Price: %.2f", *option.UnderPx)
 				}
-				if option.InterestRate != nil {
+				if option.IR != nil {
 					// InterestRateの妥当性チェック
-					if *option.InterestRate < -10 || *option.InterestRate > 10 {
-						t.Errorf("Option[%d]: InterestRate = %v, want -10 to 10", i, *option.InterestRate)
+					if *option.IR < -10 || *option.IR > 10 {
+						t.Errorf("Option[%d]: InterestRate = %v, want -10 to 10", i, *option.IR)
 					}
-					t.Logf("  Interest Rate: %.4f%%", *option.InterestRate)
+					t.Logf("  Interest Rate: %.4f%%", *option.IR)
 				}
 			}
 		}
 
-		t.Logf("Retrieved %d index options records", len(resp.IndexOptions))
+		t.Logf("Retrieved %d index options records", len(resp.Data))
 	})
 
 	t.Run("GetCallOptions", func(t *testing.T) {
@@ -218,7 +218,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 		// 全てコールオプションか確認
 		for i, option := range options {
 			if !option.IsCall() {
-				t.Errorf("Option[%d]: Expected call option but got PutCallDivision = %v", i, option.PutCallDivision)
+				t.Errorf("Option[%d]: Expected call option but got PutCallDivision = %v", i, option.PCDiv)
 			}
 		}
 
@@ -244,7 +244,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 		// 全てプットオプションか確認
 		for i, option := range options {
 			if !option.IsPut() {
-				t.Errorf("Option[%d]: Expected put option but got PutCallDivision = %v", i, option.PutCallDivision)
+				t.Errorf("Option[%d]: Expected put option but got PutCallDivision = %v", i, option.PCDiv)
 			}
 		}
 
@@ -274,13 +274,13 @@ func TestIndexOptionEndpoint(t *testing.T) {
 		})
 
 		for _, option := range options {
-			entry := strikeMap[option.StrikePrice]
+			entry := strikeMap[option.Strike]
 			if option.IsCall() {
 				entry.calls = append(entry.calls, option)
 			} else if option.IsPut() {
 				entry.puts = append(entry.puts, option)
 			}
-			strikeMap[option.StrikePrice] = entry
+			strikeMap[option.Strike] = entry
 		}
 
 		t.Logf("Option chain analysis for %s:", date)
@@ -304,10 +304,10 @@ func TestIndexOptionEndpoint(t *testing.T) {
 				totalPutOI := float64(0)
 
 				for _, call := range entry.calls {
-					totalCallOI += call.OpenInterest
+					totalCallOI += call.OI
 				}
 				for _, put := range entry.puts {
-					totalPutOI += put.OpenInterest
+					totalPutOI += put.OI
 				}
 
 				t.Logf("    Open Interest - Calls: %.0f, Puts: %.0f", totalCallOI, totalPutOI)
@@ -333,7 +333,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			t.Skip("No index options data available for contract month analysis")
 		}
 
-		if resp == nil || len(resp.IndexOptions) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No index options data available")
 		}
 
@@ -346,11 +346,11 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			puts        int
 		})
 
-		for _, option := range resp.IndexOptions {
-			data := monthlyData[option.ContractMonth]
+		for _, option := range resp.Data {
+			data := monthlyData[option.CM]
 			data.count++
-			data.totalVolume += option.Volume
-			data.totalOI += option.OpenInterest
+			data.totalVolume += option.Vo
+			data.totalOI += option.OI
 
 			if option.IsCall() {
 				data.calls++
@@ -358,7 +358,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 				data.puts++
 			}
 
-			monthlyData[option.ContractMonth] = data
+			monthlyData[option.CM] = data
 		}
 
 		t.Logf("Contract month analysis:")
@@ -384,14 +384,14 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			t.Skip("No index options data available for emergency margin analysis")
 		}
 
-		if resp == nil || len(resp.IndexOptions) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No index options data available")
 		}
 
 		normalCount := 0
 		emergencyCount := 0
 
-		for _, option := range resp.IndexOptions {
+		for _, option := range resp.Data {
 			if option.IsEmergencyMarginTriggered() {
 				emergencyCount++
 			} else {
@@ -424,11 +424,11 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			t.Skip("No index options data available")
 		}
 
-		if resp == nil || len(resp.IndexOptions) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No data available for pagination test")
 		}
 
-		firstPageCount := len(resp.IndexOptions)
+		firstPageCount := len(resp.Data)
 		t.Logf("First page: %d records", firstPageCount)
 
 		if resp.PaginationKey != "" {
@@ -439,8 +439,8 @@ func TestIndexOptionEndpoint(t *testing.T) {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
 
-			if resp2 != nil && len(resp2.IndexOptions) > 0 {
-				t.Logf("Second page: %d records", len(resp2.IndexOptions))
+			if resp2 != nil && len(resp2.Data) > 0 {
+				t.Logf("Second page: %d records", len(resp2.Data))
 			}
 		}
 	})
@@ -454,7 +454,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 		}
 
 		resp, err := jq.IndexOption.GetIndexOptions(params)
-		if err == nil && resp != nil && len(resp.IndexOptions) > 0 {
+		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Error("Expected error or empty result for future date")
 		}
 
@@ -464,7 +464,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 		}
 
 		resp, err = jq.IndexOption.GetIndexOptions(params)
-		if err == nil && resp != nil && len(resp.IndexOptions) > 0 {
+		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Error("Expected error or empty result for invalid date format")
 		}
 

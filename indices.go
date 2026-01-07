@@ -21,29 +21,29 @@ func NewIndicesService(c client.HTTPClient) *IndicesService {
 }
 
 // Index は指数四本値データを表します。
-// J-Quants API /indices エンドポイントのレスポンスデータ。
+// J-Quants API /indices/bars/daily エンドポイントのレスポンスデータ。
 type Index struct {
-	Date  string  `json:"Date"`  // 日付（YYYY-MM-DD形式）
-	Code  string  `json:"Code"`  // 指数コード
-	Open  float64 `json:"Open"`  // 始値
-	High  float64 `json:"High"`  // 高値
-	Low   float64 `json:"Low"`   // 安値
-	Close float64 `json:"Close"` // 終値
+	Date string  `json:"Date"` // 日付（YYYY-MM-DD形式）
+	Code string  `json:"Code"` // 指数コード
+	O    float64 `json:"O"`    // 始値
+	H    float64 `json:"H"`    // 高値
+	L    float64 `json:"L"`    // 安値
+	C    float64 `json:"C"`    // 終値
 }
 
 // RawIndex is used for unmarshaling JSON response with mixed types
 type RawIndex struct {
-	Date  string              `json:"Date"`
-	Code  string              `json:"Code"`
-	Open  types.Float64String `json:"Open"`
-	High  types.Float64String `json:"High"`
-	Low   types.Float64String `json:"Low"`
-	Close types.Float64String `json:"Close"`
+	Date string              `json:"Date"`
+	Code string              `json:"Code"`
+	O    types.Float64String `json:"O"`
+	H    types.Float64String `json:"H"`
+	L    types.Float64String `json:"L"`
+	C    types.Float64String `json:"C"`
 }
 
 // IndicesResponse は指数四本値のレスポンスです。
 type IndicesResponse struct {
-	Indices       []Index `json:"indices"`
+	Data          []Index `json:"data"`
 	PaginationKey string  `json:"pagination_key"` // ページネーションキー
 }
 
@@ -51,7 +51,7 @@ type IndicesResponse struct {
 func (i *IndicesResponse) UnmarshalJSON(data []byte) error {
 	// First unmarshal into RawIndex
 	type rawResponse struct {
-		Indices       []RawIndex `json:"indices"`
+		Data          []RawIndex `json:"data"`
 		PaginationKey string     `json:"pagination_key"`
 	}
 
@@ -64,15 +64,15 @@ func (i *IndicesResponse) UnmarshalJSON(data []byte) error {
 	i.PaginationKey = raw.PaginationKey
 
 	// Convert RawIndex to Index
-	i.Indices = make([]Index, len(raw.Indices))
-	for idx, ri := range raw.Indices {
-		i.Indices[idx] = Index{
-			Date:  ri.Date,
-			Code:  ri.Code,
-			Open:  float64(ri.Open),
-			High:  float64(ri.High),
-			Low:   float64(ri.Low),
-			Close: float64(ri.Close),
+	i.Data = make([]Index, len(raw.Data))
+	for idx, ri := range raw.Data {
+		i.Data[idx] = Index{
+			Date: ri.Date,
+			Code: ri.Code,
+			O:    float64(ri.O),
+			H:    float64(ri.H),
+			L:    float64(ri.L),
+			C:    float64(ri.C),
 		}
 	}
 
@@ -96,7 +96,7 @@ type IndicesParams struct {
 // - From/To: 期間指定（例: "20240101" または "2024-01-01"）
 // - PaginationKey: ページネーション用キー
 func (s *IndicesService) GetIndices(params IndicesParams) (*IndicesResponse, error) {
-	path := "/indices"
+	path := "/indices/bars/daily"
 
 	query := "?"
 	if params.Code != "" {
@@ -149,7 +149,7 @@ func (s *IndicesService) GetIndicesByCode(code string, days int) ([]Index, error
 			return nil, err
 		}
 
-		allIndices = append(allIndices, resp.Indices...)
+		allIndices = append(allIndices, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -178,7 +178,7 @@ func (s *IndicesService) GetIndicesByDate(date string) ([]Index, error) {
 			return nil, err
 		}
 
-		allIndices = append(allIndices, resp.Indices...)
+		allIndices = append(allIndices, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {

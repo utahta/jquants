@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-このリポジトリは、J-Quants API（日本の株式市場データを提供するAPI）のGoクライアントライブラリです。
+このリポジトリは、J-Quants API v2（日本の株式市場データを提供するAPI）のGoクライアントライブラリです。
 
 ## API仕様の確認方法
 
 **重要**: J-Quants APIの仕様を確認する際は、以下の順序で参照してください：
 
-1. **最初に必ず`docs/`ディレクトリを確認** - このリポジトリ内のドキュメント
+1. **最初に必ず`docs/v2/`ディレクトリを確認** - このリポジトリ内のv2 APIドキュメント
 2. **不明な点がある場合のみ**: https://jpx.gitbook.io/j-quants-ja/api-reference - 公式APIリファレンス
 
 ## 開発コマンド
@@ -88,11 +88,12 @@ golangci-lint run
 ## アーキテクチャ
 
 ### ディレクトリ構造
-- `auth/`: 認証処理（ログイン、リフレッシュトークン管理）
-- `client/`: HTTPクライアントインターフェースとモック
+- `client/`: HTTPクライアント（API認証含む）とモック
 - `types/`: カスタム型（JSONの不整合な型を処理）
-- `docs/`: 各APIエンドポイントのドキュメント
+- `docs/v1/`: v1 APIドキュメント（参照用）
+- `docs/v2/`: v2 APIドキュメント
 - `test/e2e/`: エンドツーエンドテスト
+- `cmd/gitbook2md/`: GitBook→Markdown変換ツール
 
 ### 主要な設計パターン
 
@@ -120,9 +121,9 @@ golangci-lint run
 
 1. 新しいサービスファイルを作成（例：`new_service.go`）
 2. サービス構造体とメソッドを実装
-3. `jquants.go`の`Client`構造体に新サービスを追加
+3. `jquants.go`の`JQuantsAPI`構造体に新サービスを追加
 4. 対応するテストファイルを作成（例：`new_service_test.go`）
-5. `docs/`ディレクトリにドキュメントを追加
+5. `docs/v2/`ディレクトリにドキュメントを追加
 
 ### テスト実装のパターン
 
@@ -140,14 +141,37 @@ func TestService_Method(t *testing.T) {
 }
 ```
 
-### 認証の扱い
+### 認証の扱い（v2 API）
 
-- Email/Passwordログイン: `auth.Login()`
-- リフレッシュトークン: `auth.RefreshAccessToken()`
-- 認証情報は環境変数または設定ファイルで管理
-  - `JQUANTS_EMAIL`, `JQUANTS_PASSWORD`
-  - `JQUANTS_REFRESH_TOKEN`
-  - `~/.jquants/refresh_token`
+v2 APIではAPIキー方式を使用します（v1のトークン方式は廃止）。
+
+```go
+// 環境変数から自動取得（推奨）
+httpClient, err := client.NewClientFromEnv()
+
+// 直接指定
+httpClient := client.NewClient("your-api-key")
+```
+
+- 環境変数: `JQUANTS_API_KEY`
+- APIキーは[J-Quantsダッシュボード](https://jpx-jquants.com/)から取得
+
+### v2 APIの特徴
+
+1. **レスポンス形式**: 統一された `data` キーでデータを返却
+   ```go
+   type Response struct {
+       Data          []Item `json:"data"`
+       PaginationKey string `json:"pagination_key"`
+   }
+   ```
+
+2. **短縮フィールド名**: v2では短縮形を使用
+   - 株価: `Open` → `O`, `High` → `H`, `Low` → `L`, `Close` → `C`
+   - 出来高: `Volume` → `Vo`
+   - その他: `AdjustmentOpen` → `AO`, `TurnoverValue` → `TnV` など
+
+3. **認証ヘッダー**: `x-api-key` ヘッダーでAPIキーを送信
 
 ### 重要な実装上の注意点
 
@@ -159,3 +183,4 @@ func TestService_Method(t *testing.T) {
    - 市場区分: `MarketPrime`, `MarketStandard`, `MarketGrowth` など
    - 業種コード: `Sector17Food`, `Sector33IT` など
    - 開示書類種別: `TypeOfDocumentFYConsolidatedJP`, `TypeOfDocumentFYConsolidatedIFRS` など
+   - 公表理由: `PublishReason` 構造体のヘルパーメソッド

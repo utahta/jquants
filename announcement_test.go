@@ -16,14 +16,14 @@ func TestAnnouncementService_GetAnnouncement(t *testing.T) {
 		{
 			name:     "without pagination",
 			params:   AnnouncementParams{},
-			wantPath: "/fins/announcement",
+			wantPath: "/equities/earnings-calendar",
 		},
 		{
 			name: "with pagination",
 			params: AnnouncementParams{
 				PaginationKey: "key123",
 			},
-			wantPath: "/fins/announcement?pagination_key=key123",
+			wantPath: "/equities/earnings-calendar?pagination_key=key123",
 		},
 	}
 
@@ -35,24 +35,24 @@ func TestAnnouncementService_GetAnnouncement(t *testing.T) {
 
 			// Mock response
 			mockResponse := AnnouncementResponse{
-				Announcement: []Announcement{
+				Data: []Announcement{
 					{
-						Date:          "2024-02-14",
-						Code:          "43760",
-						CompanyName:   "くふうカンパニー",
-						FiscalYear:    "9月30日",
-						SectorName:    "情報・通信業",
-						FiscalQuarter: "第１四半期",
-						Section:       "マザーズ",
+						Date:     "2024-02-14",
+						Code:     "43760",
+						CoName:   "くふうカンパニー",
+						FY:       "9月30日",
+						SectorNm: "情報・通信業",
+						FQ:       "第１四半期",
+						Section:  "マザーズ",
 					},
 					{
-						Date:          "2024-02-14",
-						Code:          "7203",
-						CompanyName:   "トヨタ自動車",
-						FiscalYear:    "3月31日",
-						SectorName:    "輸送用機器",
-						FiscalQuarter: "第３四半期",
-						Section:       "プライム",
+						Date:     "2024-02-14",
+						Code:     "7203",
+						CoName:   "トヨタ自動車",
+						FY:       "3月31日",
+						SectorNm: "輸送用機器",
+						FQ:       "第３四半期",
+						Section:  "プライム",
 					},
 				},
 				PaginationKey: "",
@@ -70,8 +70,8 @@ func TestAnnouncementService_GetAnnouncement(t *testing.T) {
 				t.Fatal("Expected response, got nil")
 				return
 			}
-			if len(resp.Announcement) != 2 {
-				t.Errorf("Expected 2 announcements, got %d", len(resp.Announcement))
+			if len(resp.Data) != 2 {
+				t.Errorf("Expected 2 announcements, got %d", len(resp.Data))
 			}
 
 			if mockClient.LastMethod != "GET" {
@@ -92,24 +92,24 @@ func TestAnnouncementService_GetAllAnnouncements(t *testing.T) {
 
 	// Mock response - 最初のページ
 	mockResponse1 := AnnouncementResponse{
-		Announcement: []Announcement{
+		Data: []Announcement{
 			{
-				Date:          "2024-02-14",
-				Code:          "7203",
-				CompanyName:   "トヨタ自動車",
-				FiscalYear:    "3月31日",
-				SectorName:    "輸送用機器",
-				FiscalQuarter: "第３四半期",
-				Section:       "プライム",
+				Date:     "2024-02-14",
+				Code:     "7203",
+				CoName:   "トヨタ自動車",
+				FY:       "3月31日",
+				SectorNm: "輸送用機器",
+				FQ:       "第３四半期",
+				Section:  "プライム",
 			},
 			{
-				Date:          "2024-02-14",
-				Code:          "9984",
-				CompanyName:   "ソフトバンクグループ",
-				FiscalYear:    "3月31日",
-				SectorName:    "情報・通信業",
-				FiscalQuarter: "第３四半期",
-				Section:       "プライム",
+				Date:     "2024-02-14",
+				Code:     "9984",
+				CoName:   "ソフトバンクグループ",
+				FY:       "3月31日",
+				SectorNm: "情報・通信業",
+				FQ:       "第３四半期",
+				Section:  "プライム",
 			},
 		},
 		PaginationKey: "next_key",
@@ -117,22 +117,22 @@ func TestAnnouncementService_GetAllAnnouncements(t *testing.T) {
 
 	// Mock response - 2ページ目
 	mockResponse2 := AnnouncementResponse{
-		Announcement: []Announcement{
+		Data: []Announcement{
 			{
-				Date:          "2024-02-14",
-				Code:          "43760",
-				CompanyName:   "くふうカンパニー",
-				FiscalYear:    "9月30日",
-				SectorName:    "情報・通信業",
-				FiscalQuarter: "第１四半期",
-				Section:       "グロース",
+				Date:     "2024-02-14",
+				Code:     "43760",
+				CoName:   "くふうカンパニー",
+				FY:       "9月30日",
+				SectorNm: "情報・通信業",
+				FQ:       "第１四半期",
+				Section:  "グロース",
 			},
 		},
 		PaginationKey: "", // 最後のページ
 	}
 
-	mockClient.SetResponse("GET", "/fins/announcement", mockResponse1)
-	mockClient.SetResponse("GET", "/fins/announcement?pagination_key=next_key", mockResponse2)
+	mockClient.SetResponse("GET", "/equities/earnings-calendar", mockResponse1)
+	mockClient.SetResponse("GET", "/equities/earnings-calendar?pagination_key=next_key", mockResponse2)
 
 	// Test
 	announcements, err := service.GetAllAnnouncements()
@@ -163,29 +163,29 @@ func TestAnnouncementService_GetAnnouncementByCode(t *testing.T) {
 
 	// Mock response
 	mockResponse := AnnouncementResponse{
-		Announcement: []Announcement{
+		Data: []Announcement{
 			{
-				Date:          "2024-02-14",
-				Code:          "7203",
-				CompanyName:   "トヨタ自動車",
-				FiscalYear:    "3月31日",
-				SectorName:    "輸送用機器",
-				FiscalQuarter: "第３四半期",
-				Section:       "プライム",
+				Date:     "2024-02-14",
+				Code:     "7203",
+				CoName:   "トヨタ自動車",
+				FY:       "3月31日",
+				SectorNm: "輸送用機器",
+				FQ:       "第３四半期",
+				Section:  "プライム",
 			},
 			{
-				Date:          "2024-02-14",
-				Code:          "9984",
-				CompanyName:   "ソフトバンクグループ",
-				FiscalYear:    "3月31日",
-				SectorName:    "情報・通信業",
-				FiscalQuarter: "第３四半期",
-				Section:       "プライム",
+				Date:     "2024-02-14",
+				Code:     "9984",
+				CoName:   "ソフトバンクグループ",
+				FY:       "3月31日",
+				SectorNm: "情報・通信業",
+				FQ:       "第３四半期",
+				Section:  "プライム",
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/fins/announcement", mockResponse)
+	mockClient.SetResponse("GET", "/equities/earnings-calendar", mockResponse)
 
 	// Test
 	announcement, err := service.GetAnnouncementByCode("7203")
@@ -207,8 +207,8 @@ func TestAnnouncementService_GetAnnouncementByCode(t *testing.T) {
 		t.Errorf("Expected section プライム, got %s", announcement.Section)
 	}
 
-	if announcement.FiscalQuarter != "第３四半期" {
-		t.Errorf("Expected fiscal quarter 第３四半期, got %s", announcement.FiscalQuarter)
+	if announcement.FQ != "第３四半期" {
+		t.Errorf("Expected fiscal quarter 第３四半期, got %s", announcement.FQ)
 	}
 }
 
@@ -219,15 +219,15 @@ func TestAnnouncementService_GetAnnouncementByCode_NotFound(t *testing.T) {
 
 	// Mock response
 	mockResponse := AnnouncementResponse{
-		Announcement: []Announcement{
+		Data: []Announcement{
 			{
-				Code:        "9984",
-				CompanyName: "ソフトバンクグループ",
+				Code:   "9984",
+				CoName: "ソフトバンクグループ",
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/fins/announcement", mockResponse)
+	mockClient.SetResponse("GET", "/equities/earnings-calendar", mockResponse)
 
 	// Test
 	_, err := service.GetAnnouncementByCode("7203")
@@ -242,7 +242,7 @@ func TestAnnouncementService_GetAnnouncement_Error(t *testing.T) {
 	service := NewAnnouncementService(mockClient)
 
 	// Mock error
-	mockClient.SetError("GET", "/fins/announcement", fmt.Errorf("API error"))
+	mockClient.SetError("GET", "/equities/earnings-calendar", fmt.Errorf("API error"))
 
 	// Test
 	_, err := service.GetAnnouncement(AnnouncementParams{})

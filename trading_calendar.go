@@ -26,14 +26,14 @@ type TradingCalendarParams struct {
 
 // TradingCalendarResponse は取引カレンダーのレスポンスです。
 type TradingCalendarResponse struct {
-	TradingCalendar []TradingCalendar `json:"trading_calendar"`
+	Data []TradingCalendar `json:"data"`
 }
 
 // TradingCalendar は取引カレンダーのデータです。
-// J-Quants API /markets/trading_calendar エンドポイントのレスポンスデータ。
+// J-Quants API /markets/calendar エンドポイントのレスポンスデータ。
 type TradingCalendar struct {
-	Date            string `json:"Date"`            // 日付（YYYY-MM-DD形式）
-	HolidayDivision string `json:"HolidayDivision"` // 休日区分（0: 非営業日, 1: 営業日, 2: 東証半日立会日, 3: 非営業日(祝日取引あり)）
+	Date   string `json:"Date"`   // 日付（YYYY-MM-DD形式）
+	HolDiv string `json:"HolDiv"` // 休日区分（0: 非営業日, 1: 営業日, 2: 東証半日立会日, 3: 非営業日(祝日取引あり)）
 }
 
 // 休日区分定数
@@ -46,16 +46,16 @@ const (
 
 // GetTradingCalendar は取引カレンダーを取得します。
 // パラメータの組み合わせ:
-// - holidaydivision指定あり、from/to指定なし: 指定された休日区分について全期間分のデータ
-// - holidaydivision指定あり、from/to指定あり: 指定された休日区分について指定された期間分のデータ
-// - holidaydivision指定なし、from/to指定あり: 指定された期間分のデータ
-// - holidaydivision指定なし、from/to指定なし: 全期間分のデータ
+// - hol_div指定あり、from/to指定なし: 指定された休日区分について全期間分のデータ
+// - hol_div指定あり、from/to指定あり: 指定された休日区分について指定された期間分のデータ
+// - hol_div指定なし、from/to指定あり: 指定された期間分のデータ
+// - hol_div指定なし、from/to指定なし: 全期間分のデータ
 func (s *TradingCalendarService) GetTradingCalendar(params TradingCalendarParams) (*TradingCalendarResponse, error) {
-	path := "/markets/trading_calendar"
+	path := "/markets/calendar"
 
 	query := "?"
 	if params.HolidayDivision != "" {
-		query += fmt.Sprintf("holidaydivision=%s&", params.HolidayDivision)
+		query += fmt.Sprintf("hol_div=%s&", params.HolidayDivision)
 	}
 	if params.From != "" {
 		query += fmt.Sprintf("from=%s&", params.From)
@@ -85,7 +85,7 @@ func (s *TradingCalendarService) GetTradingCalendarByDateRange(from, to string) 
 	if err != nil {
 		return nil, err
 	}
-	return resp.TradingCalendar, nil
+	return resp.Data, nil
 }
 
 // GetTradingDays は指定した期間の営業日のみを取得します。
@@ -98,7 +98,7 @@ func (s *TradingCalendarService) GetTradingDays(from, to string) ([]TradingCalen
 	if err != nil {
 		return nil, err
 	}
-	return resp.TradingCalendar, nil
+	return resp.Data, nil
 }
 
 // GetNonTradingDays は指定した期間の非営業日のみを取得します。
@@ -111,7 +111,7 @@ func (s *TradingCalendarService) GetNonTradingDays(from, to string) ([]TradingCa
 	if err != nil {
 		return nil, err
 	}
-	return resp.TradingCalendar, nil
+	return resp.Data, nil
 }
 
 // GetOSEHolidayTradingDays はOSEで祝日取引を実施する日を取得します。
@@ -124,25 +124,25 @@ func (s *TradingCalendarService) GetOSEHolidayTradingDays(from, to string) ([]Tr
 	if err != nil {
 		return nil, err
 	}
-	return resp.TradingCalendar, nil
+	return resp.Data, nil
 }
 
 // IsTradingDay は指定した日付が営業日かどうかを判定します。
 func (tc *TradingCalendar) IsTradingDay() bool {
-	return tc.HolidayDivision == HolidayDivisionTradingDay
+	return tc.HolDiv == HolidayDivisionTradingDay
 }
 
 // IsNonTradingDay は指定した日付が非営業日かどうかを判定します。
 func (tc *TradingCalendar) IsNonTradingDay() bool {
-	return tc.HolidayDivision == HolidayDivisionNonTradingDay
+	return tc.HolDiv == HolidayDivisionNonTradingDay
 }
 
 // IsHalfTradingDay は指定した日付が半日立会日かどうかを判定します。
 func (tc *TradingCalendar) IsHalfTradingDay() bool {
-	return tc.HolidayDivision == HolidayDivisionTSEHalfDay
+	return tc.HolDiv == HolidayDivisionTSEHalfDay
 }
 
 // HasOSEHolidayTrading は指定した日付にOSEで祝日取引があるかどうかを判定します。
 func (tc *TradingCalendar) HasOSEHolidayTrading() bool {
-	return tc.HolidayDivision == HolidayDivisionOSEHolidayTrading
+	return tc.HolDiv == HolidayDivisionOSEHolidayTrading
 }

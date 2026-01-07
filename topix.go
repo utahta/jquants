@@ -20,27 +20,27 @@ func NewTOPIXService(c client.HTTPClient) *TOPIXService {
 }
 
 // TOPIXData はTOPIX指数の四本値データを表します。
-// J-Quants API /indices/topix エンドポイントのレスポンスデータ。
+// J-Quants API /indices/bars/daily/topix エンドポイントのレスポンスデータ。
 type TOPIXData struct {
-	Date  string  `json:"Date"`  // 日付（YYYY-MM-DD形式）
-	Open  float64 `json:"Open"`  // 始値
-	High  float64 `json:"High"`  // 高値
-	Low   float64 `json:"Low"`   // 安値
-	Close float64 `json:"Close"` // 終値
+	Date string  `json:"Date"` // 日付（YYYY-MM-DD形式）
+	O    float64 `json:"O"`    // 始値
+	H    float64 `json:"H"`    // 高値
+	L    float64 `json:"L"`    // 安値
+	C    float64 `json:"C"`    // 終値
 }
 
 // RawTOPIXData is used for unmarshaling JSON response with mixed types
 type RawTOPIXData struct {
-	Date  string              `json:"Date"`
-	Open  types.Float64String `json:"Open"`
-	High  types.Float64String `json:"High"`
-	Low   types.Float64String `json:"Low"`
-	Close types.Float64String `json:"Close"`
+	Date string              `json:"Date"`
+	O    types.Float64String `json:"O"`
+	H    types.Float64String `json:"H"`
+	L    types.Float64String `json:"L"`
+	C    types.Float64String `json:"C"`
 }
 
 // TOPIXResponse はTOPIX指数のレスポンスです。
 type TOPIXResponse struct {
-	TOPIX         []TOPIXData `json:"topix"`
+	Data          []TOPIXData `json:"data"`
 	PaginationKey string      `json:"pagination_key"` // ページネーションキー
 }
 
@@ -48,7 +48,7 @@ type TOPIXResponse struct {
 func (t *TOPIXResponse) UnmarshalJSON(data []byte) error {
 	// First unmarshal into RawTOPIXData
 	type rawResponse struct {
-		TOPIX         []RawTOPIXData `json:"topix"`
+		Data          []RawTOPIXData `json:"data"`
 		PaginationKey string         `json:"pagination_key"`
 	}
 
@@ -61,14 +61,14 @@ func (t *TOPIXResponse) UnmarshalJSON(data []byte) error {
 	t.PaginationKey = raw.PaginationKey
 
 	// Convert RawTOPIXData to TOPIXData
-	t.TOPIX = make([]TOPIXData, len(raw.TOPIX))
-	for idx, rt := range raw.TOPIX {
-		t.TOPIX[idx] = TOPIXData{
-			Date:  rt.Date,
-			Open:  float64(rt.Open),
-			High:  float64(rt.High),
-			Low:   float64(rt.Low),
-			Close: float64(rt.Close),
+	t.Data = make([]TOPIXData, len(raw.Data))
+	for idx, rt := range raw.Data {
+		t.Data[idx] = TOPIXData{
+			Date: rt.Date,
+			O:    float64(rt.O),
+			H:    float64(rt.H),
+			L:    float64(rt.L),
+			C:    float64(rt.C),
 		}
 	}
 
@@ -88,7 +88,7 @@ type TOPIXParams struct {
 // - From/To: 期間指定（例: "20240101" または "2024-01-01"）
 // - PaginationKey: ページネーション用キー
 func (s *TOPIXService) GetTOPIXData(params TOPIXParams) (*TOPIXResponse, error) {
-	path := "/indices/topix"
+	path := "/indices/bars/daily/topix"
 
 	query := "?"
 	if params.From != "" {
@@ -131,7 +131,7 @@ func (s *TOPIXService) GetTOPIXByDateRange(from, to string) ([]TOPIXData, error)
 			return nil, err
 		}
 
-		allTOPIX = append(allTOPIX, resp.TOPIX...)
+		allTOPIX = append(allTOPIX, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -159,7 +159,7 @@ func (s *TOPIXService) GetAllTOPIXData() ([]TOPIXData, error) {
 			return nil, err
 		}
 
-		allTOPIX = append(allTOPIX, resp.TOPIX...)
+		allTOPIX = append(allTOPIX, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -178,10 +178,10 @@ func (s *TOPIXService) GetLatestTOPIX() (*TOPIXData, error) {
 		return nil, err
 	}
 
-	if len(resp.TOPIX) == 0 {
+	if len(resp.Data) == 0 {
 		return nil, fmt.Errorf("no TOPIX data found")
 	}
 
 	// 最新のデータを返す（通常はレスポンスの最初の要素が最新）
-	return &resp.TOPIX[0], nil
+	return &resp.Data[0], nil
 }

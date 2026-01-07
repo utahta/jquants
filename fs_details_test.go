@@ -20,21 +20,21 @@ func TestFSDetailsService_GetFSDetails(t *testing.T) {
 				Code: "86970",
 				Date: "20230130",
 			},
-			wantPath: "/fins/fs_details?code=86970&date=20230130",
+			wantPath: "/fins/details?code=86970&date=20230130",
 		},
 		{
 			name: "with code only",
 			params: FSDetailsParams{
 				Code: "86970",
 			},
-			wantPath: "/fins/fs_details?code=86970",
+			wantPath: "/fins/details?code=86970",
 		},
 		{
 			name: "with date only",
 			params: FSDetailsParams{
 				Date: "2023-01-30",
 			},
-			wantPath: "/fins/fs_details?date=2023-01-30",
+			wantPath: "/fins/details?date=2023-01-30",
 		},
 		{
 			name: "with pagination key",
@@ -42,7 +42,7 @@ func TestFSDetailsService_GetFSDetails(t *testing.T) {
 				Code:          "86970",
 				PaginationKey: "key123",
 			},
-			wantPath: "/fins/fs_details?code=86970&pagination_key=key123",
+			wantPath: "/fins/details?code=86970&pagination_key=key123",
 		},
 		{
 			name:     "with no required parameters",
@@ -60,14 +60,14 @@ func TestFSDetailsService_GetFSDetails(t *testing.T) {
 
 			// Mock response based on documentation sample
 			mockResponse := FSDetailsResponse{
-				FSDetails: []FSDetail{
+				Data: []FSDetail{
 					{
-						DisclosedDate:    "2023-01-30",
-						DisclosedTime:    "12:00:00",
-						LocalCode:        "86970",
-						DisclosureNumber: "20230127594871",
-						TypeOfDocument:   "3QFinancialStatements_Consolidated_IFRS",
-						FinancialStatement: map[string]string{
+						DiscDate: "2023-01-30",
+						DiscTime: "12:00:00",
+						Code:     "86970",
+						DiscNo:   "20230127594871",
+						DocType:  "3QFinancialStatements_Consolidated_IFRS",
+						FS: map[string]string{
 							"Goodwill (IFRS)":                                       "67374000000",
 							"Retained earnings (IFRS)":                              "263894000000",
 							"Operating profit (loss) (IFRS)":                        "51765000000.0",
@@ -115,7 +115,7 @@ func TestFSDetailsService_GetFSDetails(t *testing.T) {
 				t.Fatal("GetFSDetails() returned nil response")
 				return
 			}
-			if len(resp.FSDetails) == 0 {
+			if len(resp.Data) == 0 {
 				t.Error("GetFSDetails() returned empty data")
 			}
 			if mockClient.LastPath != tt.wantPath {
@@ -149,20 +149,20 @@ func TestFSDetailsService_GetFSDetailsByCode(t *testing.T) {
 
 	// Mock response - 最初のページ
 	mockResponse1 := FSDetailsResponse{
-		FSDetails: []FSDetail{
+		Data: []FSDetail{
 			{
-				DisclosedDate:  "2023-01-30",
-				LocalCode:      "86970",
-				TypeOfDocument: "3QFinancialStatements_Consolidated_IFRS",
-				FinancialStatement: map[string]string{
+				DiscDate: "2023-01-30",
+				Code:     "86970",
+				DocType:  "3QFinancialStatements_Consolidated_IFRS",
+				FS: map[string]string{
 					"Accounting standards, DEI": "IFRS",
 				},
 			},
 			{
-				DisclosedDate:  "2022-10-31",
-				LocalCode:      "86970",
-				TypeOfDocument: "2QFinancialStatements_Consolidated_IFRS",
-				FinancialStatement: map[string]string{
+				DiscDate: "2022-10-31",
+				Code:     "86970",
+				DocType:  "2QFinancialStatements_Consolidated_IFRS",
+				FS: map[string]string{
 					"Accounting standards, DEI": "IFRS",
 				},
 			},
@@ -172,12 +172,12 @@ func TestFSDetailsService_GetFSDetailsByCode(t *testing.T) {
 
 	// Mock response - 2ページ目
 	mockResponse2 := FSDetailsResponse{
-		FSDetails: []FSDetail{
+		Data: []FSDetail{
 			{
-				DisclosedDate:  "2022-07-29",
-				LocalCode:      "86970",
-				TypeOfDocument: "1QFinancialStatements_Consolidated_IFRS",
-				FinancialStatement: map[string]string{
+				DiscDate: "2022-07-29",
+				Code:     "86970",
+				DocType:  "1QFinancialStatements_Consolidated_IFRS",
+				FS: map[string]string{
 					"Accounting standards, DEI": "IFRS",
 				},
 			},
@@ -185,8 +185,8 @@ func TestFSDetailsService_GetFSDetailsByCode(t *testing.T) {
 		PaginationKey: "", // 最後のページ
 	}
 
-	mockClient.SetResponse("GET", "/fins/fs_details?code=86970", mockResponse1)
-	mockClient.SetResponse("GET", "/fins/fs_details?code=86970&pagination_key=next_page_key", mockResponse2)
+	mockClient.SetResponse("GET", "/fins/details?code=86970", mockResponse1)
+	mockClient.SetResponse("GET", "/fins/details?code=86970&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
 	data, err := service.GetFSDetailsByCode("86970")
@@ -199,8 +199,8 @@ func TestFSDetailsService_GetFSDetailsByCode(t *testing.T) {
 		t.Errorf("GetFSDetailsByCode() returned %d items, want 3", len(data))
 	}
 	for _, item := range data {
-		if item.LocalCode != "86970" {
-			t.Errorf("GetFSDetailsByCode() returned code %v, want 86970", item.LocalCode)
+		if item.Code != "86970" {
+			t.Errorf("GetFSDetailsByCode() returned code %v, want 86970", item.Code)
 		}
 	}
 }
@@ -212,19 +212,19 @@ func TestFSDetailsService_GetFSDetailsByDate(t *testing.T) {
 
 	// Mock response
 	mockResponse := FSDetailsResponse{
-		FSDetails: []FSDetail{
+		Data: []FSDetail{
 			{
-				DisclosedDate: "2023-01-30",
-				LocalCode:     "86970",
+				DiscDate: "2023-01-30",
+				Code:     "86970",
 			},
 			{
-				DisclosedDate: "2023-01-30",
-				LocalCode:     "13010",
+				DiscDate: "2023-01-30",
+				Code:     "13010",
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/fins/fs_details?date=20230130", mockResponse)
+	mockClient.SetResponse("GET", "/fins/details?date=20230130", mockResponse)
 
 	// Execute
 	data, err := service.GetFSDetailsByDate("20230130")
@@ -237,8 +237,8 @@ func TestFSDetailsService_GetFSDetailsByDate(t *testing.T) {
 		t.Errorf("GetFSDetailsByDate() returned %d items, want 2", len(data))
 	}
 	for _, item := range data {
-		if item.DisclosedDate != "2023-01-30" {
-			t.Errorf("GetFSDetailsByDate() returned date %v, want 2023-01-30", item.DisclosedDate)
+		if item.DiscDate != "2023-01-30" {
+			t.Errorf("GetFSDetailsByDate() returned date %v, want 2023-01-30", item.DiscDate)
 		}
 	}
 }
@@ -253,7 +253,7 @@ func TestFSDetail_AccountingStandardsMethods(t *testing.T) {
 		{
 			name: "IFRS",
 			fsDetail: FSDetail{
-				FinancialStatement: map[string]string{
+				FS: map[string]string{
 					"Accounting standards, DEI": "IFRS",
 				},
 			},
@@ -263,7 +263,7 @@ func TestFSDetail_AccountingStandardsMethods(t *testing.T) {
 		{
 			name: "Japanese GAAP",
 			fsDetail: FSDetail{
-				FinancialStatement: map[string]string{
+				FS: map[string]string{
 					"Accounting standards, DEI": "JapaneseGAAP",
 				},
 			},
@@ -273,7 +273,7 @@ func TestFSDetail_AccountingStandardsMethods(t *testing.T) {
 		{
 			name: "No standard specified",
 			fsDetail: FSDetail{
-				FinancialStatement: map[string]string{},
+				FS: map[string]string{},
 			},
 			isIFRS:         false,
 			isJapaneseGAAP: false,
@@ -304,7 +304,7 @@ func TestFSDetail_DocumentTypeMethods(t *testing.T) {
 		{
 			name: "1Q Consolidated IFRS",
 			fsDetail: FSDetail{
-				TypeOfDocument: "1QFinancialStatements_Consolidated_IFRS",
+				DocType: "1QFinancialStatements_Consolidated_IFRS",
 			},
 			isQuarterly:    true,
 			isAnnual:       false,
@@ -314,7 +314,7 @@ func TestFSDetail_DocumentTypeMethods(t *testing.T) {
 		{
 			name: "2Q Consolidated IFRS",
 			fsDetail: FSDetail{
-				TypeOfDocument: "2QFinancialStatements_Consolidated_IFRS",
+				DocType: "2QFinancialStatements_Consolidated_IFRS",
 			},
 			isQuarterly:    true,
 			isAnnual:       false,
@@ -324,7 +324,7 @@ func TestFSDetail_DocumentTypeMethods(t *testing.T) {
 		{
 			name: "3Q Consolidated IFRS",
 			fsDetail: FSDetail{
-				TypeOfDocument: "3QFinancialStatements_Consolidated_IFRS",
+				DocType: "3QFinancialStatements_Consolidated_IFRS",
 			},
 			isQuarterly:    true,
 			isAnnual:       false,
@@ -332,9 +332,9 @@ func TestFSDetail_DocumentTypeMethods(t *testing.T) {
 			quarter:        3,
 		},
 		{
-			name: "Year End Consolidated IFRS",
+			name: "FY Consolidated IFRS",
 			fsDetail: FSDetail{
-				TypeOfDocument: "YearEndFinancialStatements_Consolidated_IFRS",
+				DocType: "FYFinancialStatements_Consolidated_IFRS",
 			},
 			isQuarterly:    false,
 			isAnnual:       true,
@@ -344,7 +344,7 @@ func TestFSDetail_DocumentTypeMethods(t *testing.T) {
 		{
 			name: "Other document type",
 			fsDetail: FSDetail{
-				TypeOfDocument: "OtherDocument",
+				DocType: "OtherDocument",
 			},
 			isQuarterly:    false,
 			isAnnual:       false,
@@ -374,7 +374,7 @@ func TestFSDetail_DocumentTypeMethods(t *testing.T) {
 func TestFSDetail_GetValue(t *testing.T) {
 	// Setup
 	fsDetail := FSDetail{
-		FinancialStatement: map[string]string{
+		FS: map[string]string{
 			"Assets (IFRS)": "79205861000000",
 			"Equity (IFRS)": "320021000000",
 		},
@@ -399,7 +399,7 @@ func TestFSDetail_GetValue(t *testing.T) {
 func TestFSDetail_GetFloatValue(t *testing.T) {
 	// Setup
 	fsDetail := FSDetail{
-		FinancialStatement: map[string]string{
+		FS: map[string]string{
 			"Assets (IFRS)":                          "79205861000000",
 			"Basic earnings (loss) per share (IFRS)": "66.76",
 			"Invalid value":                          "not_a_number",
@@ -440,7 +440,7 @@ func TestFSDetail_GetFloatValue(t *testing.T) {
 func TestFSDetail_FinancialRatios(t *testing.T) {
 	// Setup - IFRS financial statement
 	fsDetailIFRS := FSDetail{
-		FinancialStatement: map[string]string{
+		FS: map[string]string{
 			"Accounting standards, DEI":                             "IFRS",
 			"Profit (loss) attributable to owners of parent (IFRS)": "35175000000",
 			"Equity attributable to owners of parent (IFRS)":        "311103000000",
@@ -509,7 +509,7 @@ func TestFSDetail_FinancialRatios(t *testing.T) {
 
 	// Test non-IFRS error
 	fsDetailJGAAP := FSDetail{
-		FinancialStatement: map[string]string{
+		FS: map[string]string{
 			"Accounting standards, DEI": "JapaneseGAAP",
 		},
 	}
@@ -522,7 +522,7 @@ func TestFSDetail_FinancialRatios(t *testing.T) {
 func TestFSDetail_FinancialRatios_ErrorCases(t *testing.T) {
 	// Setup - IFRS with zero values
 	fsDetailZeroEquity := FSDetail{
-		FinancialStatement: map[string]string{
+		FS: map[string]string{
 			"Accounting standards, DEI":                             "IFRS",
 			"Profit (loss) attributable to owners of parent (IFRS)": "35175000000",
 			"Equity attributable to owners of parent (IFRS)":        "0",
@@ -537,7 +537,7 @@ func TestFSDetail_FinancialRatios_ErrorCases(t *testing.T) {
 
 	// Setup - IFRS with zero liabilities
 	fsDetailZeroLiabilities := FSDetail{
-		FinancialStatement: map[string]string{
+		FS: map[string]string{
 			"Accounting standards, DEI":  "IFRS",
 			"Current assets (IFRS)":      "100000000000",
 			"Current liabilities (IFRS)": "0",
@@ -552,7 +552,7 @@ func TestFSDetail_FinancialRatios_ErrorCases(t *testing.T) {
 
 	// Setup - IFRS with zero assets
 	fsDetailZeroAssets := FSDetail{
-		FinancialStatement: map[string]string{
+		FS: map[string]string{
 			"Accounting standards, DEI": "IFRS",
 			"Equity (IFRS)":             "320021000000",
 			"Assets (IFRS)":             "0",
@@ -572,7 +572,7 @@ func TestFSDetailsService_GetFSDetails_Error(t *testing.T) {
 	service := NewFSDetailsService(mockClient)
 
 	// Set error response
-	mockClient.SetError("GET", "/fins/fs_details?code=86970", fmt.Errorf("unauthorized"))
+	mockClient.SetError("GET", "/fins/details?code=86970", fmt.Errorf("unauthorized"))
 
 	// Execute
 	_, err := service.GetFSDetails(FSDetailsParams{Code: "86970"})

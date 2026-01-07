@@ -6,30 +6,38 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 )
 
 const (
-	BaseURL = "https://api.jquants.com/v1"
+	BaseURL = "https://api.jquants.com/v2"
 )
 
 type Client struct {
-	httpClient  *http.Client
-	baseURL     string
-	accessToken string
+	httpClient *http.Client
+	baseURL    string
+	apiKey     string
 }
 
-func NewClient() *Client {
+func NewClient(apiKey string) *Client {
 	return &Client{
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
 		baseURL: BaseURL,
+		apiKey:  apiKey,
 	}
 }
 
-func (c *Client) SetAccessToken(token string) {
-	c.accessToken = token
+// NewClientFromEnv は環境変数 JQUANTS_API_KEY からAPIキーを取得してClientを作成します。
+// 環境変数が設定されていない場合はエラーを返します。
+func NewClientFromEnv() (*Client, error) {
+	apiKey := os.Getenv("JQUANTS_API_KEY")
+	if apiKey == "" {
+		return nil, fmt.Errorf("JQUANTS_API_KEY environment variable is not set")
+	}
+	return NewClient(apiKey), nil
 }
 
 func (c *Client) DoRequest(method, path string, body interface{}, result interface{}) error {
@@ -50,8 +58,8 @@ func (c *Client) DoRequest(method, path string, body interface{}, result interfa
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	if c.accessToken != "" {
-		req.Header.Set("Authorization", "Bearer "+c.accessToken)
+	if c.apiKey != "" {
+		req.Header.Set("x-api-key", c.apiKey)
 	}
 
 	resp, err := c.httpClient.Do(req)
@@ -64,7 +72,7 @@ func (c *Client) DoRequest(method, path string, body interface{}, result interfa
 	if err != nil {
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
-	
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("API error: status=%d, body=%s", resp.StatusCode, string(respBody))
 	}

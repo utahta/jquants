@@ -44,10 +44,10 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 			}
 
 			// IssueTypeの検証（1, 2, 3のいずれか）
-			if interest.IssueType != "" {
+			if interest.IssType != "" {
 				validIssueTypes := map[string]bool{"1": true, "2": true, "3": true}
-				if !validIssueTypes[interest.IssueType] {
-					t.Errorf("Interest[%d]: IssueType = %v, want one of [1, 2, 3]", i, interest.IssueType)
+				if !validIssueTypes[interest.IssType] {
+					t.Errorf("Interest[%d]: IssueType = %v, want one of [1, 2, 3]", i, interest.IssType)
 				}
 			}
 
@@ -58,55 +58,55 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 			}
 
 			// 信用買い残高の検証
-			if interest.LongMarginTradeVolume < 0 {
-				t.Errorf("Interest[%d]: LongMarginTradeVolume = %v, want >= 0",
-					i, interest.LongMarginTradeVolume)
+			if interest.LongVol < 0 {
+				t.Errorf("Interest[%d]: LongVol = %v, want >= 0",
+					i, interest.LongVol)
 			}
-			if interest.LongStandardizedMarginTradeVolume < 0 {
-				t.Errorf("Interest[%d]: LongStandardizedMarginTradeVolume = %v, want >= 0",
-					i, interest.LongStandardizedMarginTradeVolume)
+			if interest.LongStdVol < 0 {
+				t.Errorf("Interest[%d]: LongStdVol = %v, want >= 0",
+					i, interest.LongStdVol)
 			}
 
 			// 信用売り残高の検証
-			if interest.ShortMarginTradeVolume < 0 {
-				t.Errorf("Interest[%d]: ShortMarginTradeVolume = %v, want >= 0",
-					i, interest.ShortMarginTradeVolume)
+			if interest.ShrtVol < 0 {
+				t.Errorf("Interest[%d]: ShrtVol = %v, want >= 0",
+					i, interest.ShrtVol)
 			}
-			if interest.ShortStandardizedMarginTradeVolume < 0 {
-				t.Errorf("Interest[%d]: ShortStandardizedMarginTradeVolume = %v, want >= 0",
-					i, interest.ShortStandardizedMarginTradeVolume)
+			if interest.ShrtStdVol < 0 {
+				t.Errorf("Interest[%d]: ShrtStdVol = %v, want >= 0",
+					i, interest.ShrtStdVol)
 			}
 
 			// 一般信用残高の検証
-			if interest.LongNegotiableMarginTradeVolume < 0 {
-				t.Errorf("Interest[%d]: LongNegotiableMarginTradeVolume = %v, want >= 0",
-					i, interest.LongNegotiableMarginTradeVolume)
+			if interest.LongNegVol < 0 {
+				t.Errorf("Interest[%d]: LongNegVol = %v, want >= 0",
+					i, interest.LongNegVol)
 			}
-			if interest.ShortNegotiableMarginTradeVolume < 0 {
-				t.Errorf("Interest[%d]: ShortNegotiableMarginTradeVolume = %v, want >= 0",
-					i, interest.ShortNegotiableMarginTradeVolume)
+			if interest.ShrtNegVol < 0 {
+				t.Errorf("Interest[%d]: ShrtNegVol = %v, want >= 0",
+					i, interest.ShrtNegVol)
 			}
 
 			// バランス計算
 			marginBuyRatio := 0.0
 			marginSellRatio := 0.0
-			if interest.LongMarginTradeVolume > 0 && interest.ShortMarginTradeVolume > 0 {
-				total := interest.LongMarginTradeVolume + interest.ShortMarginTradeVolume
-				marginBuyRatio = interest.LongMarginTradeVolume / total * 100
-				marginSellRatio = interest.ShortMarginTradeVolume / total * 100
+			if interest.LongVol > 0 && interest.ShrtVol > 0 {
+				total := interest.LongVol + interest.ShrtVol
+				marginBuyRatio = interest.LongVol / total * 100
+				marginSellRatio = interest.ShrtVol / total * 100
 			}
 
 			// 最初の3件の詳細ログ
 			if i < 3 {
 				t.Logf("Interest[%d]: Date=%s, Code=%s", i, interest.Date, interest.Code)
 				t.Logf("  Long Margin: %.0f shares (Std: %.0f, Neg: %.0f)",
-					interest.LongMarginTradeVolume,
-					interest.LongStandardizedMarginTradeVolume,
-					interest.LongNegotiableMarginTradeVolume)
+					interest.LongVol,
+					interest.LongStdVol,
+					interest.LongNegVol)
 				t.Logf("  Short Margin: %.0f shares (Std: %.0f, Neg: %.0f)",
-					interest.ShortMarginTradeVolume,
-					interest.ShortStandardizedMarginTradeVolume,
-					interest.ShortNegotiableMarginTradeVolume)
+					interest.ShrtVol,
+					interest.ShrtStdVol,
+					interest.ShrtNegVol)
 				if marginBuyRatio > 0 || marginSellRatio > 0 {
 					t.Logf("  Long/Short Ratio: %.1f%% / %.1f%%", marginBuyRatio, marginSellRatio)
 				}
@@ -133,14 +133,14 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 			return
 		}
 
-		if resp == nil || len(resp.WeeklyMarginInterest) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No weekly margin interest data for the specified date")
 		}
 
-		t.Logf("Retrieved %d weekly margin interest records for %s", len(resp.WeeklyMarginInterest), friday)
+		t.Logf("Retrieved %d weekly margin interest records for %s", len(resp.Data), friday)
 
 		// 日付の一致確認
-		for i, interest := range resp.WeeklyMarginInterest {
+		for i, interest := range resp.Data {
 			if interest.Date != friday {
 				t.Errorf("Interest[%d]: Date = %v, want %v", i, interest.Date, friday)
 			}
@@ -151,10 +151,10 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 			}
 
 			// IssueTypeの検証
-			if interest.IssueType != "" {
+			if interest.IssType != "" {
 				validIssueTypes := map[string]bool{"1": true, "2": true, "3": true}
-				if !validIssueTypes[interest.IssueType] {
-					t.Errorf("Interest[%d]: IssueType = %v, want one of [1, 2, 3]", i, interest.IssueType)
+				if !validIssueTypes[interest.IssType] {
+					t.Errorf("Interest[%d]: IssueType = %v, want one of [1, 2, 3]", i, interest.IssType)
 				}
 			}
 
@@ -168,10 +168,10 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 		totalMarginBuy := 0.0
 		totalMarginSell := 0.0
 
-		for _, interest := range resp.WeeklyMarginInterest {
+		for _, interest := range resp.Data {
 			codeCount[interest.Code]++
-			totalMarginBuy += interest.LongMarginTradeVolume
-			totalMarginSell += interest.ShortMarginTradeVolume
+			totalMarginBuy += interest.LongVol
+			totalMarginSell += interest.ShrtVol
 		}
 
 		t.Logf("Market summary for %s:", friday)
@@ -209,14 +209,14 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 		// 週次変化の分析
 		for i, interest := range interests {
 			if i < 5 { // 最新5週分
-				marginBalance := interest.LongMarginTradeVolume - interest.ShortMarginTradeVolume
+				marginBalance := interest.LongVol - interest.ShrtVol
 
 				t.Logf("Week %s:", interest.Date)
 				t.Logf("  Net margin position: %.0f shares (Long: %.0f, Short: %.0f)",
-					marginBalance, interest.LongMarginTradeVolume, interest.ShortMarginTradeVolume)
+					marginBalance, interest.LongVol, interest.ShrtVol)
 				t.Logf("  Standardized margin: Long %.0f, Short %.0f shares",
-					interest.LongStandardizedMarginTradeVolume,
-					interest.ShortStandardizedMarginTradeVolume)
+					interest.LongStdVol,
+					interest.ShrtStdVol)
 			}
 		}
 
@@ -225,8 +225,8 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 			latest := interests[0]
 			previous := interests[1]
 
-			buyChange := latest.LongMarginTradeVolume - previous.LongMarginTradeVolume
-			sellChange := latest.ShortMarginTradeVolume - previous.ShortMarginTradeVolume
+			buyChange := latest.LongVol - previous.LongVol
+			sellChange := latest.ShrtVol - previous.ShrtVol
 
 			t.Logf("Weekly changes (latest vs previous):")
 			t.Logf("  Long margin: %+.0f shares", buyChange)
@@ -250,11 +250,11 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 			t.Skip("No weekly margin interest data available")
 		}
 
-		if resp == nil || len(resp.WeeklyMarginInterest) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No data available for pagination test")
 		}
 
-		firstPageCount := len(resp.WeeklyMarginInterest)
+		firstPageCount := len(resp.Data)
 		t.Logf("First page: %d records", firstPageCount)
 
 		if resp.PaginationKey != "" {
@@ -265,8 +265,8 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
 
-			if resp2 != nil && len(resp2.WeeklyMarginInterest) > 0 {
-				t.Logf("Second page: %d records", len(resp2.WeeklyMarginInterest))
+			if resp2 != nil && len(resp2.Data) > 0 {
+				t.Logf("Second page: %d records", len(resp2.Data))
 			}
 		}
 	})
@@ -287,7 +287,7 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 			t.Skip("No data available for market analysis")
 		}
 
-		if resp == nil || len(resp.WeeklyMarginInterest) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No data available")
 		}
 
@@ -301,17 +301,17 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 
 		var marginRanking []MarginData
 
-		for _, interest := range resp.WeeklyMarginInterest {
+		for _, interest := range resp.Data {
 			if len(marginRanking) >= 20 {
 				break // 上位20銘柄のみ
 			}
 
-			netVolume := interest.LongMarginTradeVolume - interest.ShortMarginTradeVolume
+			netVolume := interest.LongVol - interest.ShrtVol
 
 			marginRanking = append(marginRanking, MarginData{
 				Code:      interest.Code,
-				BuyValue:  interest.LongMarginTradeVolume,
-				SellValue: interest.ShortMarginTradeVolume,
+				BuyValue:  interest.LongVol,
+				SellValue: interest.ShrtVol,
 				NetValue:  netVolume,
 			})
 		}
@@ -347,7 +347,7 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 		}
 
 		resp, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterest(params)
-		if err == nil && resp != nil && len(resp.WeeklyMarginInterest) > 0 {
+		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Logf("Warning: Got data for non-Friday date %s", mondayStr)
 		}
 	})

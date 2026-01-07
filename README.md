@@ -1,11 +1,11 @@
 # J-Quants Go Client
 
-J-Quants APIのGo言語クライアントライブラリです。日本の株式市場データに簡単にアクセスできます。
+J-Quants API v2のGo言語クライアントライブラリです。日本の株式市場データに簡単にアクセスできます。
 
 ## 特徴
 
 - 📊 包括的な市場データアクセス（株価、財務情報、指数など）
-- 🔐 自動的な認証とトークン管理
+- 🔐 APIキーによるシンプルな認証
 - 📄 ページネーション対応
 - 🧪 充実したテストカバレッジ
 - 📝 詳細なドキュメント
@@ -24,83 +24,76 @@ package main
 import (
     "fmt"
     "log"
-    
+
     "github.com/utahta/jquants"
-    "github.com/utahta/jquants/auth"
     "github.com/utahta/jquants/client"
 )
 
 func main() {
-    // HTTPクライアントを作成
-    httpClient := client.NewClient()
-    
-    // 認証を初期化（環境変数から）
-    authClient := auth.NewAuth(httpClient)
-    if err := authClient.InitFromEnv(); err != nil {
+    // HTTPクライアントを作成（環境変数 JQUANTS_API_KEY から自動取得）
+    httpClient, err := client.NewClientFromEnv()
+    if err != nil {
         log.Fatal(err)
     }
-    
+
     // J-Quants APIクライアントを作成
     jq := jquants.NewJQuantsAPI(httpClient)
-    
+
     // 株価データを取得
     quotes, err := jq.Quotes.GetDailyQuotesByCode("7203") // トヨタ自動車
     if err != nil {
         log.Fatal(err)
     }
-    
+
     for _, quote := range quotes {
-        fmt.Printf("%s: 終値 %.2f円\n", quote.Date, *quote.Close)
+        fmt.Printf("%s: 終値 %.2f円\n", quote.Date, *quote.C)
     }
 }
 ```
 
 ## 認証設定
 
-`InitFromEnv()` は以下の優先順位で認証情報を取得します：
+J-Quants API v2ではAPIキー方式を使用します。
 
-1. 環境変数 `JQUANTS_REFRESH_TOKEN`
-2. 設定ファイル `~/.jquants/refresh_token`
-3. 環境変数 `JQUANTS_EMAIL` と `JQUANTS_PASSWORD`（自動ログイン）
-
-### 推奨: Email/Passwordによる自動認証
+### 環境変数による設定（推奨）
 
 ```bash
-export JQUANTS_EMAIL="your-email@example.com"
-export JQUANTS_PASSWORD="your-password"
+export JQUANTS_API_KEY="your-api-key"
 ```
 
-この設定により、リフレッシュトークンがない場合でも自動的にログインします。
-ログイン成功時、リフレッシュトークンは `~/.jquants/refresh_token` に自動保存されます。
+APIキーは[J-Quantsダッシュボード](https://jpx-jquants.com/)から取得できます。
 
-### リフレッシュトークンによる認証
+### 直接指定する場合
 
-```bash
-export JQUANTS_REFRESH_TOKEN="your-refresh-token"
+```go
+httpClient := client.NewClient("your-api-key")
 ```
-
-### 設定ファイルによる認証
-
-リフレッシュトークンを `~/.jquants/refresh_token` に直接保存することもできます。
 
 ## 利用可能なAPI
 
-このライブラリでアクセスできる主なAPIエンドポイント：
+このライブラリでアクセスできるAPIエンドポイント：
 
-- **株価情報**: 日次株価四本値
-- **上場銘柄一覧**: 上場している全銘柄の情報
-- **財務情報**: 企業の財務諸表データ
-- **決算発表予定**: 決算発表の予定日
-- **指数情報**: TOPIX等の指数データ
-- **売買内訳**: 投資部門別売買状況
-- **空売り情報**: 空売り残高データ
-- **信用取引残高**: 週次信用取引残高
-- **営業日カレンダー**: 東証の営業日情報
-- **財務詳細情報**: より詳細な財務データ
-- **先物取引**: 先物取引データ
-- **オプション取引**: オプション取引データ
-- **午前終値**: 前場終値データ
-- その他
+| カテゴリ | サービス | 説明 |
+|---------|---------|------|
+| **株価** | Quotes | 日次株価四本値 |
+| **株価** | PricesAM | 前場四本値 |
+| **銘柄情報** | Listed | 上場銘柄一覧 |
+| **財務** | Statements | 財務情報 |
+| **財務** | FSDetails | 財務諸表詳細（BS/PL/CF） |
+| **財務** | Dividend | 配当金情報 |
+| **財務** | Announcement | 決算発表予定 |
+| **指数** | Indices | 指数四本値 |
+| **指数** | TOPIX | TOPIX指数四本値 |
+| **デリバティブ** | Futures | 先物四本値 |
+| **デリバティブ** | Options | オプション四本値 |
+| **デリバティブ** | IndexOption | 日経225オプション |
+| **市場統計** | TradesSpec | 投資部門別売買状況 |
+| **市場統計** | Breakdown | 売買内訳データ |
+| **市場統計** | TradingCalendar | 取引カレンダー |
+| **信用取引** | WeeklyMarginInterest | 信用取引週末残高 |
+| **信用取引** | DailyMarginInterest | 日々公表信用取引残高 |
+| **空売り** | ShortSelling | 業種別空売り比率 |
+| **空売り** | ShortSellingPositions | 空売り残高報告 |
 
 ※各APIの利用可能なプランについては、[J-Quants公式サイト](https://jpx-jquants.com/)でご確認ください。
 
@@ -119,6 +112,12 @@ params := jquants.DailyQuotesParams{
     To:   "2024-01-31",
 }
 response, err := jq.Quotes.GetDailyQuotes(params)
+
+// v2 APIでは短縮フィールド名を使用
+for _, q := range response.Data {
+    fmt.Printf("日付: %s, 始値: %.2f, 高値: %.2f, 安値: %.2f, 終値: %.2f\n",
+        q.Date, *q.O, *q.H, *q.L, *q.C)
+}
 ```
 
 ### 上場銘柄一覧を取得
@@ -129,17 +128,13 @@ companies, err := jq.Listed.GetInfo()
 
 // 特定銘柄の情報を取得
 company, err := jq.Listed.GetInfoByCode("7203")
-fmt.Printf("企業名: %s\n", company.CompanyName)
+fmt.Printf("企業名: %s\n", company.Name)
 
 // 市場区分で絞り込み（定数を使用）
 primeCompanies, err := jq.Listed.GetListedByMarket(jquants.MarketPrime, "")
 for _, company := range primeCompanies {
-    fmt.Printf("%s (%s) - %s\n", company.CompanyName, company.Code, company.MarketCodeName)
+    fmt.Printf("%s (%s) - %s\n", company.Name, company.Code, company.MktName)
 }
-
-// 他の市場区分の例
-standardCompanies, err := jq.Listed.GetListedByMarket(jquants.MarketStandard, "")
-growthCompanies, err := jq.Listed.GetListedByMarket(jquants.MarketGrowth, "")
 ```
 
 ### 財務情報を取得
@@ -166,6 +161,23 @@ for _, stmt := range statements {
 }
 ```
 
+### 日々公表信用取引残高を取得
+
+```go
+// 銘柄コードで取得
+data, err := jq.DailyMarginInterest.GetDailyMarginInterestByCode("13260")
+
+// 公表日で取得
+data, err := jq.DailyMarginInterest.GetDailyMarginInterestByDate("20240208")
+
+// 公表理由の確認
+for _, d := range data {
+    if d.PubReason.IsPrecautionByJSF() {
+        fmt.Printf("%s: 日証金注意喚起銘柄\n", d.Code)
+    }
+}
+```
+
 ### ページネーション対応
 
 大量のデータを扱うAPIではページネーションがサポートされています：
@@ -177,13 +189,13 @@ params := jquants.DailyQuotesParams{
 
 // 最初のページ
 response, err := jq.Quotes.GetDailyQuotes(params)
-quotes := response.DailyQuotes
+quotes := response.Data
 
 // 次のページがある場合
 if response.PaginationKey != "" {
     params.PaginationKey = response.PaginationKey
     nextResponse, err := jq.Quotes.GetDailyQuotes(params)
-    quotes = append(quotes, nextResponse.DailyQuotes...)
+    quotes = append(quotes, nextResponse.Data...)
 }
 ```
 
@@ -212,7 +224,7 @@ make test-cover
 # リントチェック
 make lint
 
-# E2Eテスト（認証情報が必要）
+# E2Eテスト（API Keyが必要）
 make test-e2e
 ```
 
@@ -220,10 +232,10 @@ make test-e2e
 
 ```
 jquants/
-├── auth/          # 認証処理
-├── client/        # HTTPクライアント
+├── client/        # HTTPクライアント（認証含む）
 ├── types/         # カスタム型定義
 ├── docs/          # APIドキュメント
+│   └── v2/        # v2 APIドキュメント
 ├── test/e2e/      # E2Eテスト
 ├── cmd/           # コマンドラインツール
 │   └── gitbook2md/  # GitBook→Markdown変換ツール
@@ -231,31 +243,47 @@ jquants/
 └── Makefile       # ビルドタスク
 ```
 
+## V1からV2への移行
+
+J-Quants API v2では以下の変更があります：
+
+### 認証方式の変更
+
+| 項目 | V1 | V2 |
+|------|-----|-----|
+| 認証方式 | トークン方式（ID Token/Refresh Token） | APIキー方式（x-api-key） |
+| 認証パッケージ | `auth/` パッケージを使用 | `client` パッケージに統合 |
+| 環境変数 | `JQUANTS_EMAIL`, `JQUANTS_PASSWORD` | `JQUANTS_API_KEY` |
+
+### レスポンス形式の変更
+
+- レスポンスキー: 各API固有のキー → 統一された `data` キー
+- フィールド名: 短縮形に変更（例: `Open` → `O`, `Close` → `C`, `Volume` → `Vo`）
+
+### コード例
+
+```go
+// V1
+quote.Open, quote.High, quote.Low, quote.Close
+
+// V2
+quote.O, quote.H, quote.L, quote.C
+```
+
+詳細は `docs/v2/migration-v1-v2.md` を参照してください。
+
 ## ツール
 
 ### gitbook2md
 
-GitBookのドキュメントをMarkdown形式に変換するツールです。J-Quants APIの公式ドキュメントをローカルで参照する際に便利です。
+GitBookのドキュメントをMarkdown形式に変換するツールです。
 
 ```bash
 # ビルド
 cd cmd/gitbook2md && go build
 
-# 使用方法1: HTMLファイルから変換
-./gitbook2md input.html output.md
-
-# 使用方法2: URLから直接変換（推奨）
+# URLから直接変換
 ./gitbook2md --url https://jpx.gitbook.io/j-quants-ja/api-reference/statements --output statements.md
-```
-
-#### 使用例
-
-```bash
-# 財務情報APIのドキュメントを取得
-./gitbook2md --url https://jpx.gitbook.io/j-quants-ja/api-reference/statements --output docs/api/statements.md
-
-# 上場銘柄一覧APIのドキュメントを取得
-./gitbook2md --url https://jpx.gitbook.io/j-quants-ja/api-reference/listed_info --output docs/api/listed_info.md
 ```
 
 ## エラーハンドリング
@@ -273,8 +301,7 @@ if err != nil {
 ## 注意事項
 
 - J-Quants APIの利用には適切なサブスクリプションが必要です
-- 各APIの利用可能なプランについては、[J-Quants公式サイト](https://jpx-jquants.com/)でご確認ください
-- APIレート制限に注意してください
+- プランごとにレートリミットが設定されています（Free: 5/分, Light: 60/分, Standard: 120/分, Premium: 500/分）
 - 営業日以外はデータが取得できない場合があります
 - 詳細なAPI仕様は[公式ドキュメント](https://jpx.gitbook.io/j-quants-ja/api-reference)を参照してください
 

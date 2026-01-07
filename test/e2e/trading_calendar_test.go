@@ -38,7 +38,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 			if day.Date == "" {
 				t.Errorf("Calendar[%d]: Date is empty", i)
 			}
-			if day.HolidayDivision == "" {
+			if day.HolDiv == "" {
 				t.Errorf("Calendar[%d]: HolidayDivision is empty", i)
 			}
 
@@ -60,16 +60,16 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 				"2": true, // 東証半日立会日
 				"3": true, // 非営業日(祝日取引あり)
 			}
-			if !validDivisions[day.HolidayDivision] {
-				t.Errorf("Calendar[%d]: Invalid HolidayDivision: %s", i, day.HolidayDivision)
+			if !validDivisions[day.HolDiv] {
+				t.Errorf("Calendar[%d]: Invalid HolidayDivision: %s", i, day.HolDiv)
 			}
 
 			// 最初の10件の詳細ログ
 			if i < 10 {
 				status := "営業日"
-				if day.HolidayDivision == "1" {
+				if day.HolDiv == "1" {
 					status = "休日"
-				} else if day.HolidayDivision == "2" {
+				} else if day.HolDiv == "2" {
 					status = "半日営業"
 				}
 				t.Logf("Calendar[%d]: %s - %s", i, day.Date, status)
@@ -107,7 +107,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 		holidays := 0
 
 		for _, day := range calendar {
-			switch day.HolidayDivision {
+			switch day.HolDiv {
 			case "0":
 				businessDays++
 			case "1":
@@ -123,9 +123,9 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 		// 2024年1月の特定の日をチェック（元日は非営業日のはず）
 		for _, day := range calendar {
 			if day.Date == "2024-01-01" {
-				t.Logf("New Year's Day HolidayDivision: %s", day.HolidayDivision)
-				if day.HolidayDivision != "0" {
-					t.Errorf("New Year's Day should be non-business day (0), got: %s", day.HolidayDivision)
+				t.Logf("New Year's Day HolidayDivision: %s", day.HolDiv)
+				if day.HolDiv != "0" {
+					t.Errorf("New Year's Day should be non-business day (0), got: %s", day.HolDiv)
 				} else {
 					t.Logf("New Year's Day correctly marked as non-business day")
 				}
@@ -166,7 +166,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 
 			weekday := date.Weekday()
 			isWeekend := weekday == time.Saturday || weekday == time.Sunday
-			isBusinessDay := day.HolidayDivision == "1" || day.HolidayDivision == "2"
+			isBusinessDay := day.HolDiv == "1" || day.HolDiv == "2"
 
 			if isWeekend && isBusinessDay {
 				weekendBusinessDays++
@@ -210,7 +210,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 		for _, day := range calendar {
 			month := day.Date[:7] // YYYY-MM
 
-			if day.HolidayDivision == "0" {
+			if day.HolDiv == "0" {
 				monthlyBusinessDays[month]++
 			} else {
 				monthlyHolidays[month]++
@@ -263,7 +263,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 		}
 
 		status := "営業日"
-		if day.HolidayDivision == "1" {
+		if day.HolDiv == "1" {
 			status = "休日"
 		}
 		t.Logf("Today (%s) is: %s", today, status)

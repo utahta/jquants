@@ -24,14 +24,14 @@ func TestOptionsService_GetOptions(t *testing.T) {
 				ContractFlag:  "1",
 				PaginationKey: "test_key",
 			},
-			wantPath: "/derivatives/options?date=20240723&category=NK225E&code=7203&contract_flag=1&pagination_key=test_key",
+			wantPath: "/derivatives/bars/daily/options?date=20240723&category=NK225E&code=7203&contract_flag=1&pagination_key=test_key",
 		},
 		{
 			name: "with date only (required)",
 			params: OptionsParams{
 				Date: "20240723",
 			},
-			wantPath: "/derivatives/options?date=20240723",
+			wantPath: "/derivatives/bars/daily/options?date=20240723",
 		},
 		{
 			name: "with date and category",
@@ -39,7 +39,7 @@ func TestOptionsService_GetOptions(t *testing.T) {
 				Date:     "20240723",
 				Category: "TOPIXE",
 			},
-			wantPath: "/derivatives/options?date=20240723&category=TOPIXE",
+			wantPath: "/derivatives/bars/daily/options?date=20240723&category=TOPIXE",
 		},
 		{
 			name: "with EQOP category and code",
@@ -48,7 +48,7 @@ func TestOptionsService_GetOptions(t *testing.T) {
 				Category: "EQOP",
 				Code:     "7203",
 			},
-			wantPath: "/derivatives/options?date=20240723&category=EQOP&code=7203",
+			wantPath: "/derivatives/bars/daily/options?date=20240723&category=EQOP&code=7203",
 		},
 		{
 			name:    "without date (should error)",
@@ -66,45 +66,45 @@ func TestOptionsService_GetOptions(t *testing.T) {
 			if !tt.wantErr {
 				// Mock response
 				mockResponse := OptionsResponse{
-					Options: []Option{
+					Data: []Option{
 						{
-							Code:                           "140014505",
-							DerivativesProductCategory:     "TOPIXE",
-							UnderlyingSSO:                  "-",
-							Date:                           "2024-07-23",
-							ContractMonth:                  "2025-01",
-							StrikePrice:                    2450.0,
-							PutCallDivision:                "2",
-							EmergencyMarginTriggerDivision: "002",
-							WholeDayOpen:                   0.0,
-							WholeDayHigh:                   0.0,
-							WholeDayLow:                    0.0,
-							WholeDayClose:                  0.0,
-							NightSessionOpen:               0.0,
-							NightSessionHigh:               0.0,
-							NightSessionLow:                0.0,
-							NightSessionClose:              0.0,
-							DaySessionOpen:                 0.0,
-							DaySessionHigh:                 0.0,
-							DaySessionLow:                  0.0,
-							DaySessionClose:                0.0,
-							MorningSessionOpen:             "",
-							MorningSessionHigh:             "",
-							MorningSessionLow:              "",
-							MorningSessionClose:            "",
-							Volume:                         0.0,
-							OpenInterest:                   0.0,
-							TurnoverValue:                  0.0,
-							VolumeOnlyAuction:              floatPtr(0.0),
-							SettlementPrice:                floatPtr(377.0),
-							TheoreticalPrice:               floatPtr(380.3801),
-							BaseVolatility:                 floatPtr(18.115),
-							UnderlyingPrice:                floatPtr(2833.39),
-							ImpliedVolatility:              floatPtr(17.2955),
-							InterestRate:                   floatPtr(0.3527),
-							LastTradingDay:                 stringPtr("2025-01-09"),
-							SpecialQuotationDay:            stringPtr("2025-01-10"),
-							CentralContractMonthFlag:       stringPtr("0"),
+							Code:         "140014505",
+							ProdCat:      "TOPIXE",
+							UndSSO:       "-",
+							Date:         "2024-07-23",
+							CM:           "2025-01",
+							Strike:       2450.0,
+							PCDiv:        "2",
+							EmMrgnTrgDiv: "002",
+							O:            0.0,
+							H:            0.0,
+							L:            0.0,
+							C:            0.0,
+							EO:           "",
+							EH:           "",
+							EL:           "",
+							EC:           "",
+							AO:           0.0,
+							AH:           0.0,
+							AL:           0.0,
+							AC:           0.0,
+							MO:           "",
+							MH:           "",
+							ML:           "",
+							MC:           "",
+							Vo:           0.0,
+							OI:           0.0,
+							Va:           0.0,
+							VoOA:         floatPtr(0.0),
+							Settle:       floatPtr(377.0),
+							Theo:         floatPtr(380.3801),
+							BaseVol:      floatPtr(18.115),
+							UnderPx:      floatPtr(2833.39),
+							IV:           floatPtr(17.2955),
+							IR:           floatPtr(0.3527),
+							LTD:          stringPtr("2025-01-09"),
+							SQD:          stringPtr("2025-01-10"),
+							CCMFlag:      stringPtr("0"),
 						},
 					},
 					PaginationKey: "value1.value2.",
@@ -129,7 +129,7 @@ func TestOptionsService_GetOptions(t *testing.T) {
 				t.Fatal("GetOptions() returned nil response")
 				return
 			}
-			if len(resp.Options) == 0 {
+			if len(resp.Data) == 0 {
 				t.Error("GetOptions() returned empty data")
 			}
 			if mockClient.LastPath != tt.wantPath {
@@ -146,43 +146,43 @@ func TestOptionsService_GetOptionsByDate(t *testing.T) {
 
 	// Mock response - first page
 	mockResponse1 := OptionsResponse{
-		Options: []Option{
+		Data: []Option{
 			{
-				Code:                           "140014505",
-				DerivativesProductCategory:     "TOPIXE",
-				UnderlyingSSO:                  "-",
-				Date:                           "2024-07-23",
-				ContractMonth:                  "2025-01",
-				StrikePrice:                    2450.0,
-				PutCallDivision:                "2",
-				EmergencyMarginTriggerDivision: "002",
-				WholeDayClose:                  0.0,
-				Volume:                         0.0,
+				Code:         "140014505",
+				ProdCat:      "TOPIXE",
+				UndSSO:       "-",
+				Date:         "2024-07-23",
+				CM:           "2025-01",
+				Strike:       2450.0,
+				PCDiv:        "2",
+				EmMrgnTrgDiv: "002",
+				C:            0.0,
+				Vo:           0.0,
 			},
 		},
 		PaginationKey: "next_page",
 	}
-	mockClient.SetResponse("GET", "/derivatives/options?date=20240723", mockResponse1)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/options?date=20240723", mockResponse1)
 
 	// Mock response - second page
 	mockResponse2 := OptionsResponse{
-		Options: []Option{
+		Data: []Option{
 			{
-				Code:                           "140014506",
-				DerivativesProductCategory:     "NK225E",
-				UnderlyingSSO:                  "-",
-				Date:                           "2024-07-23",
-				ContractMonth:                  "2025-01",
-				StrikePrice:                    40000.0,
-				PutCallDivision:                "1",
-				EmergencyMarginTriggerDivision: "002",
-				WholeDayClose:                  50.0,
-				Volume:                         100.0,
+				Code:         "140014506",
+				ProdCat:      "NK225E",
+				UndSSO:       "-",
+				Date:         "2024-07-23",
+				CM:           "2025-01",
+				Strike:       40000.0,
+				PCDiv:        "1",
+				EmMrgnTrgDiv: "002",
+				C:            50.0,
+				Vo:           100.0,
 			},
 		},
 		PaginationKey: "", // 最終ページ
 	}
-	mockClient.SetResponse("GET", "/derivatives/options?date=20240723&pagination_key=next_page", mockResponse2)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/options?date=20240723&pagination_key=next_page", mockResponse2)
 
 	// Execute
 	options, err := service.GetOptionsByDate("20240723")
@@ -209,20 +209,20 @@ func TestOptionsService_GetOptionsByCategory(t *testing.T) {
 
 	// Mock response
 	mockResponse := OptionsResponse{
-		Options: []Option{
+		Data: []Option{
 			{
-				Code:                           "140014505",
-				DerivativesProductCategory:     "NK225E",
-				UnderlyingSSO:                  "-",
-				Date:                           "2024-07-23",
-				ContractMonth:                  "2025-01",
-				StrikePrice:                    40000.0,
-				PutCallDivision:                "2",
-				EmergencyMarginTriggerDivision: "002",
+				Code:         "140014505",
+				ProdCat:      "NK225E",
+				UndSSO:       "-",
+				Date:         "2024-07-23",
+				CM:           "2025-01",
+				Strike:       40000.0,
+				PCDiv:        "2",
+				EmMrgnTrgDiv: "002",
 			},
 		},
 	}
-	mockClient.SetResponse("GET", "/derivatives/options?date=20240723&category=NK225E", mockResponse)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/options?date=20240723&category=NK225E", mockResponse)
 
 	// Execute
 	options, err := service.GetOptionsByCategory("20240723", "NK225E")
@@ -234,8 +234,8 @@ func TestOptionsService_GetOptionsByCategory(t *testing.T) {
 	if len(options) != 1 {
 		t.Errorf("GetOptionsByCategory() returned %d items, want 1", len(options))
 	}
-	if options[0].DerivativesProductCategory != "NK225E" {
-		t.Errorf("GetOptionsByCategory() category = %v, want NK225E", options[0].DerivativesProductCategory)
+	if options[0].ProdCat != "NK225E" {
+		t.Errorf("GetOptionsByCategory() category = %v, want NK225E", options[0].ProdCat)
 	}
 }
 
@@ -246,20 +246,20 @@ func TestOptionsService_GetSecurityOptionsByCode(t *testing.T) {
 
 	// Mock response
 	mockResponse := OptionsResponse{
-		Options: []Option{
+		Data: []Option{
 			{
-				Code:                           "10014505",
-				DerivativesProductCategory:     "EQOP",
-				UnderlyingSSO:                  "7203",
-				Date:                           "2024-07-23",
-				ContractMonth:                  "2025-01",
-				StrikePrice:                    2500.0,
-				PutCallDivision:                "1",
-				EmergencyMarginTriggerDivision: "002",
+				Code:         "10014505",
+				ProdCat:      "EQOP",
+				UndSSO:       "7203",
+				Date:         "2024-07-23",
+				CM:           "2025-01",
+				Strike:       2500.0,
+				PCDiv:        "1",
+				EmMrgnTrgDiv: "002",
 			},
 		},
 	}
-	mockClient.SetResponse("GET", "/derivatives/options?date=20240723&category=EQOP&code=7203", mockResponse)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/options?date=20240723&category=EQOP&code=7203", mockResponse)
 
 	// Execute
 	options, err := service.GetSecurityOptionsByCode("20240723", "7203")
@@ -271,11 +271,11 @@ func TestOptionsService_GetSecurityOptionsByCode(t *testing.T) {
 	if len(options) != 1 {
 		t.Errorf("GetSecurityOptionsByCode() returned %d items, want 1", len(options))
 	}
-	if options[0].UnderlyingSSO != "7203" {
-		t.Errorf("GetSecurityOptionsByCode() UnderlyingSSO = %v, want 7203", options[0].UnderlyingSSO)
+	if options[0].UndSSO != "7203" {
+		t.Errorf("GetSecurityOptionsByCode() UndSSO = %v, want 7203", options[0].UndSSO)
 	}
-	if options[0].DerivativesProductCategory != "EQOP" {
-		t.Errorf("GetSecurityOptionsByCode() category = %v, want EQOP", options[0].DerivativesProductCategory)
+	if options[0].ProdCat != "EQOP" {
+		t.Errorf("GetSecurityOptionsByCode() category = %v, want EQOP", options[0].ProdCat)
 	}
 }
 
@@ -286,21 +286,21 @@ func TestOptionsService_GetCentralContractMonthOptions(t *testing.T) {
 
 	// Mock response
 	mockResponse := OptionsResponse{
-		Options: []Option{
+		Data: []Option{
 			{
-				Code:                           "140014505",
-				DerivativesProductCategory:     "NK225E",
-				UnderlyingSSO:                  "-",
-				Date:                           "2024-07-23",
-				ContractMonth:                  "2025-01",
-				StrikePrice:                    40000.0,
-				PutCallDivision:                "2",
-				EmergencyMarginTriggerDivision: "002",
-				CentralContractMonthFlag:       stringPtr("1"),
+				Code:         "140014505",
+				ProdCat:      "NK225E",
+				UndSSO:       "-",
+				Date:         "2024-07-23",
+				CM:           "2025-01",
+				Strike:       40000.0,
+				PCDiv:        "2",
+				EmMrgnTrgDiv: "002",
+				CCMFlag:      stringPtr("1"),
 			},
 		},
 	}
-	mockClient.SetResponse("GET", "/derivatives/options?date=20240723&contract_flag=1", mockResponse)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/options?date=20240723&contract_flag=1", mockResponse)
 
 	// Execute
 	options, err := service.GetCentralContractMonthOptions("20240723")
@@ -323,7 +323,7 @@ func TestOptionsService_GetOptions_Error(t *testing.T) {
 	service := NewOptionsService(mockClient)
 
 	// Set error response
-	mockClient.SetError("GET", "/derivatives/options?date=20240723", fmt.Errorf("unauthorized"))
+	mockClient.SetError("GET", "/derivatives/bars/daily/options?date=20240723", fmt.Errorf("unauthorized"))
 
 	// Execute
 	_, err := service.GetOptions(OptionsParams{Date: "20240723"})
@@ -336,8 +336,8 @@ func TestOptionsService_GetOptions_Error(t *testing.T) {
 
 func TestOption_HelperMethods(t *testing.T) {
 	t.Run("IsCall and IsPut", func(t *testing.T) {
-		callOption := Option{PutCallDivision: "2"}
-		putOption := Option{PutCallDivision: "1"}
+		callOption := Option{PCDiv: "2"}
+		putOption := Option{PCDiv: "1"}
 
 		if !callOption.IsCall() {
 			t.Error("IsCall() returned false for call option")
@@ -354,8 +354,8 @@ func TestOption_HelperMethods(t *testing.T) {
 	})
 
 	t.Run("IsEmergencyMarginTriggered", func(t *testing.T) {
-		triggered := Option{EmergencyMarginTriggerDivision: "001"}
-		normal := Option{EmergencyMarginTriggerDivision: "002"}
+		triggered := Option{EmMrgnTrgDiv: "001"}
+		normal := Option{EmMrgnTrgDiv: "002"}
 
 		if !triggered.IsEmergencyMarginTriggered() {
 			t.Error("IsEmergencyMarginTriggered() returned false for triggered")
@@ -366,8 +366,8 @@ func TestOption_HelperMethods(t *testing.T) {
 	})
 
 	t.Run("IsCentralContractMonth", func(t *testing.T) {
-		central := Option{CentralContractMonthFlag: stringPtr("1")}
-		nonCentral := Option{CentralContractMonthFlag: stringPtr("0")}
+		central := Option{CCMFlag: stringPtr("1")}
+		nonCentral := Option{CCMFlag: stringPtr("0")}
 		nilFlag := Option{}
 
 		if !central.IsCentralContractMonth() {
@@ -382,8 +382,8 @@ func TestOption_HelperMethods(t *testing.T) {
 	})
 
 	t.Run("IsSecurityOption", func(t *testing.T) {
-		securityOption := Option{UnderlyingSSO: "7203"}
-		indexOption := Option{UnderlyingSSO: "-"}
+		securityOption := Option{UndSSO: "7203"}
+		indexOption := Option{UndSSO: "-"}
 
 		if !securityOption.IsSecurityOption() {
 			t.Error("IsSecurityOption() returned false for security option")
@@ -395,17 +395,17 @@ func TestOption_HelperMethods(t *testing.T) {
 
 	t.Run("Session data helpers", func(t *testing.T) {
 		optionWithNight := Option{
-			NightSessionOpen:  100.0,
-			NightSessionHigh:  110.0,
-			NightSessionLow:   90.0,
-			NightSessionClose: 105.0,
+			EO: 100.0,
+			EH: 110.0,
+			EL: 90.0,
+			EC: 105.0,
 		}
 
 		optionNoNight := Option{
-			NightSessionOpen:  "",
-			NightSessionHigh:  "",
-			NightSessionLow:   "",
-			NightSessionClose: "",
+			EO: "",
+			EH: "",
+			EL: "",
+			EC: "",
 		}
 
 		if !optionWithNight.HasNightSession() {
@@ -426,29 +426,29 @@ func TestOption_HelperMethods(t *testing.T) {
 
 	t.Run("ITM/OTM/ATM", func(t *testing.T) {
 		callITM := Option{
-			PutCallDivision: "2",
-			StrikePrice:     100.0,
-			UnderlyingPrice: floatPtr(110.0),
+			PCDiv:   "2",
+			Strike:  100.0,
+			UnderPx: floatPtr(110.0),
 		}
 		callOTM := Option{
-			PutCallDivision: "2",
-			StrikePrice:     100.0,
-			UnderlyingPrice: floatPtr(90.0),
+			PCDiv:   "2",
+			Strike:  100.0,
+			UnderPx: floatPtr(90.0),
 		}
 		callATM := Option{
-			PutCallDivision: "2",
-			StrikePrice:     100.0,
-			UnderlyingPrice: floatPtr(100.0),
+			PCDiv:   "2",
+			Strike:  100.0,
+			UnderPx: floatPtr(100.0),
 		}
 		putITM := Option{
-			PutCallDivision: "1",
-			StrikePrice:     100.0,
-			UnderlyingPrice: floatPtr(90.0),
+			PCDiv:   "1",
+			Strike:  100.0,
+			UnderPx: floatPtr(90.0),
 		}
 		putOTM := Option{
-			PutCallDivision: "1",
-			StrikePrice:     100.0,
-			UnderlyingPrice: floatPtr(110.0),
+			PCDiv:   "1",
+			Strike:  100.0,
+			UnderPx: floatPtr(110.0),
 		}
 
 		if !callITM.IsITM() {
@@ -476,10 +476,10 @@ func TestOption_HelperMethods(t *testing.T) {
 
 	t.Run("Value calculations", func(t *testing.T) {
 		callOption := Option{
-			PutCallDivision:  "2",
-			StrikePrice:      100.0,
-			UnderlyingPrice:  floatPtr(110.0),
-			TheoreticalPrice: floatPtr(15.0),
+			PCDiv:   "2",
+			Strike:  100.0,
+			UnderPx: floatPtr(110.0),
+			Theo:    floatPtr(15.0),
 		}
 
 		// Test moneyness
@@ -501,45 +501,45 @@ func TestOption_HelperMethods(t *testing.T) {
 
 func TestOptionsResponse_UnmarshalJSON(t *testing.T) {
 	jsonData := `{
-		"options": [
+		"data": [
 			{
 				"Code": "140014505",
-				"DerivativesProductCategory": "TOPIXE",
-				"UnderlyingSSO": "-",
+				"ProdCat": "TOPIXE",
+				"UndSSO": "-",
 				"Date": "2024-07-23",
-				"ContractMonth": "2025-01",
-				"StrikePrice": 2450.0,
-				"PutCallDivision": "2",
-				"EmergencyMarginTriggerDivision": "002",
-				"WholeDayOpen": 0.0,
-				"WholeDayHigh": 0.0,
-				"WholeDayLow": 0.0,
-				"WholeDayClose": 0.0,
-				"NightSessionOpen": "",
-				"NightSessionHigh": "",
-				"NightSessionLow": "",
-				"NightSessionClose": "",
-				"DaySessionOpen": 0.0,
-				"DaySessionHigh": 0.0,
-				"DaySessionLow": 0.0,
-				"DaySessionClose": 0.0,
-				"MorningSessionOpen": "",
-				"MorningSessionHigh": "",
-				"MorningSessionLow": "",
-				"MorningSessionClose": "",
-				"Volume": 0.0,
-				"OpenInterest": 0.0,
-				"TurnoverValue": 0.0,
-				"Volume(OnlyAuction)": 0.0,
-				"SettlementPrice": 377.0,
-				"TheoreticalPrice": 380.3801,
-				"BaseVolatility": 18.115,
-				"UnderlyingPrice": 2833.39,
-				"ImpliedVolatility": 17.2955,
-				"InterestRate": 0.3527,
-				"LastTradingDay": "2025-01-09",
-				"SpecialQuotationDay": "2025-01-10",
-				"CentralContractMonthFlag": "0"
+				"CM": "2025-01",
+				"Strike": 2450.0,
+				"PCDiv": "2",
+				"EmMrgnTrgDiv": "002",
+				"O": 0.0,
+				"H": 0.0,
+				"L": 0.0,
+				"C": 0.0,
+				"EO": "",
+				"EH": "",
+				"EL": "",
+				"EC": "",
+				"AO": 0.0,
+				"AH": 0.0,
+				"AL": 0.0,
+				"AC": 0.0,
+				"MO": "",
+				"MH": "",
+				"ML": "",
+				"MC": "",
+				"Vo": 0.0,
+				"OI": 0.0,
+				"Va": 0.0,
+				"VoOA": 0.0,
+				"Settle": 377.0,
+				"Theo": 380.3801,
+				"BaseVol": 18.115,
+				"UnderPx": 2833.39,
+				"IV": 17.2955,
+				"IR": 0.3527,
+				"LTD": "2025-01-09",
+				"SQD": "2025-01-10",
+				"CCMFlag": "0"
 			}
 		],
 		"pagination_key": "value1.value2."
@@ -551,29 +551,29 @@ func TestOptionsResponse_UnmarshalJSON(t *testing.T) {
 		t.Fatalf("UnmarshalJSON() error = %v", err)
 	}
 
-	if len(resp.Options) != 1 {
-		t.Errorf("UnmarshalJSON() options count = %d, want 1", len(resp.Options))
+	if len(resp.Data) != 1 {
+		t.Errorf("UnmarshalJSON() options count = %d, want 1", len(resp.Data))
 	}
 
-	opt := resp.Options[0]
+	opt := resp.Data[0]
 	if opt.Code != "140014505" {
 		t.Errorf("UnmarshalJSON() Code = %v, want 140014505", opt.Code)
 	}
-	if opt.StrikePrice != 2450.0 {
-		t.Errorf("UnmarshalJSON() StrikePrice = %v, want 2450.0", opt.StrikePrice)
+	if opt.Strike != 2450.0 {
+		t.Errorf("UnmarshalJSON() Strike = %v, want 2450.0", opt.Strike)
 	}
 
 	// Check empty string fields are handled correctly
-	if str, ok := opt.NightSessionOpen.(string); !ok || str != "" {
-		t.Errorf("UnmarshalJSON() NightSessionOpen = %v, want empty string", opt.NightSessionOpen)
+	if str, ok := opt.EO.(string); !ok || str != "" {
+		t.Errorf("UnmarshalJSON() EO = %v, want empty string", opt.EO)
 	}
 
 	// Check optional fields
-	if opt.SettlementPrice == nil || *opt.SettlementPrice != 377.0 {
-		t.Errorf("UnmarshalJSON() SettlementPrice = %v, want 377.0", opt.SettlementPrice)
+	if opt.Settle == nil || *opt.Settle != 377.0 {
+		t.Errorf("UnmarshalJSON() Settle = %v, want 377.0", opt.Settle)
 	}
-	if opt.LastTradingDay == nil || *opt.LastTradingDay != "2025-01-09" {
-		t.Errorf("UnmarshalJSON() LastTradingDay = %v, want 2025-01-09", opt.LastTradingDay)
+	if opt.LTD == nil || *opt.LTD != "2025-01-09" {
+		t.Errorf("UnmarshalJSON() LTD = %v, want 2025-01-09", opt.LTD)
 	}
 
 	if resp.PaginationKey != "value1.value2." {

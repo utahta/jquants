@@ -29,12 +29,12 @@ func TestTOPIXEndpoint(t *testing.T) {
 			t.Fatalf("Failed to get TOPIX data: %v", err)
 		}
 
-		if resp == nil || len(resp.TOPIX) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No TOPIX data available for the specified date")
 		}
 
 		// 各TOPIXデータを詳細に検証
-		for i, topix := range resp.TOPIX {
+		for i, topix := range resp.Data {
 			// 基本情報の検証
 			if topix.Date == "" {
 				t.Errorf("TOPIX[%d]: Date is empty", i)
@@ -51,40 +51,40 @@ func TestTOPIXEndpoint(t *testing.T) {
 			}
 
 			// TOPIX指数値の検証
-			if topix.Close <= 0 {
-				t.Errorf("TOPIX[%d]: Close = %v, want > 0", i, topix.Close)
+			if topix.C <= 0 {
+				t.Errorf("TOPIX[%d]: Close = %v, want > 0", i, topix.C)
 			}
-			if topix.Open <= 0 {
-				t.Errorf("TOPIX[%d]: Open = %v, want > 0", i, topix.Open)
+			if topix.O <= 0 {
+				t.Errorf("TOPIX[%d]: Open = %v, want > 0", i, topix.O)
 			}
-			if topix.High <= 0 {
-				t.Errorf("TOPIX[%d]: High = %v, want > 0", i, topix.High)
+			if topix.H <= 0 {
+				t.Errorf("TOPIX[%d]: High = %v, want > 0", i, topix.H)
 			}
-			if topix.Low <= 0 {
-				t.Errorf("TOPIX[%d]: Low = %v, want > 0", i, topix.Low)
+			if topix.L <= 0 {
+				t.Errorf("TOPIX[%d]: Low = %v, want > 0", i, topix.L)
 			}
 
 			// 四本値の論理的整合性チェック
-			if topix.High < topix.Low {
-				t.Errorf("TOPIX[%d]: High (%v) < Low (%v)", i, topix.High, topix.Low)
+			if topix.H < topix.L {
+				t.Errorf("TOPIX[%d]: High (%v) < Low (%v)", i, topix.H, topix.L)
 			}
-			if topix.Open > topix.High || topix.Open < topix.Low {
+			if topix.O > topix.H || topix.O < topix.L {
 				t.Errorf("TOPIX[%d]: Open (%v) is outside High (%v) - Low (%v) range",
-					i, topix.Open, topix.High, topix.Low)
+					i, topix.O, topix.H, topix.L)
 			}
-			if topix.Close > topix.High || topix.Close < topix.Low {
+			if topix.C > topix.H || topix.C < topix.L {
 				t.Errorf("TOPIX[%d]: Close (%v) is outside High (%v) - Low (%v) range",
-					i, topix.Close, topix.High, topix.Low)
+					i, topix.C, topix.H, topix.L)
 			}
 
 			// 詳細ログ（最初の3件のみ）
 			if i < 3 {
 				t.Logf("TOPIX[%d]: Date=%s, Close=%.2f, O=%.2f, H=%.2f, L=%.2f",
-					i, topix.Date, topix.Close, topix.Open, topix.High, topix.Low)
+					i, topix.Date, topix.C, topix.O, topix.H, topix.L)
 			}
 		}
 
-		t.Logf("Retrieved %d TOPIX records for date %s", len(resp.TOPIX), date)
+		t.Logf("Retrieved %d TOPIX records for date %s", len(resp.Data), date)
 	})
 
 	t.Run("GetTOPIXData_MultiDay", func(t *testing.T) {
@@ -107,14 +107,14 @@ func TestTOPIXEndpoint(t *testing.T) {
 			t.Fatalf("Failed to get TOPIX data for date range: %v", err)
 		}
 
-		if resp == nil || len(resp.TOPIX) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No TOPIX data available for the specified date range")
 		}
 
-		t.Logf("Retrieved %d TOPIX records for period %s to %s", len(resp.TOPIX), fromDate, toDate)
+		t.Logf("Retrieved %d TOPIX records for period %s to %s", len(resp.Data), fromDate, toDate)
 
 		// 日付の範囲確認（YYYY-MM-DD形式での比較）
-		for _, topix := range resp.TOPIX {
+		for _, topix := range resp.Data {
 			// YYYYMMDD形式をYYYY-MM-DD形式に変換して比較
 			expectedFromDate := fromDate[:4] + "-" + fromDate[4:6] + "-" + fromDate[6:8]
 			expectedToDate := toDate[:4] + "-" + toDate[4:6] + "-" + toDate[6:8]
@@ -126,12 +126,12 @@ func TestTOPIXEndpoint(t *testing.T) {
 		}
 
 		// 日別の変動率計算
-		if len(resp.TOPIX) >= 2 {
-			for i := 1; i < len(resp.TOPIX); i++ {
-				prev := resp.TOPIX[i-1]
-				curr := resp.TOPIX[i]
-				change := curr.Close - prev.Close
-				changePercent := (change / prev.Close) * 100
+		if len(resp.Data) >= 2 {
+			for i := 1; i < len(resp.Data); i++ {
+				prev := resp.Data[i-1]
+				curr := resp.Data[i]
+				change := curr.C - prev.C
+				changePercent := (change / prev.C) * 100
 
 				if i <= 3 { // 最初の3日間のみログ
 					t.Logf("Daily change from %s to %s: %.2f points (%.2f%%)",
@@ -159,15 +159,15 @@ func TestTOPIXEndpoint(t *testing.T) {
 			return
 		}
 
-		if resp != nil && len(resp.TOPIX) > 0 {
+		if resp != nil && len(resp.Data) > 0 {
 			// 指定日のデータが取得できたことを確認
-			topix := resp.TOPIX[0]
+			topix := resp.Data[0]
 			// 日付の検証（APIはYYYY-MM-DD形式で返す）
 			expectedDate := getTestDateFormatted()
 			if topix.Date != expectedDate {
 				t.Errorf("Expected date %s, got %s", expectedDate, topix.Date)
 			}
-			t.Logf("Retrieved TOPIX data for %s: Close=%.2f", date, topix.Close)
+			t.Logf("Retrieved TOPIX data for %s: Close=%.2f", date, topix.C)
 		}
 	})
 
@@ -186,11 +186,11 @@ func TestTOPIXEndpoint(t *testing.T) {
 			t.Skip("No TOPIX data available for historical period")
 		}
 
-		if resp == nil || len(resp.TOPIX) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No TOPIX data available")
 		}
 
-		firstPageCount := len(resp.TOPIX)
+		firstPageCount := len(resp.Data)
 		t.Logf("First page: %d TOPIX records", firstPageCount)
 
 		if resp.PaginationKey != "" {
@@ -201,8 +201,8 @@ func TestTOPIXEndpoint(t *testing.T) {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
 
-			if resp2 != nil && len(resp2.TOPIX) > 0 {
-				t.Logf("Second page: %d TOPIX records", len(resp2.TOPIX))
+			if resp2 != nil && len(resp2.Data) > 0 {
+				t.Logf("Second page: %d TOPIX records", len(resp2.Data))
 			}
 		}
 	})
@@ -225,11 +225,11 @@ func TestTOPIXEndpoint(t *testing.T) {
 		if topix.Date == "" {
 			t.Error("Latest TOPIX: Date is empty")
 		}
-		if topix.Close <= 0 {
+		if topix.C <= 0 {
 			t.Error("Latest TOPIX: Close is invalid")
 		}
 
-		t.Logf("Latest TOPIX [%s]: %.2f", topix.Date, topix.Close)
+		t.Logf("Latest TOPIX [%s]: %.2f", topix.Date, topix.C)
 	})
 
 	t.Run("GetTOPIXData_Statistics", func(t *testing.T) {
@@ -252,30 +252,30 @@ func TestTOPIXEndpoint(t *testing.T) {
 			t.Skip("No TOPIX data available for statistics")
 		}
 
-		if resp == nil || len(resp.TOPIX) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No TOPIX data available")
 		}
 
 		// 基本統計の計算
 		var sum, min, max float64
-		min = resp.TOPIX[0].Close
-		max = resp.TOPIX[0].Close
+		min = resp.Data[0].C
+		max = resp.Data[0].C
 
-		for _, topix := range resp.TOPIX {
-			sum += topix.Close
-			if topix.Close < min {
-				min = topix.Close
+		for _, topix := range resp.Data {
+			sum += topix.C
+			if topix.C < min {
+				min = topix.C
 			}
-			if topix.Close > max {
-				max = topix.Close
+			if topix.C > max {
+				max = topix.C
 			}
 		}
 
-		avg := sum / float64(len(resp.TOPIX))
+		avg := sum / float64(len(resp.Data))
 		volatility := (max - min) / avg * 100
 
 		t.Logf("TOPIX Statistics (30 days):")
-		t.Logf("  Count: %d", len(resp.TOPIX))
+		t.Logf("  Count: %d", len(resp.Data))
 		t.Logf("  Average: %.2f", avg)
 		t.Logf("  Min: %.2f", min)
 		t.Logf("  Max: %.2f", max)

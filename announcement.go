@@ -20,21 +20,21 @@ func NewAnnouncementService(c client.HTTPClient) *AnnouncementService {
 }
 
 // Announcement は決算発表予定を表します。
-// J-Quants API /fins/announcement エンドポイントのレスポンスデータ。
+// J-Quants API /equities/earnings-calendar エンドポイントのレスポンスデータ。
 // 注意: このAPIは翌営業日の決算発表予定のみを返します。
 type Announcement struct {
-	Date          string `json:"Date"`          // 日付（YYYY-MM-DD形式、決算発表予定日が未定の場合は空文字）
-	Code          string `json:"Code"`          // 銘柄コード
-	CompanyName   string `json:"CompanyName"`   // 会社名
-	FiscalYear    string `json:"FiscalYear"`    // 決算期末（例: "9月30日"）
-	SectorName    string `json:"SectorName"`    // 業種名
-	FiscalQuarter string `json:"FiscalQuarter"` // 決算種別（例: "第１四半期"、"第２四半期"、"第３四半期"、"通期"）
-	Section       string `json:"Section"`       // 市場区分（例: "マザーズ"）
+	Date     string `json:"Date"`     // 日付（YYYY-MM-DD形式、決算発表予定日が未定の場合は空文字）
+	Code     string `json:"Code"`     // 銘柄コード
+	CoName   string `json:"CoName"`   // 会社名
+	FY       string `json:"FY"`       // 決算期末（例: "9月30日"）
+	SectorNm string `json:"SectorNm"` // 業種名
+	FQ       string `json:"FQ"`       // 決算種別（例: "第１四半期"、"第２四半期"、"第３四半期"、"通期"）
+	Section  string `json:"Section"`  // 市場区分（例: "マザーズ"）
 }
 
 // AnnouncementResponse は決算発表予定のレスポンスです。
 type AnnouncementResponse struct {
-	Announcement  []Announcement `json:"announcement"`
+	Data          []Announcement `json:"data"`
 	PaginationKey string         `json:"pagination_key"` // ページネーションキー
 }
 
@@ -49,7 +49,7 @@ type AnnouncementParams struct {
 // パラメータ:
 // - params: ページネーション用のパラメータ（オプション）
 func (s *AnnouncementService) GetAnnouncement(params AnnouncementParams) (*AnnouncementResponse, error) {
-	path := "/fins/announcement"
+	path := "/equities/earnings-calendar"
 
 	if params.PaginationKey != "" {
 		path += fmt.Sprintf("?pagination_key=%s", params.PaginationKey)
@@ -79,7 +79,7 @@ func (s *AnnouncementService) GetAllAnnouncements() ([]Announcement, error) {
 			return nil, err
 		}
 
-		allAnnouncements = append(allAnnouncements, resp.Announcement...)
+		allAnnouncements = append(allAnnouncements, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {

@@ -20,7 +20,7 @@ func TestTradingCalendarService_GetTradingCalendar(t *testing.T) {
 				From:            "20240101",
 				To:              "20240131",
 			},
-			wantPath: "/markets/trading_calendar?holidaydivision=1&from=20240101&to=20240131",
+			wantPath: "/markets/calendar?hol_div=1&from=20240101&to=20240131",
 		},
 		{
 			name: "with date range only",
@@ -28,19 +28,19 @@ func TestTradingCalendarService_GetTradingCalendar(t *testing.T) {
 				From: "20240101",
 				To:   "20240107",
 			},
-			wantPath: "/markets/trading_calendar?from=20240101&to=20240107",
+			wantPath: "/markets/calendar?from=20240101&to=20240107",
 		},
 		{
 			name: "with holiday division only",
 			params: TradingCalendarParams{
 				HolidayDivision: "1",
 			},
-			wantPath: "/markets/trading_calendar?holidaydivision=1",
+			wantPath: "/markets/calendar?hol_div=1",
 		},
 		{
 			name:     "with no parameters",
 			params:   TradingCalendarParams{},
-			wantPath: "/markets/trading_calendar",
+			wantPath: "/markets/calendar",
 		},
 	}
 
@@ -52,14 +52,14 @@ func TestTradingCalendarService_GetTradingCalendar(t *testing.T) {
 
 			// Mock response
 			mockResponse := TradingCalendarResponse{
-				TradingCalendar: []TradingCalendar{
+				Data: []TradingCalendar{
 					{
-						Date:            "2015-04-01",
-						HolidayDivision: "1",
+						Date:   "2015-04-01",
+						HolDiv: "1",
 					},
 					{
-						Date:            "2015-04-02",
-						HolidayDivision: "1",
+						Date:   "2015-04-02",
+						HolDiv: "1",
 					},
 				},
 			}
@@ -76,8 +76,8 @@ func TestTradingCalendarService_GetTradingCalendar(t *testing.T) {
 				t.Fatal("GetTradingCalendar() returned nil response")
 				return
 			}
-			if len(resp.TradingCalendar) != 2 {
-				t.Errorf("GetTradingCalendar() returned %d items, want 2", len(resp.TradingCalendar))
+			if len(resp.Data) != 2 {
+				t.Errorf("GetTradingCalendar() returned %d items, want 2", len(resp.Data))
 			}
 			if mockClient.LastPath != tt.wantPath {
 				t.Errorf("GetTradingCalendar() path = %v, want %v", mockClient.LastPath, tt.wantPath)
@@ -93,18 +93,18 @@ func TestTradingCalendarService_GetTradingCalendarByDateRange(t *testing.T) {
 
 	// Mock response
 	mockResponse := TradingCalendarResponse{
-		TradingCalendar: []TradingCalendar{
+		Data: []TradingCalendar{
 			{
-				Date:            "2024-01-01",
-				HolidayDivision: "0",
+				Date:   "2024-01-01",
+				HolDiv: "0",
 			},
 			{
-				Date:            "2024-01-02",
-				HolidayDivision: "1",
+				Date:   "2024-01-02",
+				HolDiv: "1",
 			},
 		},
 	}
-	mockClient.SetResponse("GET", "/markets/trading_calendar?from=20240101&to=20240107", mockResponse)
+	mockClient.SetResponse("GET", "/markets/calendar?from=20240101&to=20240107", mockResponse)
 
 	// Execute
 	resp, err := service.GetTradingCalendarByDateRange("20240101", "20240107")
@@ -119,8 +119,8 @@ func TestTradingCalendarService_GetTradingCalendarByDateRange(t *testing.T) {
 	if resp[0].Date != "2024-01-01" {
 		t.Errorf("GetTradingCalendarByDateRange() returned date %v, want 2024-01-01", resp[0].Date)
 	}
-	if resp[0].HolidayDivision != "0" {
-		t.Errorf("GetTradingCalendarByDateRange() returned holiday division %v, want 0", resp[0].HolidayDivision)
+	if resp[0].HolDiv != "0" {
+		t.Errorf("GetTradingCalendarByDateRange() returned holiday division %v, want 0", resp[0].HolDiv)
 	}
 }
 
@@ -131,18 +131,18 @@ func TestTradingCalendarService_GetTradingDays(t *testing.T) {
 
 	// Mock response
 	mockResponse := TradingCalendarResponse{
-		TradingCalendar: []TradingCalendar{
+		Data: []TradingCalendar{
 			{
-				Date:            "2024-01-02",
-				HolidayDivision: "1",
+				Date:   "2024-01-02",
+				HolDiv: "1",
 			},
 			{
-				Date:            "2024-01-03",
-				HolidayDivision: "1",
+				Date:   "2024-01-03",
+				HolDiv: "1",
 			},
 		},
 	}
-	mockClient.SetResponse("GET", "/markets/trading_calendar?holidaydivision=1&from=20240101&to=20240107", mockResponse)
+	mockClient.SetResponse("GET", "/markets/calendar?hol_div=1&from=20240101&to=20240107", mockResponse)
 
 	// Execute
 	tradingDays, err := service.GetTradingDays("20240101", "20240107")
@@ -206,7 +206,7 @@ func TestTradingCalendar_HelperMethods(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tc := TradingCalendar{HolidayDivision: tt.holidayDivision}
+			tc := TradingCalendar{HolDiv: tt.holidayDivision}
 
 			if tc.IsTradingDay() != tt.isTradingDay {
 				t.Errorf("IsTradingDay() = %v, want %v", tc.IsTradingDay(), tt.isTradingDay)
@@ -230,7 +230,7 @@ func TestTradingCalendarService_GetTradingCalendar_Error(t *testing.T) {
 	service := NewTradingCalendarService(mockClient)
 
 	// Set error response
-	mockClient.SetError("GET", "/markets/trading_calendar", fmt.Errorf("unauthorized"))
+	mockClient.SetError("GET", "/markets/calendar", fmt.Errorf("unauthorized"))
 
 	// Execute
 	_, err := service.GetTradingCalendar(TradingCalendarParams{})

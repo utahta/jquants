@@ -30,44 +30,44 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 			if position.Code != "72030" && position.Code != "7203" {
 				t.Errorf("Position[%d]: Code = %v, want 72030 or 7203", i, position.Code)
 			}
-			if position.DisclosedDate == "" {
+			if position.DiscDate == "" {
 				t.Errorf("Position[%d]: DisclosedDate is empty", i)
 			}
-			if position.CalculatedDate == "" {
+			if position.CalcDate == "" {
 				t.Errorf("Position[%d]: CalculatedDate is empty", i)
 			}
-			if position.ShortSellerName == "" {
+			if position.SSName == "" {
 				t.Errorf("Position[%d]: ShortSellerName is empty", i)
 			}
 			
 			// 日付の妥当性チェック
-			if position.DisclosedDate < position.CalculatedDate {
+			if position.DiscDate < position.CalcDate {
 				t.Errorf("Position[%d]: DisclosedDate (%s) < CalculatedDate (%s)",
-					i, position.DisclosedDate, position.CalculatedDate)
+					i, position.DiscDate, position.CalcDate)
 			}
 			
 			// 残高割合の検証（通常0.5%以上で報告義務）
-			if position.ShortPositionsToSharesOutstandingRatio < 0.5 {
+			if position.ShrtPosToSO < 0.5 {
 				t.Logf("Position[%d]: Low ratio: %.2f%% (might be below reporting threshold)",
-					i, position.ShortPositionsToSharesOutstandingRatio)
+					i, position.ShrtPosToSO)
 			}
-			if position.ShortPositionsToSharesOutstandingRatio > 50 {
+			if position.ShrtPosToSO > 50 {
 				t.Errorf("Position[%d]: Extremely high ratio: %.2f%%",
-					i, position.ShortPositionsToSharesOutstandingRatio)
+					i, position.ShrtPosToSO)
 			}
 			
 			// 株数の検証
-			if position.ShortPositionsInSharesNumber <= 0 {
+			if position.ShrtPosShares <= 0 {
 				t.Errorf("Position[%d]: ShortPositionsInSharesNumber = %v, want > 0",
-					i, position.ShortPositionsInSharesNumber)
+					i, position.ShrtPosShares)
 			}
-			if position.ShortPositionsInTradingUnitsNumber <= 0 {
+			if position.ShrtPosUnits <= 0 {
 				t.Errorf("Position[%d]: ShortPositionsInTradingUnitsNumber = %v, want > 0",
-					i, position.ShortPositionsInTradingUnitsNumber)
+					i, position.ShrtPosUnits)
 			}
 			
 			// 住所情報の検証（オプショナル）
-			if position.ShortSellerAddress == "" {
+			if position.SSAddr == "" {
 				t.Logf("Position[%d]: ShortSellerAddress is empty", i)
 			}
 			
@@ -75,11 +75,11 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 			hasDiscretionary := position.HasDiscretionaryInvestment()
 			if hasDiscretionary {
 				t.Logf("Position[%d]: Has discretionary investment contract", i)
-				if position.DiscretionaryInvestmentContractorName != "" {
-					t.Logf("  Contractor: %s", position.DiscretionaryInvestmentContractorName)
+				if position.DICName != "" {
+					t.Logf("  Contractor: %s", position.DICName)
 				}
-				if position.InvestmentFundName != "" {
-					t.Logf("  Fund: %s", position.InvestmentFundName)
+				if position.FundName != "" {
+					t.Logf("  Fund: %s", position.FundName)
 				}
 			}
 			
@@ -90,10 +90,10 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 			
 			// 最初の5件の詳細ログ
 			if i < 5 {
-				t.Logf("Position[%d]: %s", i, position.ShortSellerName)
-				t.Logf("  Disclosed: %s, Calculated: %s", position.DisclosedDate, position.CalculatedDate)
+				t.Logf("Position[%d]: %s", i, position.SSName)
+				t.Logf("  Disclosed: %s, Calculated: %s", position.DiscDate, position.CalcDate)
 				t.Logf("  Ratio: %.2f%%, Shares: %.0f", 
-					position.ShortPositionsToSharesOutstandingRatio, position.ShortPositionsInSharesNumber)
+					position.ShrtPosToSO, position.ShrtPosShares)
 				
 				// 前回からの変化
 				changeRatio := position.GetPositionChangeRatio()
@@ -130,8 +130,8 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 
 		// 日付の一致確認
 		for i, position := range positions {
-			if position.DisclosedDate != disclosedDate {
-				t.Errorf("Position[%d]: DisclosedDate = %v, want %v", i, position.DisclosedDate, disclosedDate)
+			if position.DiscDate != disclosedDate {
+				t.Errorf("Position[%d]: DisclosedDate = %v, want %v", i, position.DiscDate, disclosedDate)
 			}
 			if i >= 10 {
 				break // 最初の10件のみ確認
@@ -144,7 +144,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 		
 		for _, position := range positions {
 			codeCount[position.Code]++
-			sellerCount[position.ShortSellerName]++
+			sellerCount[position.SSName]++
 		}
 		
 		t.Logf("Disclosed date %s summary:", disclosedDate)
@@ -214,9 +214,9 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 					direction = "decreased"
 				}
 				t.Logf("  %s: %s by %.2f%% (from %.2f%% to %.2f%%)",
-					position.ShortSellerName, direction, abs(changeRatio),
-					position.ShortPositionsInPreviousReportingRatio,
-					position.ShortPositionsToSharesOutstandingRatio)
+					position.SSName, direction, abs(changeRatio),
+					position.PrevRptRatio,
+					position.ShrtPosToSO)
 			}
 		}
 	})
@@ -242,9 +242,9 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 		
 		// 期間内の日付確認
 		for _, position := range positions {
-			if position.DisclosedDate < from || position.DisclosedDate > to {
+			if position.DiscDate < from || position.DiscDate > to {
 				t.Errorf("Position disclosed date %s is outside range %s to %s",
-					position.DisclosedDate, from, to)
+					position.DiscDate, from, to)
 			}
 		}
 		
@@ -257,13 +257,13 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 					break
 				}
 				
-				currentRatio := position.ShortPositionsToSharesOutstandingRatio
+				currentRatio := position.ShrtPosToSO
 				if i > 0 {
 					change := currentRatio - prevRatio
 					t.Logf("  %s: %.2f%% (change: %+.2f%%)",
-						position.DisclosedDate, currentRatio, change)
+						position.DiscDate, currentRatio, change)
 				} else {
-					t.Logf("  %s: %.2f%%", position.DisclosedDate, currentRatio)
+					t.Logf("  %s: %.2f%%", position.DiscDate, currentRatio)
 				}
 				prevRatio = currentRatio
 			}
@@ -290,7 +290,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 		aboveFivePercent := 0
 		
 		for _, position := range positions {
-			ratio := position.ShortPositionsToSharesOutstandingRatio
+			ratio := position.ShrtPosToSO
 			if ratio < 1.0 {
 				below1Percent++
 			} else if ratio <= 5.0 {
@@ -309,9 +309,9 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 		maxRatio := 0.0
 		maxSeller := ""
 		for _, position := range positions {
-			if position.ShortPositionsToSharesOutstandingRatio > maxRatio {
-				maxRatio = position.ShortPositionsToSharesOutstandingRatio
-				maxSeller = position.ShortSellerName
+			if position.ShrtPosToSO > maxRatio {
+				maxRatio = position.ShrtPosToSO
+				maxSeller = position.SSName
 			}
 		}
 		

@@ -29,39 +29,39 @@ func TestFSDetailsEndpoint(t *testing.T) {
 		// 各財務詳細データを詳細に検証
 		for i, detail := range details {
 			// 基本情報の検証
-			if detail.LocalCode != "7203" && detail.LocalCode != "72030" {
-				t.Errorf("Detail[%d]: LocalCode = %v, want 7203 or 72030", i, detail.LocalCode)
+			if detail.Code != "7203" && detail.Code != "72030" {
+				t.Errorf("Detail[%d]: LocalCode = %v, want 7203 or 72030", i, detail.Code)
 			}
 			// LocalCodeは5桁であることを確認
-			if len(detail.LocalCode) != 5 && len(detail.LocalCode) != 4 {
-				t.Errorf("Detail[%d]: LocalCode length = %d, want 4 or 5", i, len(detail.LocalCode))
+			if len(detail.Code) != 5 && len(detail.Code) != 4 {
+				t.Errorf("Detail[%d]: LocalCode length = %d, want 4 or 5", i, len(detail.Code))
 			}
 
-			if detail.DisclosedDate == "" {
+			if detail.DiscDate == "" {
 				t.Errorf("Detail[%d]: DisclosedDate is empty", i)
 			} else {
 				// 日付フォーマットの検証（YYYY-MM-DD形式）
-				if len(detail.DisclosedDate) != 10 || detail.DisclosedDate[4] != '-' || detail.DisclosedDate[7] != '-' {
-					t.Errorf("Detail[%d]: DisclosedDate format invalid = %v, want YYYY-MM-DD", i, detail.DisclosedDate)
+				if len(detail.DiscDate) != 10 || detail.DiscDate[4] != '-' || detail.DiscDate[7] != '-' {
+					t.Errorf("Detail[%d]: DisclosedDate format invalid = %v, want YYYY-MM-DD", i, detail.DiscDate)
 				}
 			}
 
-			if detail.DisclosedTime == "" {
+			if detail.DiscTime == "" {
 				t.Errorf("Detail[%d]: DisclosedTime is empty", i)
 			} else {
 				// 時刻フォーマットの検証（HH:MM:SS形式）
-				if len(detail.DisclosedTime) != 8 || detail.DisclosedTime[2] != ':' || detail.DisclosedTime[5] != ':' {
-					t.Errorf("Detail[%d]: DisclosedTime format invalid = %v, want HH:MM:SS", i, detail.DisclosedTime)
+				if len(detail.DiscTime) != 8 || detail.DiscTime[2] != ':' || detail.DiscTime[5] != ':' {
+					t.Errorf("Detail[%d]: DisclosedTime format invalid = %v, want HH:MM:SS", i, detail.DiscTime)
 				}
 			}
 
 			// 開示番号の検証
-			if detail.DisclosureNumber == "" {
+			if detail.DiscNo == "" {
 				t.Errorf("Detail[%d]: DisclosureNumber is empty", i)
 			}
 
 			// 開示書類種別の検証
-			if detail.TypeOfDocument == "" {
+			if detail.DocType == "" {
 				t.Errorf("Detail[%d]: TypeOfDocument is empty", i)
 			}
 
@@ -161,8 +161,8 @@ func TestFSDetailsEndpoint(t *testing.T) {
 				prevEnd, _ := detail.GetValue("Previous fiscal year end date, DEI")
 
 				t.Logf("Detail[%d]: Code=%s, Type=%s",
-					i, detail.LocalCode, detail.TypeOfDocument)
-				t.Logf("  Disclosed: %s %s", detail.DisclosedDate, detail.DisclosedTime)
+					i, detail.Code, detail.DocType)
+				t.Logf("  Disclosed: %s %s", detail.DiscDate, detail.DiscTime)
 				t.Logf("  Period: %s (Previous: %s)", periodEnd, prevEnd)
 				t.Logf("  Accounting: %s, Quarter: %d",
 					map[bool]string{true: "IFRS", false: "Japanese GAAP"}[detail.IsIFRS()],
@@ -209,19 +209,19 @@ func TestFSDetailsEndpoint(t *testing.T) {
 			return
 		}
 
-		if details == nil || len(details.FSDetails) == 0 {
+		if details == nil || len(details.Data) == 0 {
 			t.Skip("No FS details data for the specified date")
 		}
 
-		t.Logf("Retrieved %d FS details records for %s", len(details.FSDetails), date)
+		t.Logf("Retrieved %d FS details records for %s", len(details.Data), date)
 
 		// 日付の一致確認
-		for i, detail := range details.FSDetails {
+		for i, detail := range details.Data {
 			// 日付形式をYYYY-MM-DDに統一して比較
 			expectedDate := getTestDateFormatted()
-			if detail.DisclosedDate != expectedDate {
+			if detail.DiscDate != expectedDate {
 				t.Errorf("Detail[%d]: DisclosedDate = %v, want %v",
-					i, detail.DisclosedDate, expectedDate)
+					i, detail.DiscDate, expectedDate)
 			}
 			if i >= 10 {
 				break // 最初の10件のみ確認
@@ -355,18 +355,18 @@ func TestFSDetailsEndpoint(t *testing.T) {
 			t.Fatalf("Failed to get FS details for date range: %v", err)
 		}
 
-		if details == nil || len(details.FSDetails) == 0 {
+		if details == nil || len(details.Data) == 0 {
 			t.Skip("No FS details data for the specified date range")
 		}
 
-		t.Logf("Retrieved %d FS details records for code 7203", len(details.FSDetails))
+		t.Logf("Retrieved %d FS details records for code 7203", len(details.Data))
 
 		// 期間内の日付確認
-		for _, detail := range details.FSDetails {
-			if detail.DisclosedDate != "" {
-				if detail.DisclosedDate < from || detail.DisclosedDate > to {
+		for _, detail := range details.Data {
+			if detail.DiscDate != "" {
+				if detail.DiscDate < from || detail.DiscDate > to {
 					t.Errorf("FS detail disclosed date %s is outside range %s to %s",
-						detail.DisclosedDate, from, to)
+						detail.DiscDate, from, to)
 				}
 			}
 		}
@@ -387,7 +387,7 @@ func TestFSDetailsEndpoint(t *testing.T) {
 		}
 
 		resp, err := jq.FSDetails.GetFSDetails(params)
-		if err == nil && resp != nil && len(resp.FSDetails) > 0 {
+		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Error("Expected error or empty result for invalid date")
 		}
 	})
