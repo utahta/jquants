@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -27,6 +28,16 @@ func NewClient(apiKey string) *Client {
 		baseURL: BaseURL,
 		apiKey:  apiKey,
 	}
+}
+
+// NewClientFromEnv は環境変数 JQUANTS_API_KEY からAPIキーを取得してClientを作成します。
+// 環境変数が設定されていない場合はエラーを返します。
+func NewClientFromEnv() (*Client, error) {
+	apiKey := os.Getenv("JQUANTS_API_KEY")
+	if apiKey == "" {
+		return nil, fmt.Errorf("JQUANTS_API_KEY environment variable is not set")
+	}
+	return NewClient(apiKey), nil
 }
 
 func (c *Client) DoRequest(method, path string, body interface{}, result interface{}) error {
