@@ -22,12 +22,12 @@ func TestPricesAMEndpoint(t *testing.T) {
 			t.Fatalf("Failed to get prices AM: %v", err)
 		}
 
-		if resp == nil || len(resp.PricesAM) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No prices AM data available")
 		}
 
 		// 各前場四本値データを詳細に検証
-		for i, quote := range resp.PricesAM {
+		for i, quote := range resp.Data {
 			// 基本情報の検証
 			if quote.Code != "72030" && quote.Code != "7203" {
 				t.Errorf("Quote[%d]: Code = %v, want 72030 or 7203", i, quote.Code)
@@ -42,77 +42,77 @@ func TestPricesAMEndpoint(t *testing.T) {
 			}
 
 			// 四本値の論理的整合性チェック
-			if quote.MorningHigh != nil && quote.MorningLow != nil && *quote.MorningHigh < *quote.MorningLow {
-				t.Errorf("Quote[%d]: MorningHigh (%v) < MorningLow (%v)", i, *quote.MorningHigh, *quote.MorningLow)
+			if quote.MH != nil && quote.ML != nil && *quote.MH < *quote.ML {
+				t.Errorf("Quote[%d]: MorningHigh (%v) < MorningLow (%v)", i, *quote.MH, *quote.ML)
 			}
-			if quote.MorningOpen != nil && quote.MorningHigh != nil && *quote.MorningOpen > *quote.MorningHigh {
-				t.Errorf("Quote[%d]: MorningOpen (%v) > MorningHigh (%v)", i, *quote.MorningOpen, *quote.MorningHigh)
+			if quote.MO != nil && quote.MH != nil && *quote.MO > *quote.MH {
+				t.Errorf("Quote[%d]: MorningOpen (%v) > MorningHigh (%v)", i, *quote.MO, *quote.MH)
 			}
-			if quote.MorningOpen != nil && quote.MorningLow != nil && *quote.MorningOpen < *quote.MorningLow {
-				t.Errorf("Quote[%d]: MorningOpen (%v) < MorningLow (%v)", i, *quote.MorningOpen, *quote.MorningLow)
+			if quote.MO != nil && quote.ML != nil && *quote.MO < *quote.ML {
+				t.Errorf("Quote[%d]: MorningOpen (%v) < MorningLow (%v)", i, *quote.MO, *quote.ML)
 			}
-			if quote.MorningClose != nil && quote.MorningHigh != nil && *quote.MorningClose > *quote.MorningHigh {
-				t.Errorf("Quote[%d]: MorningClose (%v) > MorningHigh (%v)", i, *quote.MorningClose, *quote.MorningHigh)
+			if quote.MC != nil && quote.MH != nil && *quote.MC > *quote.MH {
+				t.Errorf("Quote[%d]: MorningClose (%v) > MorningHigh (%v)", i, *quote.MC, *quote.MH)
 			}
-			if quote.MorningClose != nil && quote.MorningLow != nil && *quote.MorningClose < *quote.MorningLow {
-				t.Errorf("Quote[%d]: MorningClose (%v) < MorningLow (%v)", i, *quote.MorningClose, *quote.MorningLow)
+			if quote.MC != nil && quote.ML != nil && *quote.MC < *quote.ML {
+				t.Errorf("Quote[%d]: MorningClose (%v) < MorningLow (%v)", i, *quote.MC, *quote.ML)
 			}
 
 			// 価格の妥当性チェック（負の値は通常ありえない）
-			if quote.MorningOpen != nil && *quote.MorningOpen < 0 {
-				t.Errorf("Quote[%d]: MorningOpen = %v, want >= 0", i, *quote.MorningOpen)
+			if quote.MO != nil && *quote.MO < 0 {
+				t.Errorf("Quote[%d]: MorningOpen = %v, want >= 0", i, *quote.MO)
 			}
-			if quote.MorningHigh != nil && *quote.MorningHigh < 0 {
-				t.Errorf("Quote[%d]: MorningHigh = %v, want >= 0", i, *quote.MorningHigh)
+			if quote.MH != nil && *quote.MH < 0 {
+				t.Errorf("Quote[%d]: MorningHigh = %v, want >= 0", i, *quote.MH)
 			}
-			if quote.MorningLow != nil && *quote.MorningLow < 0 {
-				t.Errorf("Quote[%d]: MorningLow = %v, want >= 0", i, *quote.MorningLow)
+			if quote.ML != nil && *quote.ML < 0 {
+				t.Errorf("Quote[%d]: MorningLow = %v, want >= 0", i, *quote.ML)
 			}
-			if quote.MorningClose != nil && *quote.MorningClose < 0 {
-				t.Errorf("Quote[%d]: MorningClose = %v, want >= 0", i, *quote.MorningClose)
+			if quote.MC != nil && *quote.MC < 0 {
+				t.Errorf("Quote[%d]: MorningClose = %v, want >= 0", i, *quote.MC)
 			}
 
 			// 出来高の妥当性チェック
-			if quote.MorningVolume != nil && *quote.MorningVolume < 0 {
-				t.Errorf("Quote[%d]: MorningVolume = %v, want >= 0", i, *quote.MorningVolume)
+			if quote.MVo != nil && *quote.MVo < 0 {
+				t.Errorf("Quote[%d]: MorningVolume = %v, want >= 0", i, *quote.MVo)
 			}
-			if quote.MorningTurnoverValue != nil && *quote.MorningTurnoverValue < 0 {
-				t.Errorf("Quote[%d]: MorningTurnoverValue = %v, want >= 0", i, *quote.MorningTurnoverValue)
+			if quote.MVa != nil && *quote.MVa < 0 {
+				t.Errorf("Quote[%d]: MorningTurnoverValue = %v, want >= 0", i, *quote.MVa)
 			}
 
 			// 最初の5件の詳細ログ
 			if i < 5 {
 				t.Logf("Quote[%d]: Date=%s, Code=%s", i, quote.Date, quote.Code)
 				openStr := "nil"
-				if quote.MorningOpen != nil {
-					openStr = fmt.Sprintf("%.0f", *quote.MorningOpen)
+				if quote.MO != nil {
+					openStr = fmt.Sprintf("%.0f", *quote.MO)
 				}
 				highStr := "nil"
-				if quote.MorningHigh != nil {
-					highStr = fmt.Sprintf("%.0f", *quote.MorningHigh)
+				if quote.MH != nil {
+					highStr = fmt.Sprintf("%.0f", *quote.MH)
 				}
 				lowStr := "nil"
-				if quote.MorningLow != nil {
-					lowStr = fmt.Sprintf("%.0f", *quote.MorningLow)
+				if quote.ML != nil {
+					lowStr = fmt.Sprintf("%.0f", *quote.ML)
 				}
 				closeStr := "nil"
-				if quote.MorningClose != nil {
-					closeStr = fmt.Sprintf("%.0f", *quote.MorningClose)
+				if quote.MC != nil {
+					closeStr = fmt.Sprintf("%.0f", *quote.MC)
 				}
 				volumeStr := "nil"
-				if quote.MorningVolume != nil {
-					volumeStr = fmt.Sprintf("%.0f", *quote.MorningVolume)
+				if quote.MVo != nil {
+					volumeStr = fmt.Sprintf("%.0f", *quote.MVo)
 				}
 				turnoverStr := "nil"
-				if quote.MorningTurnoverValue != nil {
-					turnoverStr = fmt.Sprintf("%.0f", *quote.MorningTurnoverValue)
+				if quote.MVa != nil {
+					turnoverStr = fmt.Sprintf("%.0f", *quote.MVa)
 				}
 				t.Logf("  OHLC: Open=%s, High=%s, Low=%s, Close=%s", openStr, highStr, lowStr, closeStr)
 				t.Logf("  Volume: %s, TurnoverValue: %s", volumeStr, turnoverStr)
 			}
 		}
 
-		t.Logf("Retrieved %d prices AM records", len(resp.PricesAM))
+		t.Logf("Retrieved %d prices AM records", len(resp.Data))
 	})
 
 	t.Run("GetPricesAM_All", func(t *testing.T) {
@@ -128,14 +128,14 @@ func TestPricesAMEndpoint(t *testing.T) {
 			return
 		}
 
-		if resp == nil || len(resp.PricesAM) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No prices AM data for the specified date")
 		}
 
-		t.Logf("Retrieved %d prices AM records for all stocks", len(resp.PricesAM))
+		t.Logf("Retrieved %d prices AM records for all stocks", len(resp.Data))
 
 		// 基本的な検証（上位10件）
-		for i, quote := range resp.PricesAM {
+		for i, quote := range resp.Data {
 			if quote.Code == "" {
 				t.Errorf("Quote[%d]: Code is empty", i)
 			} else {
@@ -170,7 +170,7 @@ func TestPricesAMEndpoint(t *testing.T) {
 			t.Skip("No data available for market analysis")
 		}
 
-		if resp == nil || len(resp.PricesAM) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No data available")
 		}
 
@@ -181,19 +181,19 @@ func TestPricesAMEndpoint(t *testing.T) {
 		priceDrops := 0
 		priceRises := 0
 
-		for _, quote := range resp.PricesAM {
-			if quote.MorningVolume != nil {
-				totalVolume += *quote.MorningVolume
+		for _, quote := range resp.Data {
+			if quote.MVo != nil {
+				totalVolume += *quote.MVo
 			}
-			if quote.MorningTurnoverValue != nil {
-				totalTurnover += *quote.MorningTurnoverValue
+			if quote.MVa != nil {
+				totalTurnover += *quote.MVa
 			}
 
 			// 前場の価格変動分析
-			if quote.MorningOpen != nil && quote.MorningClose != nil && *quote.MorningOpen > 0 && *quote.MorningClose > 0 {
-				if *quote.MorningClose > *quote.MorningOpen {
+			if quote.MO != nil && quote.MC != nil && *quote.MO > 0 && *quote.MC > 0 {
+				if *quote.MC > *quote.MO {
 					priceRises++
-				} else if *quote.MorningClose < *quote.MorningOpen {
+				} else if *quote.MC < *quote.MO {
 					priceDrops++
 				}
 				priceChanges++
@@ -201,7 +201,7 @@ func TestPricesAMEndpoint(t *testing.T) {
 		}
 
 		t.Logf("Market analysis for today's morning session:")
-		t.Logf("  Total stocks: %d", len(resp.PricesAM))
+		t.Logf("  Total stocks: %d", len(resp.Data))
 		t.Logf("  Total volume: %.0f million shares", totalVolume/1000000)
 		t.Logf("  Total turnover: %.0f billion yen", totalTurnover/1000000000)
 
@@ -224,11 +224,11 @@ func TestPricesAMEndpoint(t *testing.T) {
 			t.Skip("No prices AM data available")
 		}
 
-		if resp == nil || len(resp.PricesAM) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No data available for pagination test")
 		}
 
-		firstPageCount := len(resp.PricesAM)
+		firstPageCount := len(resp.Data)
 		t.Logf("First page: %d records", firstPageCount)
 
 		if resp.PaginationKey != "" {
@@ -239,8 +239,8 @@ func TestPricesAMEndpoint(t *testing.T) {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
 
-			if resp2 != nil && len(resp2.PricesAM) > 0 {
-				t.Logf("Second page: %d records", len(resp2.PricesAM))
+			if resp2 != nil && len(resp2.Data) > 0 {
+				t.Logf("Second page: %d records", len(resp2.Data))
 			}
 		}
 	})
@@ -250,7 +250,7 @@ func TestPricesAMEndpoint(t *testing.T) {
 
 		// 存在しない銘柄コード
 		resp, err := jq.PricesAM.GetPricesAMByCode("99999")
-		if err == nil && resp != nil && len(resp.PricesAM) > 0 {
+		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Error("Expected error or empty result for invalid code")
 		}
 
@@ -260,7 +260,7 @@ func TestPricesAMEndpoint(t *testing.T) {
 		}
 
 		resp, err = jq.PricesAM.GetPricesAM(params)
-		if err == nil && resp != nil && len(resp.PricesAM) > 0 {
+		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Error("Expected error or empty result for invalid code")
 		}
 	})

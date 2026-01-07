@@ -27,12 +27,12 @@ func TestIndicesEndpoint(t *testing.T) {
 			t.Fatalf("Failed to get indices: %v", err)
 		}
 
-		if resp == nil || len(resp.Indices) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No indices data available for the specified date")
 		}
 
 		// 各指数データを詳細に検証
-		for i, index := range resp.Indices {
+		for i, index := range resp.Data {
 			// 基本情報の検証
 			if index.Date == "" {
 				t.Errorf("Index[%d]: Date is empty", i)
@@ -53,44 +53,44 @@ func TestIndicesEndpoint(t *testing.T) {
 			}
 
 			// 四本値の検証
-			if index.Open <= 0 {
-				t.Errorf("Index[%d]: Open = %v, want > 0", i, index.Open)
+			if index.O <= 0 {
+				t.Errorf("Index[%d]: Open = %v, want > 0", i, index.O)
 			}
-			if index.High <= 0 {
-				t.Errorf("Index[%d]: High = %v, want > 0", i, index.High)
+			if index.H <= 0 {
+				t.Errorf("Index[%d]: High = %v, want > 0", i, index.H)
 			}
-			if index.Low <= 0 {
-				t.Errorf("Index[%d]: Low = %v, want > 0", i, index.Low)
+			if index.L <= 0 {
+				t.Errorf("Index[%d]: Low = %v, want > 0", i, index.L)
 			}
-			if index.Close <= 0 {
-				t.Errorf("Index[%d]: Close = %v, want > 0", i, index.Close)
+			if index.C <= 0 {
+				t.Errorf("Index[%d]: Close = %v, want > 0", i, index.C)
 			}
 
 			// 四本値の論理的整合性チェック
-			if index.High < index.Low {
-				t.Errorf("Index[%d]: High (%v) < Low (%v)", i, index.High, index.Low)
+			if index.H < index.L {
+				t.Errorf("Index[%d]: High (%v) < Low (%v)", i, index.H, index.L)
 			}
-			if index.Open > index.High || index.Open < index.Low {
+			if index.O > index.H || index.O < index.L {
 				t.Errorf("Index[%d]: Open (%v) is outside High (%v) - Low (%v) range",
-					i, index.Open, index.High, index.Low)
+					i, index.O, index.H, index.L)
 			}
-			if index.Close > index.High || index.Close < index.Low {
+			if index.C > index.H || index.C < index.L {
 				t.Errorf("Index[%d]: Close (%v) is outside High (%v) - Low (%v) range",
-					i, index.Close, index.High, index.Low)
+					i, index.C, index.H, index.L)
 			}
 
 			// 最初の5件の詳細ログ
 			if i < 5 {
 				t.Logf("Index[%d]: Code=%s, Date=%s, O=%.2f, H=%.2f, L=%.2f, C=%.2f",
-					i, index.Code, index.Date, index.Open, index.High, index.Low, index.Close)
+					i, index.Code, index.Date, index.O, index.H, index.L, index.C)
 			}
 		}
 
-		t.Logf("Retrieved %d indices for date %s", len(resp.Indices), date)
+		t.Logf("Retrieved %d indices for date %s", len(resp.Data), date)
 
 		// 主要な指数が含まれているか確認
 		codeMap := make(map[string]bool)
-		for _, index := range resp.Indices {
+		for _, index := range resp.Data {
 			codeMap[index.Code] = true
 		}
 
@@ -121,14 +121,14 @@ func TestIndicesEndpoint(t *testing.T) {
 			return
 		}
 
-		if resp != nil && len(resp.Indices) > 0 {
+		if resp != nil && len(resp.Data) > 0 {
 			// 全てのデータが指定したコードか確認
-			for i, index := range resp.Indices {
+			for i, index := range resp.Data {
 				if index.Code != params.Code {
 					t.Errorf("Index[%d]: Code = %v, want %v", i, index.Code, params.Code)
 				}
 			}
-			t.Logf("Retrieved %d indices for code %s", len(resp.Indices), params.Code)
+			t.Logf("Retrieved %d indices for code %s", len(resp.Data), params.Code)
 		}
 	})
 
@@ -148,11 +148,11 @@ func TestIndicesEndpoint(t *testing.T) {
 			t.Skip("No indices data available")
 		}
 
-		if resp == nil || len(resp.Indices) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No indices data available")
 		}
 
-		firstPageCount := len(resp.Indices)
+		firstPageCount := len(resp.Data)
 		t.Logf("First page: %d indices", firstPageCount)
 
 		if resp.PaginationKey != "" {
@@ -163,11 +163,11 @@ func TestIndicesEndpoint(t *testing.T) {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
 
-			if resp2 != nil && len(resp2.Indices) > 0 {
-				t.Logf("Second page: %d indices", len(resp2.Indices))
+			if resp2 != nil && len(resp2.Data) > 0 {
+				t.Logf("Second page: %d indices", len(resp2.Data))
 
 				// 異なるデータであることを確認
-				if resp2.Indices[0].Code == resp.Indices[0].Code {
+				if resp2.Data[0].Code == resp.Data[0].Code {
 					t.Logf("Warning: Second page might contain overlapping data")
 				}
 			}
@@ -201,7 +201,7 @@ func TestIndicesEndpoint(t *testing.T) {
 			// 最初と最後のデータをログ
 			if i == 0 || i == len(indices)-1 {
 				t.Logf("TOPIX Core30 [%s]: Close=%.2f (O=%.2f, H=%.2f, L=%.2f)",
-					index.Date, index.Close, index.Open, index.High, index.Low)
+					index.Date, index.C, index.O, index.H, index.L)
 			}
 		}
 
@@ -209,8 +209,8 @@ func TestIndicesEndpoint(t *testing.T) {
 		if len(indices) >= 2 {
 			first := indices[0]
 			last := indices[len(indices)-1]
-			change := last.Close - first.Close
-			changePercent := (change / first.Close) * 100
+			change := last.C - first.C
+			changePercent := (change / first.C) * 100
 			t.Logf("Price change over period: %.2f (%.2f%%)", change, changePercent)
 		}
 	})
@@ -240,7 +240,7 @@ func TestIndicesEndpoint(t *testing.T) {
 			// 最初と最後のデータをログ
 			if i == 0 || i == len(indices)-1 {
 				t.Logf("TOPIX [%s]: Close=%.2f (O=%.2f, H=%.2f, L=%.2f)",
-					index.Date, index.Close, index.Open, index.High, index.Low)
+					index.Date, index.C, index.O, index.H, index.L)
 			}
 		}
 	})
@@ -261,11 +261,11 @@ func TestIndicesEndpoint(t *testing.T) {
 			return
 		}
 
-		if resp != nil && len(resp.Indices) > 0 {
-			t.Logf("Retrieved %d indices for January 2024", len(resp.Indices))
+		if resp != nil && len(resp.Data) > 0 {
+			t.Logf("Retrieved %d indices for January 2024", len(resp.Data))
 
 			// 日付範囲の検証
-			for _, index := range resp.Indices {
+			for _, index := range resp.Data {
 				if index.Date < params.From || index.Date > params.To {
 					t.Errorf("Index date %s is outside requested range %s to %s", index.Date, params.From, params.To)
 				}

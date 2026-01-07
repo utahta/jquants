@@ -42,37 +42,37 @@ func TestShortSellingEndpoint(t *testing.T) {
 				}
 			}
 			
-			if short.Sector33Code == "" {
+			if short.S33 == "" {
 				t.Errorf("ShortSelling[%d]: Sector33Code is empty", i)
 			} else {
 				// 33業種コードは4桁
-				if len(short.Sector33Code) != 4 {
-					t.Errorf("ShortSelling[%d]: Sector33Code length = %d, want 4", i, len(short.Sector33Code))
+				if len(short.S33) != 4 {
+					t.Errorf("ShortSelling[%d]: Sector33Code length = %d, want 4", i, len(short.S33))
 				}
 			}
 			
 			// 売買代金の検証（負の値は通常ありえない）
-			if short.SellingExcludingShortSellingTurnoverValue < 0 {
+			if short.SellExShortVa < 0 {
 				t.Errorf("ShortSelling[%d]: SellingExcludingShortSellingTurnoverValue = %v, want >= 0",
-					i, short.SellingExcludingShortSellingTurnoverValue)
+					i, short.SellExShortVa)
 			}
-			if short.ShortSellingWithRestrictionsTurnoverValue < 0 {
+			if short.ShrtWithResVa < 0 {
 				t.Errorf("ShortSelling[%d]: ShortSellingWithRestrictionsTurnoverValue = %v, want >= 0",
-					i, short.ShortSellingWithRestrictionsTurnoverValue)
+					i, short.ShrtWithResVa)
 			}
-			if short.ShortSellingWithoutRestrictionsTurnoverValue < 0 {
+			if short.ShrtNoResVa < 0 {
 				t.Errorf("ShortSelling[%d]: ShortSellingWithoutRestrictionsTurnoverValue = %v, want >= 0",
-					i, short.ShortSellingWithoutRestrictionsTurnoverValue)
+					i, short.ShrtNoResVa)
 			}
 			
 			// 比率の計算と検証
-			totalTurnover := short.SellingExcludingShortSellingTurnoverValue +
-				short.ShortSellingWithRestrictionsTurnoverValue +
-				short.ShortSellingWithoutRestrictionsTurnoverValue
+			totalTurnover := short.SellExShortVa +
+				short.ShrtWithResVa +
+				short.ShrtNoResVa
 			
 			if totalTurnover > 0 {
-				shortSellingRatio := (short.ShortSellingWithRestrictionsTurnoverValue +
-					short.ShortSellingWithoutRestrictionsTurnoverValue) / totalTurnover * 100
+				shortSellingRatio := (short.ShrtWithResVa +
+					short.ShrtNoResVa) / totalTurnover * 100
 				
 				// 空売り比率が異常でないかチェック（通常0-50%程度）
 				if shortSellingRatio > 100 {
@@ -82,10 +82,10 @@ func TestShortSellingEndpoint(t *testing.T) {
 				// 最初の5件の詳細ログ
 				if i < 5 {
 					t.Logf("ShortSelling[%d]: Sector=%s, Date=%s",
-						i, short.Sector33Code, short.Date)
-					t.Logf("  Excl Short Selling: %.0f", short.SellingExcludingShortSellingTurnoverValue)
-					t.Logf("  Short w/ Restrictions: %.0f", short.ShortSellingWithRestrictionsTurnoverValue)
-					t.Logf("  Short w/o Restrictions: %.0f", short.ShortSellingWithoutRestrictionsTurnoverValue)
+						i, short.S33, short.Date)
+					t.Logf("  Excl Short Selling: %.0f", short.SellExShortVa)
+					t.Logf("  Short w/ Restrictions: %.0f", short.ShrtWithResVa)
+					t.Logf("  Short w/o Restrictions: %.0f", short.ShrtNoResVa)
 					t.Logf("  Total Turnover: %.0f", totalTurnover)
 					t.Logf("  Short Selling Ratio: %.2f%%", shortSellingRatio)
 				}
@@ -113,8 +113,8 @@ func TestShortSellingEndpoint(t *testing.T) {
 
 		// 全てのデータが指定セクターか確認
 		for i, short := range shorts {
-			if short.Sector33Code != sectorCode {
-				t.Errorf("ShortSelling[%d]: Sector33Code = %v, want %v", i, short.Sector33Code, sectorCode)
+			if short.S33 != sectorCode {
+				t.Errorf("ShortSelling[%d]: Sector33Code = %v, want %v", i, short.S33, sectorCode)
 			}
 			// 日付フォーマットの検証
 			if short.Date != "" {
@@ -131,13 +131,13 @@ func TestShortSellingEndpoint(t *testing.T) {
 			t.Logf("Time series analysis for sector %s:", sectorCode)
 			for i := 0; i < 5 && i < len(shorts); i++ {
 				short := shorts[i]
-				totalTurnover := short.SellingExcludingShortSellingTurnoverValue +
-					short.ShortSellingWithRestrictionsTurnoverValue +
-					short.ShortSellingWithoutRestrictionsTurnoverValue
+				totalTurnover := short.SellExShortVa +
+					short.ShrtWithResVa +
+					short.ShrtNoResVa
 				
 				if totalTurnover > 0 {
-					shortSellingRatio := (short.ShortSellingWithRestrictionsTurnoverValue +
-						short.ShortSellingWithoutRestrictionsTurnoverValue) / totalTurnover * 100
+					shortSellingRatio := (short.ShrtWithResVa +
+						short.ShrtNoResVa) / totalTurnover * 100
 					
 					t.Logf("  %s: %.2f%% short selling ratio (turnover: %.0f)", 
 						short.Date, shortSellingRatio, totalTurnover)
@@ -172,16 +172,16 @@ func TestShortSellingEndpoint(t *testing.T) {
 		var sectorRatios []SectorRatio
 		
 		for _, short := range shorts {
-			totalTurnover := short.SellingExcludingShortSellingTurnoverValue +
-				short.ShortSellingWithRestrictionsTurnoverValue +
-				short.ShortSellingWithoutRestrictionsTurnoverValue
+			totalTurnover := short.SellExShortVa +
+				short.ShrtWithResVa +
+				short.ShrtNoResVa
 			
 			if totalTurnover > 0 {
-				shortSellingRatio := (short.ShortSellingWithRestrictionsTurnoverValue +
-					short.ShortSellingWithoutRestrictionsTurnoverValue) / totalTurnover * 100
+				shortSellingRatio := (short.ShrtWithResVa +
+					short.ShrtNoResVa) / totalTurnover * 100
 				
 				sectorRatios = append(sectorRatios, SectorRatio{
-					SectorCode: short.Sector33Code,
+					SectorCode: short.S33,
 					Ratio:      shortSellingRatio,
 					Turnover:   totalTurnover,
 				})
@@ -247,13 +247,13 @@ func TestShortSellingEndpoint(t *testing.T) {
 			ratios := make([]float64, 0, 5)
 			for i := 0; i < 5 && i < len(shorts); i++ {
 				short := shorts[i]
-				totalTurnover := short.SellingExcludingShortSellingTurnoverValue +
-					short.ShortSellingWithRestrictionsTurnoverValue +
-					short.ShortSellingWithoutRestrictionsTurnoverValue
+				totalTurnover := short.SellExShortVa +
+					short.ShrtWithResVa +
+					short.ShrtNoResVa
 				
 				if totalTurnover > 0 {
-					ratio := (short.ShortSellingWithRestrictionsTurnoverValue +
-						short.ShortSellingWithoutRestrictionsTurnoverValue) / totalTurnover * 100
+					ratio := (short.ShrtWithResVa +
+						short.ShrtNoResVa) / totalTurnover * 100
 					ratios = append(ratios, ratio)
 				}
 			}

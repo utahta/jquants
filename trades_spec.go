@@ -1,11 +1,9 @@
 package jquants
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/utahta/jquants/client"
-	"github.com/utahta/jquants/types"
 )
 
 // TradesSpecService は投資部門別情報を取得するサービスです。
@@ -20,239 +18,79 @@ func NewTradesSpecService(c client.HTTPClient) *TradesSpecService {
 }
 
 // TradesSpec は投資部門別情報データを表します。
-// J-Quants API /markets/trades_spec エンドポイントのレスポンスデータ。
+// J-Quants API /equities/investor-types エンドポイントのレスポンスデータ。
 type TradesSpec struct {
 	// 基本情報
-	PublishedDate string `json:"PublishedDate"` // 公表日（YYYY-MM-DD形式）
-	StartDate     string `json:"StartDate"`     // 開始日（YYYY-MM-DD形式）
-	EndDate       string `json:"EndDate"`       // 終了日（YYYY-MM-DD形式）
-	Section       string `json:"Section"`       // 市場名
+	PubDate string `json:"PubDate"` // 公表日（YYYY-MM-DD形式）
+	StDate  string `json:"StDate"`  // 開始日（YYYY-MM-DD形式）
+	EnDate  string `json:"EnDate"`  // 終了日（YYYY-MM-DD形式）
+	Section string `json:"Section"` // 市場名
 
 	// 自己取引
-	ProprietarySales     float64 `json:"ProprietarySales"`     // 自己計_売（千円）
-	ProprietaryPurchases float64 `json:"ProprietaryPurchases"` // 自己計_買（千円）
-	ProprietaryTotal     float64 `json:"ProprietaryTotal"`     // 自己計_合計（千円）
-	ProprietaryBalance   float64 `json:"ProprietaryBalance"`   // 自己計_差引（千円）
+	PropSell float64 `json:"PropSell"` // 自己計_売（千円）
+	PropBuy  float64 `json:"PropBuy"`  // 自己計_買（千円）
+	PropTot  float64 `json:"PropTot"`  // 自己計_合計（千円）
+	PropBal  float64 `json:"PropBal"`  // 自己計_差引（千円）
 
 	// 委託取引
-	BrokerageSales     float64 `json:"BrokerageSales"`     // 委託計_売（千円）
-	BrokeragePurchases float64 `json:"BrokeragePurchases"` // 委託計_買（千円）
-	BrokerageTotal     float64 `json:"BrokerageTotal"`     // 委託計_合計（千円）
-	BrokerageBalance   float64 `json:"BrokerageBalance"`   // 委託計_差引（千円）
+	BrkSell float64 `json:"BrkSell"` // 委託計_売（千円）
+	BrkBuy  float64 `json:"BrkBuy"`  // 委託計_買（千円）
+	BrkTot  float64 `json:"BrkTot"`  // 委託計_合計（千円）
+	BrkBal  float64 `json:"BrkBal"`  // 委託計_差引（千円）
 
 	// 総計
-	TotalSales     float64 `json:"TotalSales"`     // 総計_売（千円）
-	TotalPurchases float64 `json:"TotalPurchases"` // 総計_買（千円）
-	TotalTotal     float64 `json:"TotalTotal"`     // 総計_合計（千円）
-	TotalBalance   float64 `json:"TotalBalance"`   // 総計_差引（千円）
+	TotSell float64 `json:"TotSell"` // 総計_売（千円）
+	TotBuy  float64 `json:"TotBuy"`  // 総計_買（千円）
+	TotTot  float64 `json:"TotTot"`  // 総計_合計（千円）
+	TotBal  float64 `json:"TotBal"`  // 総計_差引（千円）
 
 	// 投資部門別内訳
-	IndividualsSales                    float64 `json:"IndividualsSales"`                    // 個人_売（千円）
-	IndividualsPurchases                float64 `json:"IndividualsPurchases"`                // 個人_買（千円）
-	IndividualsTotal                    float64 `json:"IndividualsTotal"`                    // 個人_合計（千円）
-	IndividualsBalance                  float64 `json:"IndividualsBalance"`                  // 個人_差引（千円）
-	ForeignersSales                     float64 `json:"ForeignersSales"`                     // 海外投資家_売（千円）
-	ForeignersPurchases                 float64 `json:"ForeignersPurchases"`                 // 海外投資家_買（千円）
-	ForeignersTotal                     float64 `json:"ForeignersTotal"`                     // 海外投資家_合計（千円）
-	ForeignersBalance                   float64 `json:"ForeignersBalance"`                   // 海外投資家_差引（千円）
-	SecuritiesCosSales                  float64 `json:"SecuritiesCosSales"`                  // 証券会社_売（千円）
-	SecuritiesCosPurchases              float64 `json:"SecuritiesCosPurchases"`              // 証券会社_買（千円）
-	SecuritiesCosTotal                  float64 `json:"SecuritiesCosTotal"`                  // 証券会社_合計（千円）
-	SecuritiesCosBalance                float64 `json:"SecuritiesCosBalance"`                // 証券会社_差引（千円）
-	InvestmentTrustsSales               float64 `json:"InvestmentTrustsSales"`               // 投資信託_売（千円）
-	InvestmentTrustsPurchases           float64 `json:"InvestmentTrustsPurchases"`           // 投資信託_買（千円）
-	InvestmentTrustsTotal               float64 `json:"InvestmentTrustsTotal"`               // 投資信託_合計（千円）
-	InvestmentTrustsBalance             float64 `json:"InvestmentTrustsBalance"`             // 投資信託_差引（千円）
-	BusinessCosSales                    float64 `json:"BusinessCosSales"`                    // 事業法人_売（千円）
-	BusinessCosPurchases                float64 `json:"BusinessCosPurchases"`                // 事業法人_買（千円）
-	BusinessCosTotal                    float64 `json:"BusinessCosTotal"`                    // 事業法人_合計（千円）
-	BusinessCosBalance                  float64 `json:"BusinessCosBalance"`                  // 事業法人_差引（千円）
-	OtherCosSales                       float64 `json:"OtherCosSales"`                       // その他法人_売（千円）
-	OtherCosPurchases                   float64 `json:"OtherCosPurchases"`                   // その他法人_買（千円）
-	OtherCosTotal                       float64 `json:"OtherCosTotal"`                       // その他法人_合計（千円）
-	OtherCosBalance                     float64 `json:"OtherCosBalance"`                     // その他法人_差引（千円）
-	InsuranceCosSales                   float64 `json:"InsuranceCosSales"`                   // 生保・損保_売（千円）
-	InsuranceCosPurchases               float64 `json:"InsuranceCosPurchases"`               // 生保・損保_買（千円）
-	InsuranceCosTotal                   float64 `json:"InsuranceCosTotal"`                   // 生保・損保_合計（千円）
-	InsuranceCosBalance                 float64 `json:"InsuranceCosBalance"`                 // 生保・損保_差引（千円）
-	CityBKsRegionalBKsEtcSales          float64 `json:"CityBKsRegionalBKsEtcSales"`          // 都銀・地銀等_売（千円）
-	CityBKsRegionalBKsEtcPurchases      float64 `json:"CityBKsRegionalBKsEtcPurchases"`      // 都銀・地銀等_買（千円）
-	CityBKsRegionalBKsEtcTotal          float64 `json:"CityBKsRegionalBKsEtcTotal"`          // 都銀・地銀等_合計（千円）
-	CityBKsRegionalBKsEtcBalance        float64 `json:"CityBKsRegionalBKsEtcBalance"`        // 都銀・地銀等_差引（千円）
-	TrustBanksSales                     float64 `json:"TrustBanksSales"`                     // 信託銀行_売（千円）
-	TrustBanksPurchases                 float64 `json:"TrustBanksPurchases"`                 // 信託銀行_買（千円）
-	TrustBanksTotal                     float64 `json:"TrustBanksTotal"`                     // 信託銀行_合計（千円）
-	TrustBanksBalance                   float64 `json:"TrustBanksBalance"`                   // 信託銀行_差引（千円）
-	OtherFinancialInstitutionsSales     float64 `json:"OtherFinancialInstitutionsSales"`     // その他金融機関_売（千円）
-	OtherFinancialInstitutionsPurchases float64 `json:"OtherFinancialInstitutionsPurchases"` // その他金融機関_買（千円）
-	OtherFinancialInstitutionsTotal     float64 `json:"OtherFinancialInstitutionsTotal"`     // その他金融機関_合計（千円）
-	OtherFinancialInstitutionsBalance   float64 `json:"OtherFinancialInstitutionsBalance"`   // その他金融機関_差引（千円）
-}
-
-// RawTradesSpec is used for unmarshaling JSON response with mixed types
-type RawTradesSpec struct {
-	// 基本情報
-	PublishedDate string `json:"PublishedDate"`
-	StartDate     string `json:"StartDate"`
-	EndDate       string `json:"EndDate"`
-	Section       string `json:"Section"`
-
-	// 自己取引
-	ProprietarySales     types.Float64String `json:"ProprietarySales"`
-	ProprietaryPurchases types.Float64String `json:"ProprietaryPurchases"`
-	ProprietaryTotal     types.Float64String `json:"ProprietaryTotal"`
-	ProprietaryBalance   types.Float64String `json:"ProprietaryBalance"`
-
-	// 委託取引
-	BrokerageSales     types.Float64String `json:"BrokerageSales"`
-	BrokeragePurchases types.Float64String `json:"BrokeragePurchases"`
-	BrokerageTotal     types.Float64String `json:"BrokerageTotal"`
-	BrokerageBalance   types.Float64String `json:"BrokerageBalance"`
-
-	// 総計
-	TotalSales     types.Float64String `json:"TotalSales"`
-	TotalPurchases types.Float64String `json:"TotalPurchases"`
-	TotalTotal     types.Float64String `json:"TotalTotal"`
-	TotalBalance   types.Float64String `json:"TotalBalance"`
-
-	// 投資部門別内訳
-	IndividualsSales                    types.Float64String `json:"IndividualsSales"`
-	IndividualsPurchases                types.Float64String `json:"IndividualsPurchases"`
-	IndividualsTotal                    types.Float64String `json:"IndividualsTotal"`
-	IndividualsBalance                  types.Float64String `json:"IndividualsBalance"`
-	ForeignersSales                     types.Float64String `json:"ForeignersSales"`
-	ForeignersPurchases                 types.Float64String `json:"ForeignersPurchases"`
-	ForeignersTotal                     types.Float64String `json:"ForeignersTotal"`
-	ForeignersBalance                   types.Float64String `json:"ForeignersBalance"`
-	SecuritiesCosSales                  types.Float64String `json:"SecuritiesCosSales"`
-	SecuritiesCosPurchases              types.Float64String `json:"SecuritiesCosPurchases"`
-	SecuritiesCosTotal                  types.Float64String `json:"SecuritiesCosTotal"`
-	SecuritiesCosBalance                types.Float64String `json:"SecuritiesCosBalance"`
-	InvestmentTrustsSales               types.Float64String `json:"InvestmentTrustsSales"`
-	InvestmentTrustsPurchases           types.Float64String `json:"InvestmentTrustsPurchases"`
-	InvestmentTrustsTotal               types.Float64String `json:"InvestmentTrustsTotal"`
-	InvestmentTrustsBalance             types.Float64String `json:"InvestmentTrustsBalance"`
-	BusinessCosSales                    types.Float64String `json:"BusinessCosSales"`
-	BusinessCosPurchases                types.Float64String `json:"BusinessCosPurchases"`
-	BusinessCosTotal                    types.Float64String `json:"BusinessCosTotal"`
-	BusinessCosBalance                  types.Float64String `json:"BusinessCosBalance"`
-	OtherCosSales                       types.Float64String `json:"OtherCosSales"`
-	OtherCosPurchases                   types.Float64String `json:"OtherCosPurchases"`
-	OtherCosTotal                       types.Float64String `json:"OtherCosTotal"`
-	OtherCosBalance                     types.Float64String `json:"OtherCosBalance"`
-	InsuranceCosSales                   types.Float64String `json:"InsuranceCosSales"`
-	InsuranceCosPurchases               types.Float64String `json:"InsuranceCosPurchases"`
-	InsuranceCosTotal                   types.Float64String `json:"InsuranceCosTotal"`
-	InsuranceCosBalance                 types.Float64String `json:"InsuranceCosBalance"`
-	CityBKsRegionalBKsEtcSales          types.Float64String `json:"CityBKsRegionalBKsEtcSales"`
-	CityBKsRegionalBKsEtcPurchases      types.Float64String `json:"CityBKsRegionalBKsEtcPurchases"`
-	CityBKsRegionalBKsEtcTotal          types.Float64String `json:"CityBKsRegionalBKsEtcTotal"`
-	CityBKsRegionalBKsEtcBalance        types.Float64String `json:"CityBKsRegionalBKsEtcBalance"`
-	TrustBanksSales                     types.Float64String `json:"TrustBanksSales"`
-	TrustBanksPurchases                 types.Float64String `json:"TrustBanksPurchases"`
-	TrustBanksTotal                     types.Float64String `json:"TrustBanksTotal"`
-	TrustBanksBalance                   types.Float64String `json:"TrustBanksBalance"`
-	OtherFinancialInstitutionsSales     types.Float64String `json:"OtherFinancialInstitutionsSales"`
-	OtherFinancialInstitutionsPurchases types.Float64String `json:"OtherFinancialInstitutionsPurchases"`
-	OtherFinancialInstitutionsTotal     types.Float64String `json:"OtherFinancialInstitutionsTotal"`
-	OtherFinancialInstitutionsBalance   types.Float64String `json:"OtherFinancialInstitutionsBalance"`
+	IndSell    float64 `json:"IndSell"`    // 個人_売（千円）
+	IndBuy     float64 `json:"IndBuy"`     // 個人_買（千円）
+	IndTot     float64 `json:"IndTot"`     // 個人_合計（千円）
+	IndBal     float64 `json:"IndBal"`     // 個人_差引（千円）
+	FrgnSell   float64 `json:"FrgnSell"`   // 海外投資家_売（千円）
+	FrgnBuy    float64 `json:"FrgnBuy"`    // 海外投資家_買（千円）
+	FrgnTot    float64 `json:"FrgnTot"`    // 海外投資家_合計（千円）
+	FrgnBal    float64 `json:"FrgnBal"`    // 海外投資家_差引（千円）
+	SecCoSell  float64 `json:"SecCoSell"`  // 証券会社_売（千円）
+	SecCoBuy   float64 `json:"SecCoBuy"`   // 証券会社_買（千円）
+	SecCoTot   float64 `json:"SecCoTot"`   // 証券会社_合計（千円）
+	SecCoBal   float64 `json:"SecCoBal"`   // 証券会社_差引（千円）
+	InvTrSell  float64 `json:"InvTrSell"`  // 投資信託_売（千円）
+	InvTrBuy   float64 `json:"InvTrBuy"`   // 投資信託_買（千円）
+	InvTrTot   float64 `json:"InvTrTot"`   // 投資信託_合計（千円）
+	InvTrBal   float64 `json:"InvTrBal"`   // 投資信託_差引（千円）
+	BusCoSell  float64 `json:"BusCoSell"`  // 事業法人_売（千円）
+	BusCoBuy   float64 `json:"BusCoBuy"`   // 事業法人_買（千円）
+	BusCoTot   float64 `json:"BusCoTot"`   // 事業法人_合計（千円）
+	BusCoBal   float64 `json:"BusCoBal"`   // 事業法人_差引（千円）
+	OthCoSell  float64 `json:"OthCoSell"`  // その他法人_売（千円）
+	OthCoBuy   float64 `json:"OthCoBuy"`   // その他法人_買（千円）
+	OthCoTot   float64 `json:"OthCoTot"`   // その他法人_合計（千円）
+	OthCoBal   float64 `json:"OthCoBal"`   // その他法人_差引（千円）
+	InsCoSell  float64 `json:"InsCoSell"`  // 生保・損保_売（千円）
+	InsCoBuy   float64 `json:"InsCoBuy"`   // 生保・損保_買（千円）
+	InsCoTot   float64 `json:"InsCoTot"`   // 生保・損保_合計（千円）
+	InsCoBal   float64 `json:"InsCoBal"`   // 生保・損保_差引（千円）
+	BankSell   float64 `json:"BankSell"`   // 都銀・地銀等_売（千円）
+	BankBuy    float64 `json:"BankBuy"`    // 都銀・地銀等_買（千円）
+	BankTot    float64 `json:"BankTot"`    // 都銀・地銀等_合計（千円）
+	BankBal    float64 `json:"BankBal"`    // 都銀・地銀等_差引（千円）
+	TrstBnkSel float64 `json:"TrstBnkSell"` // 信託銀行_売（千円）
+	TrstBnkBuy float64 `json:"TrstBnkBuy"`  // 信託銀行_買（千円）
+	TrstBnkTot float64 `json:"TrstBnkTot"`  // 信託銀行_合計（千円）
+	TrstBnkBal float64 `json:"TrstBnkBal"`  // 信託銀行_差引（千円）
+	OthFinSell float64 `json:"OthFinSell"`  // その他金融機関_売（千円）
+	OthFinBuy  float64 `json:"OthFinBuy"`   // その他金融機関_買（千円）
+	OthFinTot  float64 `json:"OthFinTot"`   // その他金融機関_合計（千円）
+	OthFinBal  float64 `json:"OthFinBal"`   // その他金融機関_差引（千円）
 }
 
 // TradesSpecResponse は投資部門別情報のレスポンスです。
 type TradesSpecResponse struct {
-	TradesSpec    []TradesSpec `json:"trades_spec"`
+	Data          []TradesSpec `json:"data"`
 	PaginationKey string       `json:"pagination_key"` // ページネーションキー
-}
-
-// UnmarshalJSON implements custom JSON unmarshaling
-func (t *TradesSpecResponse) UnmarshalJSON(data []byte) error {
-	// First unmarshal into RawTradesSpec
-	type rawResponse struct {
-		TradesSpec    []RawTradesSpec `json:"trades_spec"`
-		PaginationKey string          `json:"pagination_key"`
-	}
-
-	var raw rawResponse
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-
-	// Set pagination key
-	t.PaginationKey = raw.PaginationKey
-
-	// Convert RawTradesSpec to TradesSpec
-	t.TradesSpec = make([]TradesSpec, len(raw.TradesSpec))
-	for idx, rt := range raw.TradesSpec {
-		t.TradesSpec[idx] = TradesSpec{
-			// 基本情報
-			PublishedDate: rt.PublishedDate,
-			StartDate:     rt.StartDate,
-			EndDate:       rt.EndDate,
-			Section:       rt.Section,
-
-			// 自己取引
-			ProprietarySales:     float64(rt.ProprietarySales),
-			ProprietaryPurchases: float64(rt.ProprietaryPurchases),
-			ProprietaryTotal:     float64(rt.ProprietaryTotal),
-			ProprietaryBalance:   float64(rt.ProprietaryBalance),
-
-			// 委託取引
-			BrokerageSales:     float64(rt.BrokerageSales),
-			BrokeragePurchases: float64(rt.BrokeragePurchases),
-			BrokerageTotal:     float64(rt.BrokerageTotal),
-			BrokerageBalance:   float64(rt.BrokerageBalance),
-
-			// 総計
-			TotalSales:     float64(rt.TotalSales),
-			TotalPurchases: float64(rt.TotalPurchases),
-			TotalTotal:     float64(rt.TotalTotal),
-			TotalBalance:   float64(rt.TotalBalance),
-
-			// 投資部門別内訳
-			IndividualsSales:                    float64(rt.IndividualsSales),
-			IndividualsPurchases:                float64(rt.IndividualsPurchases),
-			IndividualsTotal:                    float64(rt.IndividualsTotal),
-			IndividualsBalance:                  float64(rt.IndividualsBalance),
-			ForeignersSales:                     float64(rt.ForeignersSales),
-			ForeignersPurchases:                 float64(rt.ForeignersPurchases),
-			ForeignersTotal:                     float64(rt.ForeignersTotal),
-			ForeignersBalance:                   float64(rt.ForeignersBalance),
-			SecuritiesCosSales:                  float64(rt.SecuritiesCosSales),
-			SecuritiesCosPurchases:              float64(rt.SecuritiesCosPurchases),
-			SecuritiesCosTotal:                  float64(rt.SecuritiesCosTotal),
-			SecuritiesCosBalance:                float64(rt.SecuritiesCosBalance),
-			InvestmentTrustsSales:               float64(rt.InvestmentTrustsSales),
-			InvestmentTrustsPurchases:           float64(rt.InvestmentTrustsPurchases),
-			InvestmentTrustsTotal:               float64(rt.InvestmentTrustsTotal),
-			InvestmentTrustsBalance:             float64(rt.InvestmentTrustsBalance),
-			BusinessCosSales:                    float64(rt.BusinessCosSales),
-			BusinessCosPurchases:                float64(rt.BusinessCosPurchases),
-			BusinessCosTotal:                    float64(rt.BusinessCosTotal),
-			BusinessCosBalance:                  float64(rt.BusinessCosBalance),
-			OtherCosSales:                       float64(rt.OtherCosSales),
-			OtherCosPurchases:                   float64(rt.OtherCosPurchases),
-			OtherCosTotal:                       float64(rt.OtherCosTotal),
-			OtherCosBalance:                     float64(rt.OtherCosBalance),
-			InsuranceCosSales:                   float64(rt.InsuranceCosSales),
-			InsuranceCosPurchases:               float64(rt.InsuranceCosPurchases),
-			InsuranceCosTotal:                   float64(rt.InsuranceCosTotal),
-			InsuranceCosBalance:                 float64(rt.InsuranceCosBalance),
-			CityBKsRegionalBKsEtcSales:          float64(rt.CityBKsRegionalBKsEtcSales),
-			CityBKsRegionalBKsEtcPurchases:      float64(rt.CityBKsRegionalBKsEtcPurchases),
-			CityBKsRegionalBKsEtcTotal:          float64(rt.CityBKsRegionalBKsEtcTotal),
-			CityBKsRegionalBKsEtcBalance:        float64(rt.CityBKsRegionalBKsEtcBalance),
-			TrustBanksSales:                     float64(rt.TrustBanksSales),
-			TrustBanksPurchases:                 float64(rt.TrustBanksPurchases),
-			TrustBanksTotal:                     float64(rt.TrustBanksTotal),
-			TrustBanksBalance:                   float64(rt.TrustBanksBalance),
-			OtherFinancialInstitutionsSales:     float64(rt.OtherFinancialInstitutionsSales),
-			OtherFinancialInstitutionsPurchases: float64(rt.OtherFinancialInstitutionsPurchases),
-			OtherFinancialInstitutionsTotal:     float64(rt.OtherFinancialInstitutionsTotal),
-			OtherFinancialInstitutionsBalance:   float64(rt.OtherFinancialInstitutionsBalance),
-		}
-	}
-
-	return nil
 }
 
 // TradesSpecParams は投資部門別情報のリクエストパラメータです。
@@ -282,7 +120,7 @@ const (
 // - section指定なし、from/to指定あり: すべてのセクションの指定した期間のデータ
 // - section指定なし、from/to指定なし: すべてのセクションの全期間のデータ
 func (s *TradesSpecService) GetTradesSpec(params TradesSpecParams) (*TradesSpecResponse, error) {
-	path := "/markets/trades_spec"
+	path := "/equities/investor-types"
 
 	query := "?"
 	if params.Section != "" {
@@ -328,7 +166,7 @@ func (s *TradesSpecService) GetTradesSpecByDateRange(from, to string) ([]TradesS
 			return nil, err
 		}
 
-		allTradesSpec = append(allTradesSpec, resp.TradesSpec...)
+		allTradesSpec = append(allTradesSpec, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -357,7 +195,7 @@ func (s *TradesSpecService) GetTradesSpecBySection(section string) ([]TradesSpec
 			return nil, err
 		}
 
-		allTradesSpec = append(allTradesSpec, resp.TradesSpec...)
+		allTradesSpec = append(allTradesSpec, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -385,7 +223,7 @@ func (s *TradesSpecService) GetAllTradesSpec() ([]TradesSpec, error) {
 			return nil, err
 		}
 
-		allTradesSpec = append(allTradesSpec, resp.TradesSpec...)
+		allTradesSpec = append(allTradesSpec, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -401,21 +239,21 @@ func (s *TradesSpecService) GetAllTradesSpec() ([]TradesSpec, error) {
 func (ts *TradesSpec) IsBuyerDominant(investorType string) bool {
 	switch investorType {
 	case "individuals":
-		return ts.IndividualsBalance > 0
+		return ts.IndBal > 0
 	case "foreigners":
-		return ts.ForeignersBalance > 0
+		return ts.FrgnBal > 0
 	case "securities":
-		return ts.SecuritiesCosBalance > 0
+		return ts.SecCoBal > 0
 	case "investment_trusts":
-		return ts.InvestmentTrustsBalance > 0
+		return ts.InvTrBal > 0
 	case "business":
-		return ts.BusinessCosBalance > 0
+		return ts.BusCoBal > 0
 	case "insurance":
-		return ts.InsuranceCosBalance > 0
+		return ts.InsCoBal > 0
 	case "trust_banks":
-		return ts.TrustBanksBalance > 0
+		return ts.TrstBnkBal > 0
 	case "total":
-		return ts.TotalBalance > 0
+		return ts.TotBal > 0
 	default:
 		return false
 	}
@@ -425,21 +263,21 @@ func (ts *TradesSpec) IsBuyerDominant(investorType string) bool {
 func (ts *TradesSpec) GetNetFlow(investorType string) float64 {
 	switch investorType {
 	case "individuals":
-		return ts.IndividualsBalance
+		return ts.IndBal
 	case "foreigners":
-		return ts.ForeignersBalance
+		return ts.FrgnBal
 	case "securities":
-		return ts.SecuritiesCosBalance
+		return ts.SecCoBal
 	case "investment_trusts":
-		return ts.InvestmentTrustsBalance
+		return ts.InvTrBal
 	case "business":
-		return ts.BusinessCosBalance
+		return ts.BusCoBal
 	case "insurance":
-		return ts.InsuranceCosBalance
+		return ts.InsCoBal
 	case "trust_banks":
-		return ts.TrustBanksBalance
+		return ts.TrstBnkBal
 	case "total":
-		return ts.TotalBalance
+		return ts.TotBal
 	default:
 		return 0
 	}

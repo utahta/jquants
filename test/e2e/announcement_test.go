@@ -24,12 +24,12 @@ func TestAnnouncementEndpoint(t *testing.T) {
 			return
 		}
 
-		if resp == nil || len(resp.Announcement) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No announcement data for default date")
 		}
 
 		// 各発表予定を詳細に検証
-		for i, ann := range resp.Announcement {
+		for i, ann := range resp.Data {
 			if i >= 10 {
 				break // 最初の10件のみ詳細検証
 			}
@@ -47,21 +47,21 @@ func TestAnnouncementEndpoint(t *testing.T) {
 			if ann.Code == "" {
 				t.Errorf("Announcement[%d]: Code is empty", i)
 			}
-			if ann.CompanyName == "" {
-				t.Errorf("Announcement[%d]: CompanyName is empty", i)
+			if ann.CoName == "" {
+				t.Errorf("Announcement[%d]: CoName is empty", i)
 			}
 
 			// 決算情報の検証
-			if ann.FiscalYear == "" {
+			if ann.FY == "" {
 				t.Errorf("Announcement[%d]: FiscalYear is empty", i)
 			} else {
 				// 決算期末の形式検証（例：「3月31日」「9月30日」）
-				if !(ann.FiscalYear == "3月31日" || ann.FiscalYear == "9月30日") {
-					t.Logf("Announcement[%d]: Unexpected FiscalYear format = %v", i, ann.FiscalYear)
+				if !(ann.FY == "3月31日" || ann.FY == "9月30日") {
+					t.Logf("Announcement[%d]: Unexpected FiscalYear format = %v", i, ann.FY)
 				}
 			}
 
-			if ann.FiscalQuarter == "" {
+			if ann.FQ == "" {
 				t.Errorf("Announcement[%d]: FiscalQuarter is empty", i)
 			} else {
 				// 決算種別の妥当性チェック
@@ -72,12 +72,12 @@ func TestAnnouncementEndpoint(t *testing.T) {
 					"通期":    true,
 					"本決算":   true,
 				}
-				if !validQuarters[ann.FiscalQuarter] {
-					t.Logf("Announcement[%d]: Unexpected FiscalQuarter = %v", i, ann.FiscalQuarter)
+				if !validQuarters[ann.FQ] {
+					t.Logf("Announcement[%d]: Unexpected FiscalQuarter = %v", i, ann.FQ)
 				}
 			}
 
-			if ann.SectorName == "" {
+			if ann.SectorNm == "" {
 				t.Errorf("Announcement[%d]: SectorName is empty", i)
 			}
 
@@ -105,7 +105,7 @@ func TestAnnouncementEndpoint(t *testing.T) {
 			// 最初の5件の詳細ログ
 			if i < 5 {
 				t.Logf("Announcement[%d]: %s (%s) - %s %s %s",
-					i, ann.CompanyName, ann.Code, ann.FiscalYear, ann.FiscalQuarter, ann.SectorName)
+					i, ann.CoName, ann.Code, ann.FY, ann.FQ, ann.SectorNm)
 				if ann.Date != "" {
 					t.Logf("  Scheduled Date: %s", ann.Date)
 				}
@@ -115,7 +115,7 @@ func TestAnnouncementEndpoint(t *testing.T) {
 			}
 		}
 
-		t.Logf("Total announcements: %d", len(resp.Announcement))
+		t.Logf("Total announcements: %d", len(resp.Data))
 		if resp.PaginationKey != "" {
 			t.Logf("Pagination key present: %s", resp.PaginationKey)
 		}
@@ -136,8 +136,8 @@ func TestAnnouncementEndpoint(t *testing.T) {
 			return
 		}
 
-		if resp != nil && len(resp.Announcement) > 0 {
-			t.Logf("Found %d announcements (翌営業日分)", len(resp.Announcement))
+		if resp != nil && len(resp.Data) > 0 {
+			t.Logf("Found %d announcements (翌営業日分)", len(resp.Data))
 		} else {
 			t.Logf("No announcements for default date")
 		}
@@ -155,11 +155,11 @@ func TestAnnouncementEndpoint(t *testing.T) {
 			t.Skip("No announcement data available")
 		}
 
-		if resp == nil || len(resp.Announcement) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No announcement data available")
 		}
 
-		firstPageCount := len(resp.Announcement)
+		firstPageCount := len(resp.Data)
 		t.Logf("First page: %d announcements", firstPageCount)
 
 		if resp.PaginationKey != "" {
@@ -170,12 +170,12 @@ func TestAnnouncementEndpoint(t *testing.T) {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
 
-			if resp2 != nil && len(resp2.Announcement) > 0 {
-				t.Logf("Second page: %d announcements", len(resp2.Announcement))
+			if resp2 != nil && len(resp2.Data) > 0 {
+				t.Logf("Second page: %d announcements", len(resp2.Data))
 
 				// 異なるデータであることを確認
-				if resp2.Announcement[0].Code == resp.Announcement[0].Code &&
-					resp2.Announcement[0].CompanyName == resp.Announcement[0].CompanyName {
+				if resp2.Data[0].Code == resp.Data[0].Code &&
+					resp2.Data[0].CoName == resp.Data[0].CoName {
 					t.Error("Second page contains duplicate data")
 				}
 			}
@@ -193,14 +193,14 @@ func TestAnnouncementEndpoint(t *testing.T) {
 			t.Skip("No announcement data available")
 		}
 
-		if resp == nil || len(resp.Announcement) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No announcement data available")
 		}
 
 		// 業種別の集計
 		sectorCount := make(map[string]int)
-		for _, ann := range resp.Announcement {
-			sectorCount[ann.SectorName]++
+		for _, ann := range resp.Data {
+			sectorCount[ann.SectorNm]++
 		}
 
 		t.Logf("Sector analysis:")
@@ -220,14 +220,14 @@ func TestAnnouncementEndpoint(t *testing.T) {
 			t.Skip("No announcement data available")
 		}
 
-		if resp == nil || len(resp.Announcement) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No announcement data available")
 		}
 
 		// 決算四半期別の集計
 		quarterCount := make(map[string]int)
-		for _, ann := range resp.Announcement {
-			quarterCount[ann.FiscalQuarter]++
+		for _, ann := range resp.Data {
+			quarterCount[ann.FQ]++
 		}
 
 		t.Logf("Quarter analysis:")

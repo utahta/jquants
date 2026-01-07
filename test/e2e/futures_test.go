@@ -49,39 +49,39 @@ func TestFuturesEndpoint(t *testing.T) {
 			}
 
 			// 限月の検証
-			if future.ContractMonth == "" {
+			if future.CM == "" {
 				t.Errorf("Future[%d]: ContractMonth is empty", i)
 			} else {
 				// 限月フォーマットの検証（YYYY-MM形式）
-				if len(future.ContractMonth) != 7 || future.ContractMonth[4] != '-' {
-					t.Errorf("Future[%d]: ContractMonth format invalid = %v, want YYYY-MM", i, future.ContractMonth)
+				if len(future.CM) != 7 || future.CM[4] != '-' {
+					t.Errorf("Future[%d]: ContractMonth format invalid = %v, want YYYY-MM", i, future.CM)
 				}
 			}
 
 			// 先物商品区分の検証
-			if future.DerivativesProductCategory == "" {
+			if future.ProdCat == "" {
 				t.Errorf("Future[%d]: DerivativesProductCategory is empty", i)
 			}
 
 			// 緊急取引証拠金発動区分の検証
-			if future.EmergencyMarginTriggerDivision != "001" && future.EmergencyMarginTriggerDivision != "002" {
-				t.Errorf("Future[%d]: EmergencyMarginTriggerDivision = %v, want 001 or 002", i, future.EmergencyMarginTriggerDivision)
+			if future.EmMrgnTrgDiv != "001" && future.EmMrgnTrgDiv != "002" {
+				t.Errorf("Future[%d]: EmergencyMarginTriggerDivision = %v, want 001 or 002", i, future.EmMrgnTrgDiv)
 			}
 
 			// 日通し四本値の論理的整合性チェック
-			if future.WholeDayHigh < future.WholeDayLow {
-				t.Errorf("Future[%d]: WholeDayHigh (%v) < WholeDayLow (%v)", i, future.WholeDayHigh, future.WholeDayLow)
+			if future.H < future.L {
+				t.Errorf("Future[%d]: WholeDayHigh (%v) < WholeDayLow (%v)", i, future.H, future.L)
 			}
-			if future.WholeDayOpen > 0 && future.WholeDayHigh > 0 && future.WholeDayOpen > future.WholeDayHigh {
-				t.Errorf("Future[%d]: WholeDayOpen (%v) > WholeDayHigh (%v)", i, future.WholeDayOpen, future.WholeDayHigh)
+			if future.O > 0 && future.H > 0 && future.O > future.H {
+				t.Errorf("Future[%d]: WholeDayOpen (%v) > WholeDayHigh (%v)", i, future.O, future.H)
 			}
-			if future.WholeDayOpen > 0 && future.WholeDayLow > 0 && future.WholeDayOpen < future.WholeDayLow {
-				t.Errorf("Future[%d]: WholeDayOpen (%v) < WholeDayLow (%v)", i, future.WholeDayOpen, future.WholeDayLow)
+			if future.O > 0 && future.L > 0 && future.O < future.L {
+				t.Errorf("Future[%d]: WholeDayOpen (%v) < WholeDayLow (%v)", i, future.O, future.L)
 			}
 
 			// 日中四本値の論理的整合性チェック
-			if future.DaySessionHigh < future.DaySessionLow {
-				t.Errorf("Future[%d]: DaySessionHigh (%v) < DaySessionLow (%v)", i, future.DaySessionHigh, future.DaySessionLow)
+			if future.AH < future.AL {
+				t.Errorf("Future[%d]: DaySessionHigh (%v) < DaySessionLow (%v)", i, future.AH, future.AL)
 			}
 
 			// ナイトセッション四本値のチェック（データがある場合）
@@ -94,14 +94,14 @@ func TestFuturesEndpoint(t *testing.T) {
 			}
 
 			// 出来高・建玉の妥当性チェック
-			if future.Volume < 0 {
-				t.Errorf("Future[%d]: Volume = %v, want >= 0", i, future.Volume)
+			if future.Vo < 0 {
+				t.Errorf("Future[%d]: Volume = %v, want >= 0", i, future.Vo)
 			}
-			if future.OpenInterest < 0 {
-				t.Errorf("Future[%d]: OpenInterest = %v, want >= 0", i, future.OpenInterest)
+			if future.OI < 0 {
+				t.Errorf("Future[%d]: OpenInterest = %v, want >= 0", i, future.OI)
 			}
-			if future.TurnoverValue < 0 {
-				t.Errorf("Future[%d]: TurnoverValue = %v, want >= 0", i, future.TurnoverValue)
+			if future.Va < 0 {
+				t.Errorf("Future[%d]: TurnoverValue = %v, want >= 0", i, future.Va)
 			}
 
 			// 先物商品区分の検証（有効な値かチェック）
@@ -120,20 +120,20 @@ func TestFuturesEndpoint(t *testing.T) {
 				"NK225MCF": true, // 日経225マイクロ先物
 				"TOA3MF":   true, // TONA3ヶ月金利先物
 			}
-			if !validCategories[future.DerivativesProductCategory] {
-				t.Logf("Future[%d]: Unknown DerivativesProductCategory: %s", i, future.DerivativesProductCategory)
+			if !validCategories[future.ProdCat] {
+				t.Logf("Future[%d]: Unknown DerivativesProductCategory: %s", i, future.ProdCat)
 			}
 
 			// 最初の5件の詳細ログ
 			if i < 5 {
 				t.Logf("Future[%d]: Date=%s, Code=%s", i, future.Date, future.Code)
-				t.Logf("  Category: %s, Month: %s", future.DerivativesProductCategory, future.ContractMonth)
+				t.Logf("  Category: %s, Month: %s", future.ProdCat, future.CM)
 				t.Logf("  WholeDay OHLC: Open=%.1f, High=%.1f, Low=%.1f, Close=%.1f",
-					future.WholeDayOpen, future.WholeDayHigh, future.WholeDayLow, future.WholeDayClose)
+					future.O, future.H, future.L, future.C)
 				t.Logf("  DaySession OHLC: Open=%.1f, High=%.1f, Low=%.1f, Close=%.1f",
-					future.DaySessionOpen, future.DaySessionHigh, future.DaySessionLow, future.DaySessionClose)
+					future.AO, future.AH, future.AL, future.AC)
 				t.Logf("  Volume: %.0f, OpenInterest: %.0f, Turnover: %.0f",
-					future.Volume, future.OpenInterest, future.TurnoverValue)
+					future.Vo, future.OI, future.Va)
 
 				// ナイトセッションデータの表示
 				if future.HasNightSession() {
@@ -163,34 +163,34 @@ func TestFuturesEndpoint(t *testing.T) {
 				}
 
 				// 2016年7月19日以降の追加情報
-				if future.SettlementPrice != nil {
-					t.Logf("  Settlement: %.1f", *future.SettlementPrice)
+				if future.Settle != nil {
+					t.Logf("  Settlement: %.1f", *future.Settle)
 				}
-				if future.LastTradingDay != nil && *future.LastTradingDay != "" {
+				if future.LTD != nil && *future.LTD != "" {
 					// LastTradingDayのフォーマット検証
-					if len(*future.LastTradingDay) != 10 || (*future.LastTradingDay)[4] != '-' || (*future.LastTradingDay)[7] != '-' {
-						t.Errorf("Future[%d]: LastTradingDay format invalid = %v, want YYYY-MM-DD", i, *future.LastTradingDay)
+					if len(*future.LTD) != 10 || (*future.LTD)[4] != '-' || (*future.LTD)[7] != '-' {
+						t.Errorf("Future[%d]: LastTradingDay format invalid = %v, want YYYY-MM-DD", i, *future.LTD)
 					}
-					t.Logf("  Last Trading Day: %s", *future.LastTradingDay)
+					t.Logf("  Last Trading Day: %s", *future.LTD)
 				}
-				if future.SpecialQuotationDay != nil && *future.SpecialQuotationDay != "" {
+				if future.SQD != nil && *future.SQD != "" {
 					// SpecialQuotationDayのフォーマット検証
-					if len(*future.SpecialQuotationDay) != 10 || (*future.SpecialQuotationDay)[4] != '-' || (*future.SpecialQuotationDay)[7] != '-' {
-						t.Errorf("Future[%d]: SpecialQuotationDay format invalid = %v, want YYYY-MM-DD", i, *future.SpecialQuotationDay)
+					if len(*future.SQD) != 10 || (*future.SQD)[4] != '-' || (*future.SQD)[7] != '-' {
+						t.Errorf("Future[%d]: SpecialQuotationDay format invalid = %v, want YYYY-MM-DD", i, *future.SQD)
 					}
-					t.Logf("  SQ Day: %s", *future.SpecialQuotationDay)
+					t.Logf("  SQ Day: %s", *future.SQD)
 				}
-				if future.VolumeOnlyAuction != nil {
+				if future.VoOA != nil {
 					// Volume(OnlyAuction)の妥当性チェック
-					if *future.VolumeOnlyAuction < 0 {
-						t.Errorf("Future[%d]: VolumeOnlyAuction = %v, want >= 0", i, *future.VolumeOnlyAuction)
+					if *future.VoOA < 0 {
+						t.Errorf("Future[%d]: VolumeOnlyAuction = %v, want >= 0", i, *future.VoOA)
 					}
-					t.Logf("  Volume (Only Auction): %.0f", *future.VolumeOnlyAuction)
+					t.Logf("  Volume (Only Auction): %.0f", *future.VoOA)
 				}
-				if future.CentralContractMonthFlag != nil {
+				if future.CCMFlag != nil {
 					// 中心限月フラグの検証
-					if *future.CentralContractMonthFlag != "0" && *future.CentralContractMonthFlag != "1" {
-						t.Errorf("Future[%d]: CentralContractMonthFlag = %v, want 0 or 1", i, *future.CentralContractMonthFlag)
+					if *future.CCMFlag != "0" && *future.CCMFlag != "1" {
+						t.Errorf("Future[%d]: CentralContractMonthFlag = %v, want 0 or 1", i, *future.CCMFlag)
 					}
 				}
 				if future.IsCentralContractMonth() {
@@ -223,8 +223,8 @@ func TestFuturesEndpoint(t *testing.T) {
 
 		// 全て日経225先物か確認
 		for i, future := range futures {
-			if future.DerivativesProductCategory != "NK225F" {
-				t.Errorf("Future[%d]: Expected NK225F but got %s", i, future.DerivativesProductCategory)
+			if future.ProdCat != "NK225F" {
+				t.Errorf("Future[%d]: Expected NK225F but got %s", i, future.ProdCat)
 			}
 		}
 
@@ -251,7 +251,7 @@ func TestFuturesEndpoint(t *testing.T) {
 		for i, future := range futures {
 			if !future.IsCentralContractMonth() {
 				t.Errorf("Future[%d]: Expected central contract month but got CentralContractMonthFlag = %v",
-					i, future.CentralContractMonthFlag)
+					i, future.CCMFlag)
 			}
 		}
 
@@ -283,15 +283,15 @@ func TestFuturesEndpoint(t *testing.T) {
 		})
 
 		for _, future := range futures {
-			data := monthlyData[future.ContractMonth]
+			data := monthlyData[future.CM]
 			if data.categories == nil {
 				data.categories = make(map[string]int)
 			}
 			data.count++
-			data.totalVolume += future.Volume
-			data.totalOI += future.OpenInterest
-			data.categories[future.DerivativesProductCategory]++
-			monthlyData[future.ContractMonth] = data
+			data.totalVolume += future.Vo
+			data.totalOI += future.OI
+			data.categories[future.ProdCat]++
+			monthlyData[future.CM] = data
 		}
 
 		t.Logf("Contract month analysis:")
@@ -330,12 +330,12 @@ func TestFuturesEndpoint(t *testing.T) {
 		})
 
 		for _, future := range futures {
-			data := categoryData[future.DerivativesProductCategory]
+			data := categoryData[future.ProdCat]
 			data.count++
-			data.totalVolume += future.Volume
-			data.totalOI += future.OpenInterest
-			data.contracts = append(data.contracts, future.ContractMonth)
-			categoryData[future.DerivativesProductCategory] = data
+			data.totalVolume += future.Vo
+			data.totalOI += future.OI
+			data.contracts = append(data.contracts, future.CM)
+			categoryData[future.ProdCat] = data
 		}
 
 		t.Logf("Category analysis:")
@@ -367,11 +367,11 @@ func TestFuturesEndpoint(t *testing.T) {
 		validPriceCount := 0
 
 		for _, future := range futures {
-			totalVolume += future.Volume
-			totalTurnover += future.TurnoverValue
+			totalVolume += future.Vo
+			totalTurnover += future.Va
 
 			// 日通しレンジの計算
-			if future.WholeDayHigh > 0 && future.WholeDayLow > 0 {
+			if future.H > 0 && future.L > 0 {
 				rangeSum += future.GetWholeDayRange()
 				validPriceCount++
 			}
@@ -453,14 +453,14 @@ func TestFuturesEndpoint(t *testing.T) {
 			t.Skip("No futures data available for emergency margin analysis")
 		}
 
-		if resp == nil || len(resp.Futures) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No futures data available")
 		}
 
 		normalCount := 0
 		emergencyCount := 0
 
-		for _, future := range resp.Futures {
+		for _, future := range resp.Data {
 			if future.IsEmergencyMarginTriggered() {
 				emergencyCount++
 			} else {

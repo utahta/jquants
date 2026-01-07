@@ -10,7 +10,7 @@ import (
 	"github.com/utahta/jquants"
 )
 
-// TestTradesSpecEndpoint は/markets/trades_specエンドポイントの完全なテスト
+// TestTradesSpecEndpoint は/equities/investor-typesエンドポイントの完全なテスト
 func TestTradesSpecEndpoint(t *testing.T) {
 	t.Run("GetTradesSpec_ByDateRange", func(t *testing.T) {
 		// 最近の営業日の投資部門別売買状況を取得
@@ -34,25 +34,25 @@ func TestTradesSpecEndpoint(t *testing.T) {
 			if trade.Section == "" {
 				t.Errorf("Trade[%d]: Section is empty", i)
 			}
-			if trade.StartDate == "" {
-				t.Errorf("Trade[%d]: StartDate is empty", i)
+			if trade.StDate == "" {
+				t.Errorf("Trade[%d]: StDate is empty", i)
 			}
-			if trade.EndDate == "" {
-				t.Errorf("Trade[%d]: EndDate is empty", i)
+			if trade.EnDate == "" {
+				t.Errorf("Trade[%d]: EnDate is empty", i)
 			}
 
 			// 日付範囲の検証
-			if trade.StartDate > trade.EndDate {
-				t.Errorf("Trade[%d]: StartDate (%s) > EndDate (%s)",
-					i, trade.StartDate, trade.EndDate)
+			if trade.StDate > trade.EnDate {
+				t.Errorf("Trade[%d]: StDate (%s) > EnDate (%s)",
+					i, trade.StDate, trade.EnDate)
 			}
 
 			// 売買金額の検証（負の値は許容される）
-			if trade.TotalSales < 0 {
-				t.Logf("Trade[%d]: TotalSales is negative: %.0f", i, trade.TotalSales)
+			if trade.TotSell < 0 {
+				t.Logf("Trade[%d]: TotSell is negative: %.0f", i, trade.TotSell)
 			}
-			if trade.TotalPurchases < 0 {
-				t.Logf("Trade[%d]: TotalPurchases is negative: %.0f", i, trade.TotalPurchases)
+			if trade.TotBuy < 0 {
+				t.Logf("Trade[%d]: TotBuy is negative: %.0f", i, trade.TotBuy)
 			}
 
 			// セクション（部門）の妥当性チェック
@@ -69,10 +69,10 @@ func TestTradesSpecEndpoint(t *testing.T) {
 			// 最初の5件の詳細ログ
 			if i < 5 {
 				t.Logf("Trade[%d]: Section=%s, Period=%s to %s",
-					i, trade.Section, trade.StartDate, trade.EndDate)
+					i, trade.Section, trade.StDate, trade.EnDate)
 				t.Logf("  Sales: %.0f, Purchases: %.0f, Net: %.0f",
-					trade.TotalSales, trade.TotalPurchases,
-					trade.TotalSales-trade.TotalPurchases)
+					trade.TotSell, trade.TotBuy,
+					trade.TotSell-trade.TotBuy)
 			}
 		}
 
@@ -108,11 +108,11 @@ func TestTradesSpecEndpoint(t *testing.T) {
 				curr := trades[i]
 				prev := trades[i-1]
 
-				salesChange := curr.TotalSales - prev.TotalSales
-				purchasesChange := curr.TotalPurchases - prev.TotalPurchases
+				salesChange := curr.TotSell - prev.TotSell
+				purchasesChange := curr.TotBuy - prev.TotBuy
 
 				t.Logf("Period %s: Sales change: %.0f, Purchases change: %.0f",
-					curr.EndDate, salesChange, purchasesChange)
+					curr.EnDate, salesChange, purchasesChange)
 			}
 		}
 	})
@@ -170,8 +170,8 @@ func TestTradesSpecEndpoint(t *testing.T) {
 				if len(trades) > 0 {
 					latest := trades[0]
 					t.Logf("  %s: Sales=%.0f, Purchases=%.0f, Net=%.0f",
-						market, latest.TotalSales, latest.TotalPurchases,
-						latest.TotalSales-latest.TotalPurchases)
+						market, latest.TotSell, latest.TotBuy,
+						latest.TotSell-latest.TotBuy)
 				}
 			}
 		}
@@ -200,9 +200,9 @@ func TestTradesSpecEndpoint(t *testing.T) {
 
 		// 期間内のデータか確認
 		for _, trade := range trades {
-			if trade.StartDate < from || trade.EndDate > to {
+			if trade.StDate < from || trade.EnDate > to {
 				t.Logf("Trade period (%s to %s) extends beyond requested range (%s to %s)",
-					trade.StartDate, trade.EndDate, from, to)
+					trade.StDate, trade.EnDate, from, to)
 			}
 		}
 
@@ -216,8 +216,8 @@ func TestTradesSpecEndpoint(t *testing.T) {
 		for _, trade := range trades {
 			summary := sectionSummary[trade.Section]
 			summary.count++
-			summary.totalSales += trade.TotalSales
-			summary.totalPurchases += trade.TotalPurchases
+			summary.totalSales += trade.TotSell
+			summary.totalPurchases += trade.TotBuy
 			sectionSummary[trade.Section] = summary
 		}
 
@@ -247,16 +247,16 @@ func TestTradesSpecEndpoint(t *testing.T) {
 		t.Logf("TSEPrime trend analysis (last 3 periods):")
 		for i := 0; i < 3 && i < len(trades); i++ {
 			trade := trades[i]
-			net := trade.TotalSales - trade.TotalPurchases
+			net := trade.TotSell - trade.TotBuy
 			netRatio := 0.0
-			if trade.TotalPurchases != 0 {
-				netRatio = net / trade.TotalPurchases * 100
+			if trade.TotBuy != 0 {
+				netRatio = net / trade.TotBuy * 100
 			}
 
 			t.Logf("Period %d (%s to %s):",
-				i+1, trade.StartDate, trade.EndDate)
-			t.Logf("  Sales: %.0f billion", trade.TotalSales/1000000)
-			t.Logf("  Purchases: %.0f billion", trade.TotalPurchases/1000000)
+				i+1, trade.StDate, trade.EnDate)
+			t.Logf("  Sales: %.0f billion", trade.TotSell/1000000)
+			t.Logf("  Purchases: %.0f billion", trade.TotBuy/1000000)
 			t.Logf("  Net: %.0f billion (%.2f%%)", net/1000000, netRatio)
 		}
 
@@ -265,8 +265,8 @@ func TestTradesSpecEndpoint(t *testing.T) {
 			recent := trades[0]
 			previous := trades[1]
 
-			salesChange := recent.TotalSales - previous.TotalSales
-			purchasesChange := recent.TotalPurchases - previous.TotalPurchases
+			salesChange := recent.TotSell - previous.TotSell
+			purchasesChange := recent.TotBuy - previous.TotBuy
 
 			t.Logf("Recent change:")
 			t.Logf("  Sales change: %.0f billion", salesChange/1000000)

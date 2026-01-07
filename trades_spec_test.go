@@ -21,7 +21,7 @@ func TestTradesSpecService_GetTradesSpec(t *testing.T) {
 				To:            "20230403",
 				PaginationKey: "key123",
 			},
-			wantPath: "/markets/trades_spec?section=TSEPrime&from=20230324&to=20230403&pagination_key=key123",
+			wantPath: "/equities/investor-types?section=TSEPrime&from=20230324&to=20230403&pagination_key=key123",
 		},
 		{
 			name: "with section and date range",
@@ -30,14 +30,14 @@ func TestTradesSpecService_GetTradesSpec(t *testing.T) {
 				From:    "20230324",
 				To:      "20230403",
 			},
-			wantPath: "/markets/trades_spec?section=TSEPrime&from=20230324&to=20230403",
+			wantPath: "/equities/investor-types?section=TSEPrime&from=20230324&to=20230403",
 		},
 		{
 			name: "with section only",
 			params: TradesSpecParams{
 				Section: "TSEStandard",
 			},
-			wantPath: "/markets/trades_spec?section=TSEStandard",
+			wantPath: "/equities/investor-types?section=TSEStandard",
 		},
 		{
 			name: "with date range only",
@@ -45,12 +45,12 @@ func TestTradesSpecService_GetTradesSpec(t *testing.T) {
 				From: "20230324",
 				To:   "20230403",
 			},
-			wantPath: "/markets/trades_spec?from=20230324&to=20230403",
+			wantPath: "/equities/investor-types?from=20230324&to=20230403",
 		},
 		{
 			name:     "with no parameters",
 			params:   TradesSpecParams{},
-			wantPath: "/markets/trades_spec",
+			wantPath: "/equities/investor-types",
 		},
 	}
 
@@ -62,32 +62,32 @@ func TestTradesSpecService_GetTradesSpec(t *testing.T) {
 
 			// Mock response
 			mockResponse := TradesSpecResponse{
-				TradesSpec: []TradesSpec{
+				Data: []TradesSpec{
 					{
-						PublishedDate:        "2017-01-13",
-						StartDate:            "2017-01-04",
-						EndDate:              "2017-01-06",
-						Section:              "TSE1st",
-						ProprietarySales:     1311271004,
-						ProprietaryPurchases: 1453326508,
-						ProprietaryTotal:     2764597512,
-						ProprietaryBalance:   142055504,
-						BrokerageSales:       7165529005,
-						BrokeragePurchases:   7030019854,
-						BrokerageTotal:       14195548859,
-						BrokerageBalance:     -135509151,
-						TotalSales:           8476800009,
-						TotalPurchases:       8483346362,
-						TotalTotal:           16960146371,
-						TotalBalance:         6546353,
-						IndividualsSales:     1401711615,
-						IndividualsPurchases: 1161801155,
-						IndividualsTotal:     2563512770,
-						IndividualsBalance:   -239910460,
-						ForeignersSales:      5094891735,
-						ForeignersPurchases:  5317151774,
-						ForeignersTotal:      10412043509,
-						ForeignersBalance:    222260039,
+						PubDate:  "2017-01-13",
+						StDate:   "2017-01-04",
+						EnDate:   "2017-01-06",
+						Section:  "TSE1st",
+						PropSell: 1311271004,
+						PropBuy:  1453326508,
+						PropTot:  2764597512,
+						PropBal:  142055504,
+						BrkSell:  7165529005,
+						BrkBuy:   7030019854,
+						BrkTot:   14195548859,
+						BrkBal:   -135509151,
+						TotSell:  8476800009,
+						TotBuy:   8483346362,
+						TotTot:   16960146371,
+						TotBal:   6546353,
+						IndSell:  1401711615,
+						IndBuy:   1161801155,
+						IndTot:   2563512770,
+						IndBal:   -239910460,
+						FrgnSell: 5094891735,
+						FrgnBuy:  5317151774,
+						FrgnTot:  10412043509,
+						FrgnBal:  222260039,
 					},
 				},
 				PaginationKey: "",
@@ -105,7 +105,7 @@ func TestTradesSpecService_GetTradesSpec(t *testing.T) {
 				t.Fatal("GetTradesSpec() returned nil response")
 				return
 			}
-			if len(resp.TradesSpec) == 0 {
+			if len(resp.Data) == 0 {
 				t.Error("GetTradesSpec() returned empty data")
 			}
 			if mockClient.LastPath != tt.wantPath {
@@ -122,24 +122,24 @@ func TestTradesSpecService_GetTradesSpecByDateRange(t *testing.T) {
 
 	// Mock response - 最初のページ
 	mockResponse1 := TradesSpecResponse{
-		TradesSpec: []TradesSpec{
+		Data: []TradesSpec{
 			{
-				PublishedDate:      "2017-01-13",
-				StartDate:          "2017-01-04",
-				EndDate:            "2017-01-06",
-				Section:            "TSEPrime",
-				TotalBalance:       1000000,
-				ForeignersBalance:  500000,
-				IndividualsBalance: -200000,
+				PubDate: "2017-01-13",
+				StDate:  "2017-01-04",
+				EnDate:  "2017-01-06",
+				Section: "TSEPrime",
+				TotBal:  1000000,
+				FrgnBal: 500000,
+				IndBal:  -200000,
 			},
 			{
-				PublishedDate:      "2017-01-20",
-				StartDate:          "2017-01-11",
-				EndDate:            "2017-01-13",
-				Section:            "TSEPrime",
-				TotalBalance:       800000,
-				ForeignersBalance:  300000,
-				IndividualsBalance: -100000,
+				PubDate: "2017-01-20",
+				StDate:  "2017-01-11",
+				EnDate:  "2017-01-13",
+				Section: "TSEPrime",
+				TotBal:  800000,
+				FrgnBal: 300000,
+				IndBal:  -100000,
 			},
 		},
 		PaginationKey: "next_page_key",
@@ -147,22 +147,22 @@ func TestTradesSpecService_GetTradesSpecByDateRange(t *testing.T) {
 
 	// Mock response - 2ページ目
 	mockResponse2 := TradesSpecResponse{
-		TradesSpec: []TradesSpec{
+		Data: []TradesSpec{
 			{
-				PublishedDate:      "2017-01-27",
-				StartDate:          "2017-01-18",
-				EndDate:            "2017-01-20",
-				Section:            "TSEStandard",
-				TotalBalance:       600000,
-				ForeignersBalance:  200000,
-				IndividualsBalance: -50000,
+				PubDate: "2017-01-27",
+				StDate:  "2017-01-18",
+				EnDate:  "2017-01-20",
+				Section: "TSEStandard",
+				TotBal:  600000,
+				FrgnBal: 200000,
+				IndBal:  -50000,
 			},
 		},
 		PaginationKey: "", // 最後のページ
 	}
 
-	mockClient.SetResponse("GET", "/markets/trades_spec?from=20170104&to=20170120", mockResponse1)
-	mockClient.SetResponse("GET", "/markets/trades_spec?from=20170104&to=20170120&pagination_key=next_page_key", mockResponse2)
+	mockClient.SetResponse("GET", "/equities/investor-types?from=20170104&to=20170120", mockResponse1)
+	mockClient.SetResponse("GET", "/equities/investor-types?from=20170104&to=20170120&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
 	tradesSpec, err := service.GetTradesSpecByDateRange("20170104", "20170120")
@@ -183,23 +183,23 @@ func TestTradesSpecService_GetTradesSpecBySection(t *testing.T) {
 
 	// Mock response
 	mockResponse := TradesSpecResponse{
-		TradesSpec: []TradesSpec{
+		Data: []TradesSpec{
 			{
-				Section:            "TSEPrime",
-				TotalBalance:       1000000,
-				ForeignersBalance:  500000,
-				IndividualsBalance: -200000,
+				Section: "TSEPrime",
+				TotBal:  1000000,
+				FrgnBal: 500000,
+				IndBal:  -200000,
 			},
 			{
-				Section:            "TSEPrime",
-				TotalBalance:       800000,
-				ForeignersBalance:  300000,
-				IndividualsBalance: -100000,
+				Section: "TSEPrime",
+				TotBal:  800000,
+				FrgnBal: 300000,
+				IndBal:  -100000,
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/markets/trades_spec?section=TSEPrime", mockResponse)
+	mockClient.SetResponse("GET", "/equities/investor-types?section=TSEPrime", mockResponse)
 
 	// Execute
 	tradesSpec, err := service.GetTradesSpecBySection("TSEPrime")
@@ -228,7 +228,7 @@ func TestTradesSpec_IsBuyerDominant(t *testing.T) {
 		{
 			name: "individuals buyer dominant",
 			tradesSpec: TradesSpec{
-				IndividualsBalance: 100000,
+				IndBal: 100000,
 			},
 			investorType: "individuals",
 			want:         true,
@@ -236,7 +236,7 @@ func TestTradesSpec_IsBuyerDominant(t *testing.T) {
 		{
 			name: "individuals seller dominant",
 			tradesSpec: TradesSpec{
-				IndividualsBalance: -100000,
+				IndBal: -100000,
 			},
 			investorType: "individuals",
 			want:         false,
@@ -244,7 +244,7 @@ func TestTradesSpec_IsBuyerDominant(t *testing.T) {
 		{
 			name: "foreigners buyer dominant",
 			tradesSpec: TradesSpec{
-				ForeignersBalance: 500000,
+				FrgnBal: 500000,
 			},
 			investorType: "foreigners",
 			want:         true,
@@ -252,7 +252,7 @@ func TestTradesSpec_IsBuyerDominant(t *testing.T) {
 		{
 			name: "foreigners seller dominant",
 			tradesSpec: TradesSpec{
-				ForeignersBalance: -300000,
+				FrgnBal: -300000,
 			},
 			investorType: "foreigners",
 			want:         false,
@@ -260,7 +260,7 @@ func TestTradesSpec_IsBuyerDominant(t *testing.T) {
 		{
 			name: "total buyer dominant",
 			tradesSpec: TradesSpec{
-				TotalBalance: 1000000,
+				TotBal: 1000000,
 			},
 			investorType: "total",
 			want:         true,
@@ -268,7 +268,7 @@ func TestTradesSpec_IsBuyerDominant(t *testing.T) {
 		{
 			name: "unknown investor type",
 			tradesSpec: TradesSpec{
-				TotalBalance: 1000000,
+				TotBal: 1000000,
 			},
 			investorType: "unknown",
 			want:         false,
@@ -287,14 +287,14 @@ func TestTradesSpec_IsBuyerDominant(t *testing.T) {
 
 func TestTradesSpec_GetNetFlow(t *testing.T) {
 	tradesSpec := TradesSpec{
-		IndividualsBalance:      -100000,
-		ForeignersBalance:       500000,
-		SecuritiesCosBalance:    50000,
-		InvestmentTrustsBalance: 25000,
-		BusinessCosBalance:      -20000,
-		InsuranceCosBalance:     75000,
-		TrustBanksBalance:       30000,
-		TotalBalance:            1000000,
+		IndBal:     -100000,
+		FrgnBal:    500000,
+		SecCoBal:   50000,
+		InvTrBal:   25000,
+		BusCoBal:   -20000,
+		InsCoBal:   75000,
+		TrstBnkBal: 30000,
+		TotBal:     1000000,
 	}
 
 	tests := []struct {
@@ -328,7 +328,7 @@ func TestTradesSpecService_GetTradesSpec_Error(t *testing.T) {
 	service := NewTradesSpecService(mockClient)
 
 	// Set error response
-	mockClient.SetError("GET", "/markets/trades_spec", fmt.Errorf("unauthorized"))
+	mockClient.SetError("GET", "/equities/investor-types", fmt.Errorf("unauthorized"))
 
 	// Execute
 	_, err := service.GetTradesSpec(TradesSpecParams{})
