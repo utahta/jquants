@@ -11,7 +11,7 @@ import (
 	"github.com/utahta/jquants"
 )
 
-// TestDailyQuotesEndpoint は/prices/daily_quotesエンドポイントの完全なテスト
+// TestDailyQuotesEndpoint は/equities/bars/dailyエンドポイントの完全なテスト
 func TestDailyQuotesEndpoint(t *testing.T) {
 	t.Run("GetDailyQuotes_ByCodeAndDateRange", func(t *testing.T) {
 		// 過去10日間のトヨタ自動車の株価を取得
@@ -34,12 +34,12 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 			t.Fatalf("Failed to get daily quotes: %v", err)
 		}
 
-		if resp == nil || len(resp.DailyQuotes) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No quotes data available for the specified date range")
 		}
 
 		// 各日次データを詳細に検証
-		for i, quote := range resp.DailyQuotes {
+		for i, quote := range resp.Data {
 			// 基本情報の検証
 			if quote.Code != "72030" && quote.Code != "7203" {
 				t.Errorf("Quote[%d]: Code = %v, want 72030 or 7203", i, quote.Code)
@@ -54,108 +54,108 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 			}
 
 			// 四本値の検証
-			if quote.Open == nil {
-				t.Errorf("Quote[%d]: Open is nil", i)
-			} else if *quote.Open <= 0 {
-				t.Errorf("Quote[%d]: Open = %v, want > 0", i, *quote.Open)
+			if quote.O == nil {
+				t.Errorf("Quote[%d]: O (Open) is nil", i)
+			} else if *quote.O <= 0 {
+				t.Errorf("Quote[%d]: O = %v, want > 0", i, *quote.O)
 			}
 
-			if quote.High == nil {
-				t.Errorf("Quote[%d]: High is nil", i)
-			} else if *quote.High <= 0 {
-				t.Errorf("Quote[%d]: High = %v, want > 0", i, *quote.High)
+			if quote.H == nil {
+				t.Errorf("Quote[%d]: H (High) is nil", i)
+			} else if *quote.H <= 0 {
+				t.Errorf("Quote[%d]: H = %v, want > 0", i, *quote.H)
 			}
 
-			if quote.Low == nil {
-				t.Errorf("Quote[%d]: Low is nil", i)
-			} else if *quote.Low <= 0 {
-				t.Errorf("Quote[%d]: Low = %v, want > 0", i, *quote.Low)
+			if quote.L == nil {
+				t.Errorf("Quote[%d]: L (Low) is nil", i)
+			} else if *quote.L <= 0 {
+				t.Errorf("Quote[%d]: L = %v, want > 0", i, *quote.L)
 			}
 
-			if quote.Close == nil {
-				t.Errorf("Quote[%d]: Close is nil", i)
-			} else if *quote.Close <= 0 {
-				t.Errorf("Quote[%d]: Close = %v, want > 0", i, *quote.Close)
+			if quote.C == nil {
+				t.Errorf("Quote[%d]: C (Close) is nil", i)
+			} else if *quote.C <= 0 {
+				t.Errorf("Quote[%d]: C = %v, want > 0", i, *quote.C)
 			}
 
 			// 四本値の論理的整合性チェック
-			if quote.High != nil && quote.Low != nil && *quote.High < *quote.Low {
-				t.Errorf("Quote[%d]: High (%v) < Low (%v)", i, *quote.High, *quote.Low)
+			if quote.H != nil && quote.L != nil && *quote.H < *quote.L {
+				t.Errorf("Quote[%d]: H (%v) < L (%v)", i, *quote.H, *quote.L)
 			}
-			if quote.Open != nil && quote.High != nil && *quote.Open > *quote.High {
-				t.Errorf("Quote[%d]: Open (%v) > High (%v)", i, *quote.Open, *quote.High)
+			if quote.O != nil && quote.H != nil && *quote.O > *quote.H {
+				t.Errorf("Quote[%d]: O (%v) > H (%v)", i, *quote.O, *quote.H)
 			}
-			if quote.Open != nil && quote.Low != nil && *quote.Open < *quote.Low {
-				t.Errorf("Quote[%d]: Open (%v) < Low (%v)", i, *quote.Open, *quote.Low)
+			if quote.O != nil && quote.L != nil && *quote.O < *quote.L {
+				t.Errorf("Quote[%d]: O (%v) < L (%v)", i, *quote.O, *quote.L)
 			}
-			if quote.Close != nil && quote.High != nil && *quote.Close > *quote.High {
-				t.Errorf("Quote[%d]: Close (%v) > High (%v)", i, *quote.Close, *quote.High)
+			if quote.C != nil && quote.H != nil && *quote.C > *quote.H {
+				t.Errorf("Quote[%d]: C (%v) > H (%v)", i, *quote.C, *quote.H)
 			}
-			if quote.Close != nil && quote.Low != nil && *quote.Close < *quote.Low {
-				t.Errorf("Quote[%d]: Close (%v) < Low (%v)", i, *quote.Close, *quote.Low)
+			if quote.C != nil && quote.L != nil && *quote.C < *quote.L {
+				t.Errorf("Quote[%d]: C (%v) < L (%v)", i, *quote.C, *quote.L)
 			}
 
 			// 出来高の検証
-			if quote.Volume == nil {
-				t.Errorf("Quote[%d]: Volume is nil", i)
-			} else if *quote.Volume < 0 {
-				t.Errorf("Quote[%d]: Volume = %v, want >= 0", i, *quote.Volume)
+			if quote.Vo == nil {
+				t.Errorf("Quote[%d]: Vo (Volume) is nil", i)
+			} else if *quote.Vo < 0 {
+				t.Errorf("Quote[%d]: Vo = %v, want >= 0", i, *quote.Vo)
 			}
 
 			// 売買代金の検証
-			if quote.TurnoverValue == nil {
-				t.Errorf("Quote[%d]: TurnoverValue is nil", i)
-			} else if *quote.TurnoverValue < 0 {
-				t.Errorf("Quote[%d]: TurnoverValue = %v, want >= 0", i, *quote.TurnoverValue)
+			if quote.Va == nil {
+				t.Errorf("Quote[%d]: Va (TurnoverValue) is nil", i)
+			} else if *quote.Va < 0 {
+				t.Errorf("Quote[%d]: Va = %v, want >= 0", i, *quote.Va)
 			}
 
 			// ストップ高・ストップ安フラグの検証
-			if quote.UpperLimit != "0" && quote.UpperLimit != "1" {
-				t.Errorf("Quote[%d]: UpperLimit = %v, want 0 or 1", i, quote.UpperLimit)
+			if quote.UL != "0" && quote.UL != "1" {
+				t.Errorf("Quote[%d]: UL = %v, want 0 or 1", i, quote.UL)
 			}
-			if quote.LowerLimit != "0" && quote.LowerLimit != "1" {
-				t.Errorf("Quote[%d]: LowerLimit = %v, want 0 or 1", i, quote.LowerLimit)
+			if quote.LL != "0" && quote.LL != "1" {
+				t.Errorf("Quote[%d]: LL = %v, want 0 or 1", i, quote.LL)
 			}
 
 			// 調整係数の検証
-			if quote.AdjustmentFactor <= 0 {
-				t.Errorf("Quote[%d]: AdjustmentFactor = %v, want > 0", i, quote.AdjustmentFactor)
+			if quote.AdjFactor <= 0 {
+				t.Errorf("Quote[%d]: AdjFactor = %v, want > 0", i, quote.AdjFactor)
 			}
 
 			// 調整後四本値の検証
-			if quote.AdjustmentOpen == nil {
-				t.Errorf("Quote[%d]: AdjustmentOpen is nil", i)
+			if quote.AdjO == nil {
+				t.Errorf("Quote[%d]: AdjO is nil", i)
 			}
-			if quote.AdjustmentHigh == nil {
-				t.Errorf("Quote[%d]: AdjustmentHigh is nil", i)
+			if quote.AdjH == nil {
+				t.Errorf("Quote[%d]: AdjH is nil", i)
 			}
-			if quote.AdjustmentLow == nil {
-				t.Errorf("Quote[%d]: AdjustmentLow is nil", i)
+			if quote.AdjL == nil {
+				t.Errorf("Quote[%d]: AdjL is nil", i)
 			}
-			if quote.AdjustmentClose == nil {
-				t.Errorf("Quote[%d]: AdjustmentClose is nil", i)
+			if quote.AdjC == nil {
+				t.Errorf("Quote[%d]: AdjC is nil", i)
 			}
-			if quote.AdjustmentVolume == nil {
-				t.Errorf("Quote[%d]: AdjustmentVolume is nil", i)
+			if quote.AdjVo == nil {
+				t.Errorf("Quote[%d]: AdjVo is nil", i)
 			}
 
 			if i == 0 {
 				// 最初のデータの詳細ログ
-				t.Logf("Latest quote: Date=%s, O=%v, H=%v, L=%v, C=%v, V=%v",
+				t.Logf("Latest quote: Date=%s, O=%v, H=%v, L=%v, C=%v, Vo=%v",
 					quote.Date,
-					safeDeref(quote.Open),
-					safeDeref(quote.High),
-					safeDeref(quote.Low),
-					safeDeref(quote.Close),
-					safeDeref(quote.Volume))
+					safeDeref(quote.O),
+					safeDeref(quote.H),
+					safeDeref(quote.L),
+					safeDeref(quote.C),
+					safeDeref(quote.Vo))
 			}
 		}
 
-		t.Logf("Retrieved %d quotes for date range %s to %s", len(resp.DailyQuotes), from, to)
+		t.Logf("Retrieved %d quotes for date range %s to %s", len(resp.Data), from, to)
 
 		// データの並び順を確認
-		if len(resp.DailyQuotes) > 1 {
-			isAscending := resp.DailyQuotes[0].Date < resp.DailyQuotes[1].Date
+		if len(resp.Data) > 1 {
+			isAscending := resp.Data[0].Date < resp.Data[1].Date
 			t.Logf("Data order: %s", ternary(isAscending, "ascending", "descending"))
 		}
 	})
@@ -177,14 +177,14 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 			return
 		}
 
-		if resp == nil || len(resp.DailyQuotes) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No quotes data available for the specified date")
 		}
 
-		t.Logf("Found %d quotes for date %s", len(resp.DailyQuotes), date)
+		t.Logf("Found %d quotes for date %s", len(resp.Data), date)
 
 		// 最初の10件を検証
-		for i, quote := range resp.DailyQuotes {
+		for i, quote := range resp.Data {
 			if i >= 10 {
 				break
 			}
@@ -221,11 +221,11 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 			t.Skip("No quotes data available")
 		}
 
-		if resp == nil || len(resp.DailyQuotes) == 0 {
+		if resp == nil || len(resp.Data) == 0 {
 			t.Skip("No quotes data available")
 		}
 
-		firstPageCount := len(resp.DailyQuotes)
+		firstPageCount := len(resp.Data)
 		t.Logf("First page: %d quotes", firstPageCount)
 
 		if resp.PaginationKey != "" {
@@ -236,11 +236,11 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
 
-			if resp2 != nil && len(resp2.DailyQuotes) > 0 {
-				t.Logf("Second page: %d quotes", len(resp2.DailyQuotes))
+			if resp2 != nil && len(resp2.Data) > 0 {
+				t.Logf("Second page: %d quotes", len(resp2.Data))
 
 				// 異なるデータであることを確認
-				if resp2.DailyQuotes[0].Code == resp.DailyQuotes[0].Code {
+				if resp2.Data[0].Code == resp.Data[0].Code {
 					t.Error("Second page might contain duplicate data")
 				}
 			}
@@ -299,7 +299,7 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 		}
 
 		resp, err := jq.Quotes.GetDailyQuotes(params)
-		if err == nil && len(resp.DailyQuotes) > 0 {
+		if err == nil && len(resp.Data) > 0 {
 			t.Error("Expected no data for invalid code")
 		}
 
@@ -311,7 +311,7 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 		}
 
 		resp, err = jq.Quotes.GetDailyQuotes(params)
-		if err == nil && len(resp.DailyQuotes) > 0 {
+		if err == nil && len(resp.Data) > 0 {
 			t.Error("Expected no data for future date")
 		}
 	})

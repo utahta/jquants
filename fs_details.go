@@ -6,7 +6,7 @@ import (
 	"github.com/utahta/jquants/client"
 )
 
-// FSDetailsService は財務諸表(BS/PL)詳細情報を取得するサービスです。
+// FSDetailsService は財務諸表(BS/PL/CF)詳細情報を取得するサービスです。
 // 四半期毎の詳細な財務諸表データを提供します。
 //
 // 注意: このAPIはプレミアムプラン専用です。
@@ -29,25 +29,25 @@ type FSDetailsParams struct {
 
 // FSDetailsResponse は財務諸表詳細情報のレスポンスです。
 type FSDetailsResponse struct {
-	FSDetails     []FSDetail `json:"fs_details"`
+	Data          []FSDetail `json:"data"`
 	PaginationKey string     `json:"pagination_key"` // ページネーションキー
 }
 
 // FSDetail は財務諸表詳細情報を表します。
-// J-Quants API /fins/fs_details エンドポイントのレスポンスデータ。
-// 上場企業の四半期毎の財務情報における、貸借対照表、損益計算書に記載の項目。
+// J-Quants API /fins/details エンドポイントのレスポンスデータ。
+// 上場企業の四半期毎の財務情報における、貸借対照表、損益計算書、キャッシュ・フロー計算書に記載の項目。
 //
 // 注意: このデータはプレミアムプラン専用APIで取得されます。
 type FSDetail struct {
 	// 基本情報
-	DisclosedDate    string `json:"DisclosedDate"`    // 開示日（YYYY-MM-DD形式）
-	DisclosedTime    string `json:"DisclosedTime"`    // 開示時刻（HH:MM:SS形式）
-	LocalCode        string `json:"LocalCode"`        // 銘柄コード（5桁）
-	DisclosureNumber string `json:"DisclosureNumber"` // 開示番号（昇順ソートのキー）
-	TypeOfDocument   string `json:"TypeOfDocument"`   // 開示書類種別
+	DiscDate string `json:"DiscDate"` // 開示日（YYYY-MM-DD形式）
+	DiscTime string `json:"DiscTime"` // 開示時刻（HH:MM:SS形式）
+	Code     string `json:"Code"`     // 銘柄コード（5桁）
+	DiscNo   string `json:"DiscNo"`   // 開示番号（昇順ソートのキー）
+	DocType  string `json:"DocType"`  // 開示書類種別
 
 	// 財務諸表データ
-	FinancialStatement map[string]string `json:"FinancialStatement"` // 財務諸表の各種項目（冗長ラベル（英語）とその値のマップ）
+	FS map[string]string `json:"FS"` // 財務諸表の各種項目（冗長ラベル（英語）とその値のマップ）
 }
 
 // GetFSDetails は財務諸表詳細情報を取得します。
@@ -60,7 +60,7 @@ func (s *FSDetailsService) GetFSDetails(params FSDetailsParams) (*FSDetailsRespo
 		return nil, fmt.Errorf("either code or date parameter is required")
 	}
 
-	path := "/fins/fs_details"
+	path := "/fins/details"
 
 	query := "?"
 	if params.Code != "" {
@@ -105,7 +105,7 @@ func (s *FSDetailsService) GetFSDetailsByCode(code string) ([]FSDetail, error) {
 			return nil, err
 		}
 
-		allData = append(allData, resp.FSDetails...)
+		allData = append(allData, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -134,7 +134,7 @@ func (s *FSDetailsService) GetFSDetailsByDate(date string) ([]FSDetail, error) {
 			return nil, err
 		}
 
-		allData = append(allData, resp.FSDetails...)
+		allData = append(allData, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -148,7 +148,7 @@ func (s *FSDetailsService) GetFSDetailsByDate(date string) ([]FSDetail, error) {
 
 // IsIFRS は財務諸表がIFRS基準かどうかを判定します。
 func (d *FSDetail) IsIFRS() bool {
-	if standards, ok := d.FinancialStatement["Accounting standards, DEI"]; ok {
+	if standards, ok := d.FS["Accounting standards, DEI"]; ok {
 		return standards == "IFRS"
 	}
 	return false
@@ -156,7 +156,7 @@ func (d *FSDetail) IsIFRS() bool {
 
 // IsJapaneseGAAP は財務諸表が日本基準かどうかを判定します。
 func (d *FSDetail) IsJapaneseGAAP() bool {
-	if standards, ok := d.FinancialStatement["Accounting standards, DEI"]; ok {
+	if standards, ok := d.FS["Accounting standards, DEI"]; ok {
 		return standards == "JapaneseGAAP"
 	}
 	return false
@@ -164,28 +164,28 @@ func (d *FSDetail) IsJapaneseGAAP() bool {
 
 // IsQuarterly は四半期財務諸表かどうかを判定します。
 func (d *FSDetail) IsQuarterly() bool {
-	return contains(d.TypeOfDocument, "Q") && contains(d.TypeOfDocument, "Financial")
+	return contains(d.DocType, "Q") && contains(d.DocType, "Financial")
 }
 
 // IsAnnual は年次財務諸表かどうかを判定します。
 func (d *FSDetail) IsAnnual() bool {
-	return contains(d.TypeOfDocument, "YearEnd") && contains(d.TypeOfDocument, "Financial")
+	return contains(d.DocType, "FY") && contains(d.DocType, "Financial")
 }
 
 // IsConsolidated は連結財務諸表かどうかを判定します。
 func (d *FSDetail) IsConsolidated() bool {
-	return contains(d.TypeOfDocument, "Consolidated")
+	return contains(d.DocType, "Consolidated")
 }
 
 // GetQuarter は四半期を取得します（1, 2, 3, 0（年次））。
 func (d *FSDetail) GetQuarter() int {
-	if contains(d.TypeOfDocument, "1Q") {
+	if contains(d.DocType, "1Q") {
 		return 1
-	} else if contains(d.TypeOfDocument, "2Q") {
+	} else if contains(d.DocType, "2Q") {
 		return 2
-	} else if contains(d.TypeOfDocument, "3Q") {
+	} else if contains(d.DocType, "3Q") {
 		return 3
-	} else if contains(d.TypeOfDocument, "YearEnd") {
+	} else if contains(d.DocType, "FY") {
 		return 0
 	}
 	return -1
@@ -193,13 +193,13 @@ func (d *FSDetail) GetQuarter() int {
 
 // GetValue は指定されたキーの値を取得します。
 func (d *FSDetail) GetValue(key string) (string, bool) {
-	value, ok := d.FinancialStatement[key]
+	value, ok := d.FS[key]
 	return value, ok
 }
 
 // GetFloatValue は指定されたキーの値をfloat64として取得します。
 func (d *FSDetail) GetFloatValue(key string) (float64, error) {
-	value, ok := d.FinancialStatement[key]
+	value, ok := d.FS[key]
 	if !ok {
 		return 0, fmt.Errorf("key %s not found", key)
 	}

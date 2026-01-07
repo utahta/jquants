@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/utahta/jquants"
-	"github.com/utahta/jquants/auth"
 	"github.com/utahta/jquants/client"
 )
 
@@ -18,14 +17,14 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	// 認証設定
-	c := client.NewClient()
-	a := auth.NewAuth(c)
-
-	// 環境変数から認証
-	if err := a.InitFromEnv(); err != nil {
-		panic("Authentication failed: " + err.Error())
+	// 環境変数からAPIキーを取得
+	apiKey := os.Getenv("JQUANTS_API_KEY")
+	if apiKey == "" {
+		panic("JQUANTS_API_KEY environment variable is not set")
 	}
+
+	// クライアント作成（v2 APIではAPIキーを直接使用）
+	c := client.NewClient(apiKey)
 
 	// JQuantsAPI作成
 	jq = jquants.NewJQuantsAPI(c)

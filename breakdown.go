@@ -35,7 +35,7 @@ type BreakdownParams struct {
 
 // BreakdownResponse は売買内訳データのレスポンスです。
 type BreakdownResponse struct {
-	Breakdown     []Breakdown `json:"breakdown"`
+	Data          []Breakdown `json:"data"`
 	PaginationKey string      `json:"pagination_key"` // ページネーションキー
 }
 
@@ -49,53 +49,53 @@ type Breakdown struct {
 	Code string `json:"Code"` // 銘柄コード
 
 	// 売りの約定代金内訳（単位：円）
-	LongSellValue               float64 `json:"LongSellValue"`               // 実売りの約定代金
-	ShortSellWithoutMarginValue float64 `json:"ShortSellWithoutMarginValue"` // 空売り（信用新規売りを除く）の約定代金
-	MarginSellNewValue          float64 `json:"MarginSellNewValue"`          // 信用新規売りの約定代金
-	MarginSellCloseValue        float64 `json:"MarginSellCloseValue"`        // 信用返済売りの約定代金
+	LongSellVa     float64 `json:"LongSellVa"`     // 実売りの約定代金
+	ShrtNoMrgnVa   float64 `json:"ShrtNoMrgnVa"`   // 空売り（信用新規売りを除く）の約定代金
+	MrgnSellNewVa  float64 `json:"MrgnSellNewVa"`  // 信用新規売りの約定代金
+	MrgnSellCloseVa float64 `json:"MrgnSellCloseVa"` // 信用返済売りの約定代金
 
 	// 買いの約定代金内訳（単位：円）
-	LongBuyValue        float64 `json:"LongBuyValue"`        // 現物買いの約定代金
-	MarginBuyNewValue   float64 `json:"MarginBuyNewValue"`   // 信用新規買いの約定代金
-	MarginBuyCloseValue float64 `json:"MarginBuyCloseValue"` // 信用返済買いの約定代金
+	LongBuyVa      float64 `json:"LongBuyVa"`      // 現物買いの約定代金
+	MrgnBuyNewVa   float64 `json:"MrgnBuyNewVa"`   // 信用新規買いの約定代金
+	MrgnBuyCloseVa float64 `json:"MrgnBuyCloseVa"` // 信用返済買いの約定代金
 
 	// 売りの約定株数内訳（単位：株）
-	LongSellVolume               float64 `json:"LongSellVolume"`               // 実売りの約定株数
-	ShortSellWithoutMarginVolume float64 `json:"ShortSellWithoutMarginVolume"` // 空売り（信用新規売りを除く）の約定株数
-	MarginSellNewVolume          float64 `json:"MarginSellNewVolume"`          // 信用新規売りの約定株数
-	MarginSellCloseVolume        float64 `json:"MarginSellCloseVolume"`        // 信用返済売りの約定株数
+	LongSellVo      float64 `json:"LongSellVo"`      // 実売りの約定株数
+	ShrtNoMrgnVo    float64 `json:"ShrtNoMrgnVo"`    // 空売り（信用新規売りを除く）の約定株数
+	MrgnSellNewVo   float64 `json:"MrgnSellNewVo"`   // 信用新規売りの約定株数
+	MrgnSellCloseVo float64 `json:"MrgnSellCloseVo"` // 信用返済売りの約定株数
 
 	// 買いの約定株数内訳（単位：株）
-	LongBuyVolume        float64 `json:"LongBuyVolume"`        // 現物買いの約定株数
-	MarginBuyNewVolume   float64 `json:"MarginBuyNewVolume"`   // 信用新規買いの約定株数
-	MarginBuyCloseVolume float64 `json:"MarginBuyCloseVolume"` // 信用返済買いの約定株数
+	LongBuyVo      float64 `json:"LongBuyVo"`      // 現物買いの約定株数
+	MrgnBuyNewVo   float64 `json:"MrgnBuyNewVo"`   // 信用新規買いの約定株数
+	MrgnBuyCloseVo float64 `json:"MrgnBuyCloseVo"` // 信用返済買いの約定株数
 }
 
 // RawBreakdown is used for unmarshaling JSON response with mixed types
 type RawBreakdown struct {
-	Date                         string              `json:"Date"`
-	Code                         string              `json:"Code"`
-	LongSellValue                types.Float64String `json:"LongSellValue"`
-	ShortSellWithoutMarginValue  types.Float64String `json:"ShortSellWithoutMarginValue"`
-	MarginSellNewValue           types.Float64String `json:"MarginSellNewValue"`
-	MarginSellCloseValue         types.Float64String `json:"MarginSellCloseValue"`
-	LongBuyValue                 types.Float64String `json:"LongBuyValue"`
-	MarginBuyNewValue            types.Float64String `json:"MarginBuyNewValue"`
-	MarginBuyCloseValue          types.Float64String `json:"MarginBuyCloseValue"`
-	LongSellVolume               types.Float64String `json:"LongSellVolume"`
-	ShortSellWithoutMarginVolume types.Float64String `json:"ShortSellWithoutMarginVolume"`
-	MarginSellNewVolume          types.Float64String `json:"MarginSellNewVolume"`
-	MarginSellCloseVolume        types.Float64String `json:"MarginSellCloseVolume"`
-	LongBuyVolume                types.Float64String `json:"LongBuyVolume"`
-	MarginBuyNewVolume           types.Float64String `json:"MarginBuyNewVolume"`
-	MarginBuyCloseVolume         types.Float64String `json:"MarginBuyCloseVolume"`
+	Date            string              `json:"Date"`
+	Code            string              `json:"Code"`
+	LongSellVa      types.Float64String `json:"LongSellVa"`
+	ShrtNoMrgnVa    types.Float64String `json:"ShrtNoMrgnVa"`
+	MrgnSellNewVa   types.Float64String `json:"MrgnSellNewVa"`
+	MrgnSellCloseVa types.Float64String `json:"MrgnSellCloseVa"`
+	LongBuyVa       types.Float64String `json:"LongBuyVa"`
+	MrgnBuyNewVa    types.Float64String `json:"MrgnBuyNewVa"`
+	MrgnBuyCloseVa  types.Float64String `json:"MrgnBuyCloseVa"`
+	LongSellVo      types.Float64String `json:"LongSellVo"`
+	ShrtNoMrgnVo    types.Float64String `json:"ShrtNoMrgnVo"`
+	MrgnSellNewVo   types.Float64String `json:"MrgnSellNewVo"`
+	MrgnSellCloseVo types.Float64String `json:"MrgnSellCloseVo"`
+	LongBuyVo       types.Float64String `json:"LongBuyVo"`
+	MrgnBuyNewVo    types.Float64String `json:"MrgnBuyNewVo"`
+	MrgnBuyCloseVo  types.Float64String `json:"MrgnBuyCloseVo"`
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling
 func (r *BreakdownResponse) UnmarshalJSON(data []byte) error {
 	// First unmarshal into RawBreakdown
 	type rawResponse struct {
-		Breakdown     []RawBreakdown `json:"breakdown"`
+		Data          []RawBreakdown `json:"data"`
 		PaginationKey string         `json:"pagination_key"`
 	}
 
@@ -108,25 +108,25 @@ func (r *BreakdownResponse) UnmarshalJSON(data []byte) error {
 	r.PaginationKey = raw.PaginationKey
 
 	// Convert RawBreakdown to Breakdown
-	r.Breakdown = make([]Breakdown, len(raw.Breakdown))
-	for i, rb := range raw.Breakdown {
-		r.Breakdown[i] = Breakdown{
-			Date:                         rb.Date,
-			Code:                         rb.Code,
-			LongSellValue:                float64(rb.LongSellValue),
-			ShortSellWithoutMarginValue:  float64(rb.ShortSellWithoutMarginValue),
-			MarginSellNewValue:           float64(rb.MarginSellNewValue),
-			MarginSellCloseValue:         float64(rb.MarginSellCloseValue),
-			LongBuyValue:                 float64(rb.LongBuyValue),
-			MarginBuyNewValue:            float64(rb.MarginBuyNewValue),
-			MarginBuyCloseValue:          float64(rb.MarginBuyCloseValue),
-			LongSellVolume:               float64(rb.LongSellVolume),
-			ShortSellWithoutMarginVolume: float64(rb.ShortSellWithoutMarginVolume),
-			MarginSellNewVolume:          float64(rb.MarginSellNewVolume),
-			MarginSellCloseVolume:        float64(rb.MarginSellCloseVolume),
-			LongBuyVolume:                float64(rb.LongBuyVolume),
-			MarginBuyNewVolume:           float64(rb.MarginBuyNewVolume),
-			MarginBuyCloseVolume:         float64(rb.MarginBuyCloseVolume),
+	r.Data = make([]Breakdown, len(raw.Data))
+	for i, rb := range raw.Data {
+		r.Data[i] = Breakdown{
+			Date:            rb.Date,
+			Code:            rb.Code,
+			LongSellVa:      float64(rb.LongSellVa),
+			ShrtNoMrgnVa:    float64(rb.ShrtNoMrgnVa),
+			MrgnSellNewVa:   float64(rb.MrgnSellNewVa),
+			MrgnSellCloseVa: float64(rb.MrgnSellCloseVa),
+			LongBuyVa:       float64(rb.LongBuyVa),
+			MrgnBuyNewVa:    float64(rb.MrgnBuyNewVa),
+			MrgnBuyCloseVa:  float64(rb.MrgnBuyCloseVa),
+			LongSellVo:      float64(rb.LongSellVo),
+			ShrtNoMrgnVo:    float64(rb.ShrtNoMrgnVo),
+			MrgnSellNewVo:   float64(rb.MrgnSellNewVo),
+			MrgnSellCloseVo: float64(rb.MrgnSellCloseVo),
+			LongBuyVo:       float64(rb.LongBuyVo),
+			MrgnBuyNewVo:    float64(rb.MrgnBuyNewVo),
+			MrgnBuyCloseVo:  float64(rb.MrgnBuyCloseVo),
 		}
 	}
 
@@ -200,7 +200,7 @@ func (s *BreakdownService) GetBreakdownByCode(code string, days int) ([]Breakdow
 			return nil, err
 		}
 
-		allBreakdown = append(allBreakdown, resp.Breakdown...)
+		allBreakdown = append(allBreakdown, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -229,7 +229,7 @@ func (s *BreakdownService) GetBreakdownByDate(date string) ([]Breakdown, error) 
 			return nil, err
 		}
 
-		allBreakdown = append(allBreakdown, resp.Breakdown...)
+		allBreakdown = append(allBreakdown, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -245,38 +245,38 @@ func (s *BreakdownService) GetBreakdownByDate(date string) ([]Breakdown, error) 
 
 // GetTotalSellValue は売りの約定代金合計を返します
 func (b *Breakdown) GetTotalSellValue() float64 {
-	return b.LongSellValue + b.ShortSellWithoutMarginValue +
-		b.MarginSellNewValue + b.MarginSellCloseValue
+	return b.LongSellVa + b.ShrtNoMrgnVa +
+		b.MrgnSellNewVa + b.MrgnSellCloseVa
 }
 
 // GetTotalSellVolume は売りの約定株数合計を返します
 func (b *Breakdown) GetTotalSellVolume() float64 {
-	return b.LongSellVolume + b.ShortSellWithoutMarginVolume +
-		b.MarginSellNewVolume + b.MarginSellCloseVolume
+	return b.LongSellVo + b.ShrtNoMrgnVo +
+		b.MrgnSellNewVo + b.MrgnSellCloseVo
 }
 
 // 買い合計を計算するヘルパーメソッド
 
 // GetTotalBuyValue は買いの約定代金合計を返します
 func (b *Breakdown) GetTotalBuyValue() float64 {
-	return b.LongBuyValue + b.MarginBuyNewValue + b.MarginBuyCloseValue
+	return b.LongBuyVa + b.MrgnBuyNewVa + b.MrgnBuyCloseVa
 }
 
 // GetTotalBuyVolume は買いの約定株数合計を返します
 func (b *Breakdown) GetTotalBuyVolume() float64 {
-	return b.LongBuyVolume + b.MarginBuyNewVolume + b.MarginBuyCloseVolume
+	return b.LongBuyVo + b.MrgnBuyNewVo + b.MrgnBuyCloseVo
 }
 
 // 信用取引関連のヘルパーメソッド
 
 // GetMarginNewValue は信用新規取引の約定代金合計を返します
 func (b *Breakdown) GetMarginNewValue() float64 {
-	return b.MarginSellNewValue + b.MarginBuyNewValue
+	return b.MrgnSellNewVa + b.MrgnBuyNewVa
 }
 
 // GetMarginCloseValue は信用返済取引の約定代金合計を返します
 func (b *Breakdown) GetMarginCloseValue() float64 {
-	return b.MarginSellCloseValue + b.MarginBuyCloseValue
+	return b.MrgnSellCloseVa + b.MrgnBuyCloseVa
 }
 
 // GetShortSellRatio は空売り比率を返します（空売り÷全売り）
@@ -285,6 +285,6 @@ func (b *Breakdown) GetShortSellRatio() float64 {
 	if totalSell == 0 {
 		return 0
 	}
-	shortSell := b.ShortSellWithoutMarginValue + b.MarginSellNewValue
+	shortSell := b.ShrtNoMrgnVa + b.MrgnSellNewVa
 	return shortSell / totalSell
 }

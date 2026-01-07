@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// TestListedEndpoint は/listed/infoエンドポイントの完全なテスト
+// TestListedEndpoint は/equities/masterエンドポイントの完全なテスト
 func TestListedEndpoint(t *testing.T) {
 	t.Run("GetInfo_All", func(t *testing.T) {
 		// 全ての上場企業情報を取得
@@ -43,61 +43,45 @@ func TestListedEndpoint(t *testing.T) {
 			if company.Code == "" {
 				t.Errorf("Company[%d]: Code is empty", i)
 			}
-			// LocalCodeの検証（オプショナル）
-			if company.LocalCode != "" {
-				// LocalCodeが存在する場合は5桁形式であることを確認
-				if len(company.LocalCode) != 5 {
-					t.Errorf("Company[%d]: LocalCode length = %d, want 5", i, len(company.LocalCode))
-				}
+			if company.CoName == "" {
+				t.Errorf("Company[%d]: CoName is empty", i)
 			}
-			if company.CompanyName == "" {
-				t.Errorf("Company[%d]: CompanyName is empty", i)
+			if company.CoNameEn == "" {
+				t.Logf("Company[%d]: CoNameEn is empty (might be acceptable)", i)
 			}
-			if company.CompanyNameEnglish == "" {
-				t.Logf("Company[%d]: CompanyNameEnglish is empty (might be acceptable)", i)
-			}
-			
+
 			// 業種情報の検証
-			if company.Sector17Code == "" {
-				t.Errorf("Company[%d]: Sector17Code is empty", i)
+			if company.S17 == "" {
+				t.Errorf("Company[%d]: S17 (Sector17Code) is empty", i)
 			}
-			if company.Sector17CodeName == "" {
-				t.Errorf("Company[%d]: Sector17CodeName is empty", i)
+			if company.S17Nm == "" {
+				t.Errorf("Company[%d]: S17Nm (Sector17CodeName) is empty", i)
 			}
-			if company.Sector33Code == "" {
-				t.Errorf("Company[%d]: Sector33Code is empty", i)
+			if company.S33 == "" {
+				t.Errorf("Company[%d]: S33 (Sector33Code) is empty", i)
 			}
-			if company.Sector33CodeName == "" {
-				t.Errorf("Company[%d]: Sector33CodeName is empty", i)
+			if company.S33Nm == "" {
+				t.Errorf("Company[%d]: S33Nm (Sector33CodeName) is empty", i)
 			}
-			
+
 			// 規模区分の検証
-			if company.ScaleCategory == "" {
-				t.Errorf("Company[%d]: ScaleCategory is empty", i)
+			if company.ScaleCat == "" {
+				t.Errorf("Company[%d]: ScaleCat is empty", i)
 			}
-			
+
 			// 市場区分の検証
-			if company.MarketCode == "" {
-				t.Errorf("Company[%d]: MarketCode is empty", i)
+			if company.Mkt == "" {
+				t.Errorf("Company[%d]: Mkt (MarketCode) is empty", i)
 			}
-			if company.MarketCodeName == "" {
-				t.Errorf("Company[%d]: MarketCodeName is empty", i)
+			if company.MktNm == "" {
+				t.Errorf("Company[%d]: MktNm (MarketCodeName) is empty", i)
 			}
-			
-			// 廃止情報の検証
-			if company.IsDelisted != "" {
-				// IsDelistedはtrue/falseの値のみ許可
-				if company.IsDelisted != "true" && company.IsDelisted != "false" {
-					t.Errorf("Company[%d]: IsDelisted = %v, want true or false", i, company.IsDelisted)
-				}
-				t.Logf("Company[%d]: IsDelisted: %s", i, company.IsDelisted)
-			}
-			
+
 			// 詳細ログ（最初の3件のみ）
 			if i < 3 {
-				t.Logf("Company[%d]: %s (%s/%s) - %s - %s - %s",
-					i, company.CompanyName, company.Code, company.LocalCode,
-					company.Sector33CodeName, company.MarketCodeName, company.ScaleCategory)
+				t.Logf("Company[%d]: %s (%s) - %s - %s - %s",
+					i, company.CoName, company.Code,
+					company.S33Nm, company.MktNm, company.ScaleCat)
 			}
 		}
 	})
@@ -120,31 +104,28 @@ func TestListedEndpoint(t *testing.T) {
 		if company.Code != "72030" && company.Code != "7203" {
 			t.Errorf("Code = %v, want 72030 or 7203", company.Code)
 		}
-		if company.CompanyName == "" {
-			t.Error("CompanyName is empty")
+		if company.CoName == "" {
+			t.Error("CoName is empty")
 		}
-		if company.Sector17Code == "" {
-			t.Error("Sector17Code is empty")
+		if company.S17 == "" {
+			t.Error("S17 is empty")
 		}
-		if company.Sector33Code == "" {
-			t.Error("Sector33Code is empty")
+		if company.S33 == "" {
+			t.Error("S33 is empty")
 		}
-		if company.MarketCode == "" {
-			t.Error("MarketCode is empty")
+		if company.Mkt == "" {
+			t.Error("Mkt is empty")
 		}
-		if company.ScaleCategory == "" {
-			t.Error("ScaleCategory is empty")
+		if company.ScaleCat == "" {
+			t.Error("ScaleCat is empty")
 		}
 
-		t.Logf("Company: %s (%s)", company.CompanyName, company.Code)
-		t.Logf("Sector: %s (%s)", company.Sector33CodeName, company.Sector33Code)
-		t.Logf("Market: %s (%s)", company.MarketCodeName, company.MarketCode)
-		t.Logf("Scale: %s", company.ScaleCategory)
-		if company.CompanyNameEnglish != "" {
-			t.Logf("English Name: %s", company.CompanyNameEnglish)
-		}
-		if company.IsDelisted != "" {
-			t.Logf("Delisted Status: %s", company.IsDelisted)
+		t.Logf("Company: %s (%s)", company.CoName, company.Code)
+		t.Logf("Sector: %s (%s)", company.S33Nm, company.S33)
+		t.Logf("Market: %s (%s)", company.MktNm, company.Mkt)
+		t.Logf("Scale: %s", company.ScaleCat)
+		if company.CoNameEn != "" {
+			t.Logf("English Name: %s", company.CoNameEn)
 		}
 	})
 
@@ -182,10 +163,10 @@ func TestListedEndpoint(t *testing.T) {
 		// 市場別の集計
 		marketCount := make(map[string]int)
 		scaleCount := make(map[string]int)
-		
+
 		for _, company := range companies {
-			marketCount[company.MarketCodeName]++
-			scaleCount[company.ScaleCategory]++
+			marketCount[company.MktNm]++
+			scaleCount[company.ScaleCat]++
 		}
 
 		t.Logf("Market segment distribution:")
@@ -216,10 +197,10 @@ func TestListedEndpoint(t *testing.T) {
 		// 33業種分類での集計
 		sector33Count := make(map[string]int)
 		sector17Count := make(map[string]int)
-		
+
 		for _, company := range companies {
-			sector33Count[company.Sector33CodeName]++
-			sector17Count[company.Sector17CodeName]++
+			sector33Count[company.S33Nm]++
+			sector17Count[company.S17Nm]++
 		}
 
 		t.Logf("Top 10 sectors (33 classification):")
@@ -236,45 +217,6 @@ func TestListedEndpoint(t *testing.T) {
 		for sector, num := range sector17Count {
 			t.Logf("  %s: %d companies", sector, num)
 		}
-	})
-
-	t.Run("GetInfo_ListingStatus", func(t *testing.T) {
-		// 上場・廃止ステータス分析
-		companies, err := jq.Listed.GetListedInfo("", "")
-		if err != nil {
-			if isSubscriptionLimited(err) {
-				t.Skip("Skipping due to subscription limitation")
-			}
-			t.Skip("No listed companies data available")
-		}
-
-		if len(companies) == 0 {
-			t.Skip("No companies data available")
-		}
-
-		listedCount := 0
-		delistedCount := 0
-		
-		for _, company := range companies {
-			if company.IsDelisted == "true" {
-				delistedCount++
-				// 廃止企業の最初の5件のみログ出力
-				if delistedCount <= 5 {
-					t.Logf("Delisted company: %s (%s) - IsDelisted: %s",
-						company.CompanyName, company.Code, company.IsDelisted)
-				}
-			} else if company.IsDelisted == "false" || company.IsDelisted == "" {
-				listedCount++
-			} else {
-				t.Errorf("Invalid IsDelisted value: %s for company %s (%s)",
-					company.IsDelisted, company.CompanyName, company.Code)
-			}
-		}
-
-		t.Logf("Listing status:")
-		t.Logf("  Active listings: %d", listedCount)
-		t.Logf("  Delisted companies: %d", delistedCount)
-		t.Logf("  Total: %d", len(companies))
 	})
 
 	t.Run("GetInfo_CodeValidation", func(t *testing.T) {
@@ -309,7 +251,7 @@ func TestListedEndpoint(t *testing.T) {
 			default:
 				invalidCodes++
 				t.Logf("Invalid code length for %s: %s (length: %d)",
-					company.CompanyName, company.Code, codeLen)
+					company.CoName, company.Code, codeLen)
 			}
 		}
 

@@ -63,24 +63,24 @@ func TestBreakdownService_GetBreakdown(t *testing.T) {
 
 			// Mock response
 			mockResponse := BreakdownResponse{
-				Breakdown: []Breakdown{
+				Data: []Breakdown{
 					{
-						Date:                         "2024-01-31",
-						Code:                         "72030",
-						LongSellValue:                115164000.0,
-						ShortSellWithoutMarginValue:  93561000.0,
-						MarginSellNewValue:           6412000.0,
-						MarginSellCloseValue:         23009000.0,
-						LongBuyValue:                 185114000.0,
-						MarginBuyNewValue:            35568000.0,
-						MarginBuyCloseValue:          17464000.0,
-						LongSellVolume:               415000.0,
-						ShortSellWithoutMarginVolume: 337000.0,
-						MarginSellNewVolume:          23000.0,
-						MarginSellCloseVolume:        83000.0,
-						LongBuyVolume:                667000.0,
-						MarginBuyNewVolume:           128000.0,
-						MarginBuyCloseVolume:         63000.0,
+						Date:            "2024-01-31",
+						Code:            "72030",
+						LongSellVa:      115164000.0,
+						ShrtNoMrgnVa:    93561000.0,
+						MrgnSellNewVa:   6412000.0,
+						MrgnSellCloseVa: 23009000.0,
+						LongBuyVa:       185114000.0,
+						MrgnBuyNewVa:    35568000.0,
+						MrgnBuyCloseVa:  17464000.0,
+						LongSellVo:      415000.0,
+						ShrtNoMrgnVo:    337000.0,
+						MrgnSellNewVo:   23000.0,
+						MrgnSellCloseVo: 83000.0,
+						LongBuyVo:       667000.0,
+						MrgnBuyNewVo:    128000.0,
+						MrgnBuyCloseVo:  63000.0,
 					},
 				},
 				PaginationKey: "",
@@ -101,8 +101,8 @@ func TestBreakdownService_GetBreakdown(t *testing.T) {
 			if mockClient.LastPath != tt.wantPath {
 				t.Errorf("GetBreakdown() path = %v, want %v", mockClient.LastPath, tt.wantPath)
 			}
-			if len(resp.Breakdown) != 1 {
-				t.Errorf("GetBreakdown() returned %d items, want 1", len(resp.Breakdown))
+			if len(resp.Data) != 1 {
+				t.Errorf("GetBreakdown() returned %d items, want 1", len(resp.Data))
 			}
 		})
 	}
@@ -121,14 +121,14 @@ func TestBreakdownService_GetBreakdownByCode(t *testing.T) {
 
 	// Mock response
 	mockResponse := BreakdownResponse{
-		Breakdown: []Breakdown{
+		Data: []Breakdown{
 			{
-				Date:           "2024-02-01",
-				Code:           "72030",
-				LongSellValue:  100000000.0,
-				LongBuyValue:   120000000.0,
-				LongSellVolume: 400000.0,
-				LongBuyVolume:  500000.0,
+				Date:       "2024-02-01",
+				Code:       "72030",
+				LongSellVa: 100000000.0,
+				LongBuyVa:  120000000.0,
+				LongSellVo: 400000.0,
+				LongBuyVo:  500000.0,
 			},
 		},
 		PaginationKey: "",
@@ -157,16 +157,16 @@ func TestBreakdownService_GetBreakdownByDate(t *testing.T) {
 
 	// Mock response - 最初のページ
 	mockResponse1 := BreakdownResponse{
-		Breakdown: []Breakdown{
+		Data: []Breakdown{
 			{
-				Date:          "2024-01-01",
-				Code:          "13010",
-				LongSellValue: 100000000.0,
+				Date:       "2024-01-01",
+				Code:       "13010",
+				LongSellVa: 100000000.0,
 			},
 			{
-				Date:          "2024-01-01",
-				Code:          "13020",
-				LongSellValue: 200000000.0,
+				Date:       "2024-01-01",
+				Code:       "13020",
+				LongSellVa: 200000000.0,
 			},
 		},
 		PaginationKey: "next_page_key",
@@ -174,11 +174,11 @@ func TestBreakdownService_GetBreakdownByDate(t *testing.T) {
 
 	// Mock response - 2ページ目
 	mockResponse2 := BreakdownResponse{
-		Breakdown: []Breakdown{
+		Data: []Breakdown{
 			{
-				Date:          "2024-01-01",
-				Code:          "72030",
-				LongSellValue: 300000000.0,
+				Date:       "2024-01-01",
+				Code:       "72030",
+				LongSellVa: 300000000.0,
 			},
 		},
 		PaginationKey: "", // 最後のページ
@@ -219,23 +219,23 @@ func TestBreakdownService_GetBreakdown_Error(t *testing.T) {
 func TestBreakdown_HelperMethods(t *testing.T) {
 	b := &Breakdown{
 		// 売りの約定代金
-		LongSellValue:               100.0,
-		ShortSellWithoutMarginValue: 50.0,
-		MarginSellNewValue:          30.0,
-		MarginSellCloseValue:        20.0,
+		LongSellVa:      100.0,
+		ShrtNoMrgnVa:    50.0,
+		MrgnSellNewVa:   30.0,
+		MrgnSellCloseVa: 20.0,
 		// 買いの約定代金
-		LongBuyValue:        150.0,
-		MarginBuyNewValue:   40.0,
-		MarginBuyCloseValue: 10.0,
+		LongBuyVa:      150.0,
+		MrgnBuyNewVa:   40.0,
+		MrgnBuyCloseVa: 10.0,
 		// 売りの約定株数
-		LongSellVolume:               1000.0,
-		ShortSellWithoutMarginVolume: 500.0,
-		MarginSellNewVolume:          300.0,
-		MarginSellCloseVolume:        200.0,
+		LongSellVo:      1000.0,
+		ShrtNoMrgnVo:    500.0,
+		MrgnSellNewVo:   300.0,
+		MrgnSellCloseVo: 200.0,
 		// 買いの約定株数
-		LongBuyVolume:        1500.0,
-		MarginBuyNewVolume:   400.0,
-		MarginBuyCloseVolume: 100.0,
+		LongBuyVo:      1500.0,
+		MrgnBuyNewVo:   400.0,
+		MrgnBuyCloseVo: 100.0,
 	}
 
 	// 売り合計テスト
@@ -275,10 +275,10 @@ func TestBreakdown_HelperMethods(t *testing.T) {
 func TestBreakdown_GetShortSellRatio_ZeroDivision(t *testing.T) {
 	b := &Breakdown{
 		// 全て0
-		LongSellValue:               0,
-		ShortSellWithoutMarginValue: 0,
-		MarginSellNewValue:          0,
-		MarginSellCloseValue:        0,
+		LongSellVa:      0,
+		ShrtNoMrgnVa:    0,
+		MrgnSellNewVa:   0,
+		MrgnSellCloseVa: 0,
 	}
 
 	// ゼロ除算のテスト

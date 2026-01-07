@@ -10,26 +10,23 @@ import (
 )
 
 const (
-	BaseURL = "https://api.jquants.com/v1"
+	BaseURL = "https://api.jquants.com/v2"
 )
 
 type Client struct {
-	httpClient  *http.Client
-	baseURL     string
-	accessToken string
+	httpClient *http.Client
+	baseURL    string
+	apiKey     string
 }
 
-func NewClient() *Client {
+func NewClient(apiKey string) *Client {
 	return &Client{
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
 		baseURL: BaseURL,
+		apiKey:  apiKey,
 	}
-}
-
-func (c *Client) SetAccessToken(token string) {
-	c.accessToken = token
 }
 
 func (c *Client) DoRequest(method, path string, body interface{}, result interface{}) error {
@@ -50,8 +47,8 @@ func (c *Client) DoRequest(method, path string, body interface{}, result interfa
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	if c.accessToken != "" {
-		req.Header.Set("Authorization", "Bearer "+c.accessToken)
+	if c.apiKey != "" {
+		req.Header.Set("x-api-key", c.apiKey)
 	}
 
 	resp, err := c.httpClient.Do(req)
@@ -64,7 +61,7 @@ func (c *Client) DoRequest(method, path string, body interface{}, result interfa
 	if err != nil {
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
-	
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("API error: status=%d, body=%s", resp.StatusCode, string(respBody))
 	}

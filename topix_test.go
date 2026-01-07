@@ -20,7 +20,7 @@ func TestTOPIXService_GetTOPIXData(t *testing.T) {
 				To:            "20240131",
 				PaginationKey: "key123",
 			},
-			wantPath: "/indices/topix?from=20240101&to=20240131&pagination_key=key123",
+			wantPath: "/indices/bars/daily/topix?from=20240101&to=20240131&pagination_key=key123",
 		},
 		{
 			name: "with date range only",
@@ -28,19 +28,19 @@ func TestTOPIXService_GetTOPIXData(t *testing.T) {
 				From: "20240101",
 				To:   "20240131",
 			},
-			wantPath: "/indices/topix?from=20240101&to=20240131",
+			wantPath: "/indices/bars/daily/topix?from=20240101&to=20240131",
 		},
 		{
 			name: "with from date only",
 			params: TOPIXParams{
 				From: "20240101",
 			},
-			wantPath: "/indices/topix?from=20240101",
+			wantPath: "/indices/bars/daily/topix?from=20240101",
 		},
 		{
 			name:     "with no parameters",
 			params:   TOPIXParams{},
-			wantPath: "/indices/topix",
+			wantPath: "/indices/bars/daily/topix",
 		},
 	}
 
@@ -52,13 +52,13 @@ func TestTOPIXService_GetTOPIXData(t *testing.T) {
 
 			// Mock response
 			mockResponse := TOPIXResponse{
-				TOPIX: []TOPIXData{
+				Data: []TOPIXData{
 					{
-						Date:  "2022-06-28",
-						Open:  1885.52,
-						High:  1907.38,
-						Low:   1885.32,
-						Close: 1907.38,
+						Date: "2022-06-28",
+						O:    1885.52,
+						H:    1907.38,
+						L:    1885.32,
+						C:    1907.38,
 					},
 				},
 				PaginationKey: "",
@@ -76,7 +76,7 @@ func TestTOPIXService_GetTOPIXData(t *testing.T) {
 				t.Fatal("GetTOPIXData() returned nil response")
 				return
 			}
-			if len(resp.TOPIX) == 0 {
+			if len(resp.Data) == 0 {
 				t.Error("GetTOPIXData() returned empty data")
 			}
 			if mockClient.LastPath != tt.wantPath {
@@ -93,16 +93,16 @@ func TestTOPIXService_GetTOPIXByDateRange(t *testing.T) {
 
 	// Mock response - 最初のページ
 	mockResponse1 := TOPIXResponse{
-		TOPIX: []TOPIXData{
+		Data: []TOPIXData{
 			{
-				Date:  "2024-01-01",
-				Open:  2400.0,
-				Close: 2420.0,
+				Date: "2024-01-01",
+				O:    2400.0,
+				C:    2420.0,
 			},
 			{
-				Date:  "2024-01-02",
-				Open:  2420.0,
-				Close: 2435.0,
+				Date: "2024-01-02",
+				O:    2420.0,
+				C:    2435.0,
 			},
 		},
 		PaginationKey: "next_page_key",
@@ -110,18 +110,18 @@ func TestTOPIXService_GetTOPIXByDateRange(t *testing.T) {
 
 	// Mock response - 2ページ目
 	mockResponse2 := TOPIXResponse{
-		TOPIX: []TOPIXData{
+		Data: []TOPIXData{
 			{
-				Date:  "2024-01-03",
-				Open:  2435.0,
-				Close: 2450.0,
+				Date: "2024-01-03",
+				O:    2435.0,
+				C:    2450.0,
 			},
 		},
 		PaginationKey: "", // 最後のページ
 	}
 
-	mockClient.SetResponse("GET", "/indices/topix?from=20240101&to=20240103", mockResponse1)
-	mockClient.SetResponse("GET", "/indices/topix?from=20240101&to=20240103&pagination_key=next_page_key", mockResponse2)
+	mockClient.SetResponse("GET", "/indices/bars/daily/topix?from=20240101&to=20240103", mockResponse1)
+	mockClient.SetResponse("GET", "/indices/bars/daily/topix?from=20240101&to=20240103&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
 	topixData, err := service.GetTOPIXByDateRange("20240101", "20240103")
@@ -142,26 +142,26 @@ func TestTOPIXService_GetLatestTOPIX(t *testing.T) {
 
 	// Mock response with multiple data points (最新が最初にくる想定)
 	mockResponse := TOPIXResponse{
-		TOPIX: []TOPIXData{
+		Data: []TOPIXData{
 			{
-				Date:  "2024-02-01",
-				Open:  2480.0,
-				High:  2490.0,
-				Low:   2475.0,
-				Close: 2485.0,
+				Date: "2024-02-01",
+				O:    2480.0,
+				H:    2490.0,
+				L:    2475.0,
+				C:    2485.0,
 			},
 			{
-				Date:  "2024-01-31",
-				Close: 2470.0,
+				Date: "2024-01-31",
+				C:    2470.0,
 			},
 			{
-				Date:  "2024-01-30",
-				Close: 2450.0,
+				Date: "2024-01-30",
+				C:    2450.0,
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/indices/topix", mockResponse)
+	mockClient.SetResponse("GET", "/indices/bars/daily/topix", mockResponse)
 
 	// Execute
 	latest, err := service.GetLatestTOPIX()
@@ -177,8 +177,8 @@ func TestTOPIXService_GetLatestTOPIX(t *testing.T) {
 	if latest.Date != "2024-02-01" {
 		t.Errorf("GetLatestTOPIX() returned date %v, want 2024-02-01", latest.Date)
 	}
-	if latest.Close != 2485.0 {
-		t.Errorf("GetLatestTOPIX() returned close %v, want 2485.0", latest.Close)
+	if latest.C != 2485.0 {
+		t.Errorf("GetLatestTOPIX() returned close %v, want 2485.0", latest.C)
 	}
 }
 
@@ -189,10 +189,10 @@ func TestTOPIXService_GetLatestTOPIX_NoData(t *testing.T) {
 
 	// Mock empty response
 	mockResponse := TOPIXResponse{
-		TOPIX:         []TOPIXData{},
+		Data:          []TOPIXData{},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/indices/topix", mockResponse)
+	mockClient.SetResponse("GET", "/indices/bars/daily/topix", mockResponse)
 
 	// Execute
 	_, err := service.GetLatestTOPIX()
@@ -209,7 +209,7 @@ func TestTOPIXService_GetTOPIXData_Error(t *testing.T) {
 	service := NewTOPIXService(mockClient)
 
 	// Set error response
-	mockClient.SetError("GET", "/indices/topix", fmt.Errorf("unauthorized"))
+	mockClient.SetError("GET", "/indices/bars/daily/topix", fmt.Errorf("unauthorized"))
 
 	// Execute
 	_, err := service.GetTOPIXData(TOPIXParams{})

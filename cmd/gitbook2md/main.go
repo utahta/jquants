@@ -229,6 +229,12 @@ func (p *GitBookParser) extractStructuredContent(n *html.Node, content *strings.
 			p.extractList(n, content, n.Data == "ol")
 			return
 		}
+
+		// Look for definition lists (used for API parameters and response fields)
+		if n.Data == "dl" {
+			p.extractDefinitionList(n, content)
+			return
+		}
 	}
 
 	// Process children
@@ -318,7 +324,132 @@ func (p *GitBookParser) extractList(n *html.Node, content *strings.Builder, orde
 	content.WriteString("\n")
 }
 
+// extractDefinitionList extracts definition lists (dl/dt/dd) used for API parameters
+func (p *GitBookParser) extractDefinitionList(n *html.Node, content *strings.Builder) {
+	// Find all definition items (can be wrapped in div or directly as dt/dd pairs)
+	p.extractDefinitionItems(n, content)
+	content.WriteString("\n")
+}
+
+// extractDefinitionItems recursively finds and extracts dt/dd pairs
+func (p *GitBookParser) extractDefinitionItems(n *html.Node, content *strings.Builder) {
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		if c.Type == html.ElementNode {
+			if c.Data == "div" {
+				// Definition item wrapped in div
+				p.extractSingleDefinition(c, content)
+			} else if c.Data == "dt" {
+				// Direct dt element - find the next dd
+				term := p.extractDefinitionTerm(c)
+				desc := ""
+				// Look for the next dd sibling
+				for dd := c.NextSibling; dd != nil; dd = dd.NextSibling {
+					if dd.Type == html.ElementNode && dd.Data == "dd" {
+						desc = p.extractText(dd)
+						break
+					}
+				}
+				if term != "" {
+					content.WriteString(term)
+					if desc != "" {
+						content.WriteString("\n  " + desc)
+					}
+					content.WriteString("\n\n")
+				}
+			}
+		}
+	}
+}
+
+// extractSingleDefinition extracts a single dt/dd pair from a container div
+func (p *GitBookParser) extractSingleDefinition(n *html.Node, content *strings.Builder) {
+	var term, desc string
+
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		if c.Type == html.ElementNode {
+			switch c.Data {
+			case "dt":
+				term = p.extractDefinitionTerm(c)
+			case "dd":
+				desc = p.extractText(c)
+			}
+		}
+	}
+
+	if term != "" {
+		content.WriteString(term)
+		if desc != "" {
+			content.WriteString("\n  " + desc)
+		}
+		content.WriteString("\n\n")
+	}
+}
+
+// extractDefinitionTerm extracts the term from a dt element
+// Format: **name** (type, required/optional)
+func (p *GitBookParser) extractDefinitionTerm(n *html.Node) string {
+	var name, typeStr, requiredStr string
+
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		if c.Type == html.ElementNode && c.Data == "span" {
+			text := p.extractText(c)
+			class := p.getAttr(c, "class")
+
+			if strings.Contains(class, "font-semibold") {
+				name = text
+			} else if strings.Contains(class, "text-gray") || strings.Contains(class, "bg-gray") {
+				if typeStr == "" && isTypeText(text) {
+					typeStr = text
+				} else if text == "optional" {
+					requiredStr = text
+				}
+			} else if strings.Contains(class, "text-red") || strings.Contains(class, "bg-red") {
+				if text == "required" {
+					requiredStr = text
+				}
+			} else if strings.Contains(class, "text-blue") || strings.Contains(class, "bg-blue") {
+				if text == "optional" {
+					requiredStr = text
+				}
+			}
+		}
+	}
+
+	if name == "" {
+		return ""
+	}
+
+	result := "**" + name + "**"
+	if typeStr != "" || requiredStr != "" {
+		result += " ("
+		if typeStr != "" {
+			result += typeStr
+		}
+		if requiredStr != "" {
+			if typeStr != "" {
+				result += ", "
+			}
+			result += requiredStr
+		}
+		result += ")"
+	}
+
+	return result
+}
+
 // Helper methods
+
+// isTypeText checks if the text represents a type annotation
+// Supports both simple types (string, number) and compound types (number | string)
+func isTypeText(text string) bool {
+	types := []string{"string", "number", "boolean", "array", "object"}
+	for _, t := range types {
+		if strings.Contains(text, t) {
+			return true
+		}
+	}
+	return false
+}
 
 func (p *GitBookParser) getAttr(n *html.Node, key string) string {
 	for _, attr := range n.Attr {
@@ -338,6 +469,27 @@ func (p *GitBookParser) extractText(n *html.Node) string {
 func (p *GitBookParser) extractTextRecursive(n *html.Node, text *strings.Builder) {
 	if n.Type == html.TextNode {
 		text.WriteString(n.Data)
+	}
+
+	// Handle checkbox input elements
+	if n.Type == html.ElementNode && n.Data == "input" {
+		inputType := p.getAttr(n, "type")
+		if inputType == "checkbox" {
+			// Check if the checkbox is checked
+			isChecked := false
+			for _, attr := range n.Attr {
+				if attr.Key == "checked" {
+					isChecked = true
+					break
+				}
+			}
+			if isChecked {
+				text.WriteString("✓")
+			} else {
+				text.WriteString("✗")
+			}
+			return
+		}
 	}
 
 	for c := n.FirstChild; c != nil; c = c.NextSibling {

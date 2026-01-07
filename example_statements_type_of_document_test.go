@@ -21,15 +21,15 @@ func ExampleTypeOfDocument_usage() {
 	// Accounting standard: IFRS
 }
 
-func ExampleStatement_TypeOfDocument() {
+func ExampleStatement_DocType() {
 	// Statementからの直接使用例
 	stmt := &jquants.Statement{
-		TypeOfDocument: jquants.ParseTypeOfDocument("2QFinancialStatements_Consolidated_JP"),
+		DocType: jquants.ParseTypeOfDocument("2QFinancialStatements_Consolidated_JP"),
 	}
 
-	fmt.Printf("Is quarterly: %v\n", stmt.TypeOfDocument.IsQuarterly())
-	fmt.Printf("Period: %s\n", stmt.TypeOfDocument.GetPeriod())
-	fmt.Printf("Accounting standard: %s\n", stmt.TypeOfDocument.GetAccountingStandard())
+	fmt.Printf("Is quarterly: %v\n", stmt.DocType.IsQuarterly())
+	fmt.Printf("Period: %s\n", stmt.DocType.GetPeriod())
+	fmt.Printf("Accounting standard: %s\n", stmt.DocType.GetAccountingStandard())
 
 	// Output:
 	// Is quarterly: true
@@ -40,16 +40,16 @@ func ExampleStatement_TypeOfDocument() {
 func ExampleTypeOfDocument_filtering() {
 	// 財務諸表のフィルタリング例
 	statements := []jquants.Statement{
-		{TypeOfDocument: jquants.TypeOfDocumentFYConsolidatedIFRS},
-		{TypeOfDocument: jquants.TypeOfDocumentFYNonConsolidatedJP},
-		{TypeOfDocument: jquants.TypeOfDocumentDividendRevision},
-		{TypeOfDocument: jquants.TypeOfDocument2QConsolidatedJP},
+		{DocType: jquants.TypeOfDocumentFYConsolidatedIFRS},
+		{DocType: jquants.TypeOfDocumentFYNonConsolidatedJP},
+		{DocType: jquants.TypeOfDocumentDividendRevision},
+		{DocType: jquants.TypeOfDocument2QConsolidatedJP},
 	}
 
 	// IFRS採用企業の通期決算のみ抽出
 	for _, stmt := range statements {
-		if stmt.TypeOfDocument.IsAnnual() && stmt.TypeOfDocument.GetAccountingStandard() == "IFRS" {
-			fmt.Printf("Found IFRS annual report: %s\n", stmt.TypeOfDocument)
+		if stmt.DocType.IsAnnual() && stmt.DocType.GetAccountingStandard() == "IFRS" {
+			fmt.Printf("Found IFRS annual report: %s\n", stmt.DocType)
 		}
 	}
 

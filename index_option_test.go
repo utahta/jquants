@@ -19,14 +19,14 @@ func TestIndexOptionService_GetIndexOptions(t *testing.T) {
 				Date:          "20230322",
 				PaginationKey: "key123",
 			},
-			wantPath: "/option/index_option?date=20230322&pagination_key=key123",
+			wantPath: "/derivatives/bars/daily/options/225?date=20230322&pagination_key=key123",
 		},
 		{
 			name: "with date only",
 			params: IndexOptionParams{
 				Date: "20230322",
 			},
-			wantPath: "/option/index_option?date=20230322",
+			wantPath: "/derivatives/bars/daily/options/225?date=20230322",
 		},
 	}
 
@@ -38,38 +38,38 @@ func TestIndexOptionService_GetIndexOptions(t *testing.T) {
 
 			// Mock response based on documentation sample
 			mockResponse := IndexOptionResponse{
-				IndexOptions: []IndexOption{
+				Data: []IndexOption{
 					{
-						Date:                           "2023-03-22",
-						Code:                           "130060018",
-						ContractMonth:                  "2025-06",
-						StrikePrice:                    20000.0,
-						PutCallDivision:                "1",
-						LastTradingDay:                 "2025-06-12",
-						SpecialQuotationDay:            "2025-06-13",
-						EmergencyMarginTriggerDivision: "002",
-						WholeDayOpen:                   0.0,
-						WholeDayHigh:                   0.0,
-						WholeDayLow:                    0.0,
-						WholeDayClose:                  0.0,
-						NightSessionOpen:               floatPtr(0.0),
-						NightSessionHigh:               floatPtr(0.0),
-						NightSessionLow:                floatPtr(0.0),
-						NightSessionClose:              floatPtr(0.0),
-						DaySessionOpen:                 0.0,
-						DaySessionHigh:                 0.0,
-						DaySessionLow:                  0.0,
-						DaySessionClose:                0.0,
-						Volume:                         0.0,
-						VolumeOnlyAuction:              floatPtr(0.0),
-						OpenInterest:                   330.0,
-						TurnoverValue:                  0.0,
-						SettlementPrice:                floatPtr(980.0),
-						TheoreticalPrice:               floatPtr(974.641),
-						BaseVolatility:                 floatPtr(17.93025),
-						UnderlyingPrice:                floatPtr(27466.61),
-						ImpliedVolatility:              floatPtr(23.1816),
-						InterestRate:                   floatPtr(0.2336),
+						Date:         "2023-03-22",
+						Code:         "130060018",
+						CM:           "2025-06",
+						Strike:       20000.0,
+						PCDiv:        "1",
+						LTD:          "2025-06-12",
+						SQD:          "2025-06-13",
+						EmMrgnTrgDiv: "002",
+						O:            0.0,
+						H:            0.0,
+						L:            0.0,
+						C:            0.0,
+						EO:           floatPtr(0.0),
+						EH:           floatPtr(0.0),
+						EL:           floatPtr(0.0),
+						EC:           floatPtr(0.0),
+						AO:           0.0,
+						AH:           0.0,
+						AL:           0.0,
+						AC:           0.0,
+						Vo:           0.0,
+						VoOA:         floatPtr(0.0),
+						OI:           330.0,
+						Va:           0.0,
+						Settle:       floatPtr(980.0),
+						Theo:         floatPtr(974.641),
+						BaseVol:      floatPtr(17.93025),
+						UnderPx:      floatPtr(27466.61),
+						IV:           floatPtr(23.1816),
+						IR:           floatPtr(0.2336),
 					},
 				},
 				PaginationKey: "",
@@ -87,7 +87,7 @@ func TestIndexOptionService_GetIndexOptions(t *testing.T) {
 				t.Fatal("GetIndexOptions() returned nil response")
 				return
 			}
-			if len(resp.IndexOptions) == 0 {
+			if len(resp.Data) == 0 {
 				t.Error("GetIndexOptions() returned empty data")
 			}
 			if mockClient.LastPath != tt.wantPath {
@@ -121,20 +121,20 @@ func TestIndexOptionService_GetIndexOptionsByDate(t *testing.T) {
 
 	// Mock response - 最初のページ
 	mockResponse1 := IndexOptionResponse{
-		IndexOptions: []IndexOption{
+		Data: []IndexOption{
 			{
-				Date:                           "2023-03-22",
-				Code:                           "130060018",
-				PutCallDivision:                "1",
-				StrikePrice:                    20000.0,
-				EmergencyMarginTriggerDivision: "002",
+				Date:         "2023-03-22",
+				Code:         "130060018",
+				PCDiv:        "1",
+				Strike:       20000.0,
+				EmMrgnTrgDiv: "002",
 			},
 			{
-				Date:                           "2023-03-22",
-				Code:                           "130060019",
-				PutCallDivision:                "2",
-				StrikePrice:                    21000.0,
-				EmergencyMarginTriggerDivision: "002",
+				Date:         "2023-03-22",
+				Code:         "130060019",
+				PCDiv:        "2",
+				Strike:       21000.0,
+				EmMrgnTrgDiv: "002",
 			},
 		},
 		PaginationKey: "next_page_key",
@@ -142,20 +142,20 @@ func TestIndexOptionService_GetIndexOptionsByDate(t *testing.T) {
 
 	// Mock response - 2ページ目
 	mockResponse2 := IndexOptionResponse{
-		IndexOptions: []IndexOption{
+		Data: []IndexOption{
 			{
-				Date:                           "2023-03-22",
-				Code:                           "130060020",
-				PutCallDivision:                "1",
-				StrikePrice:                    22000.0,
-				EmergencyMarginTriggerDivision: "002",
+				Date:         "2023-03-22",
+				Code:         "130060020",
+				PCDiv:        "1",
+				Strike:       22000.0,
+				EmMrgnTrgDiv: "002",
 			},
 		},
 		PaginationKey: "", // 最後のページ
 	}
 
-	mockClient.SetResponse("GET", "/option/index_option?date=20230322", mockResponse1)
-	mockClient.SetResponse("GET", "/option/index_option?date=20230322&pagination_key=next_page_key", mockResponse2)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/options/225?date=20230322", mockResponse1)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/options/225?date=20230322&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
 	options, err := service.GetIndexOptionsByDate("20230322")
@@ -176,32 +176,32 @@ func TestIndexOptionService_GetCallOptions(t *testing.T) {
 
 	// Mock response with both call and put options
 	mockResponse := IndexOptionResponse{
-		IndexOptions: []IndexOption{
+		Data: []IndexOption{
 			{
-				Date:                           "2023-03-22",
-				Code:                           "130060018",
-				PutCallDivision:                "1", // Put
-				StrikePrice:                    20000.0,
-				EmergencyMarginTriggerDivision: "002",
+				Date:         "2023-03-22",
+				Code:         "130060018",
+				PCDiv:        "1", // Put
+				Strike:       20000.0,
+				EmMrgnTrgDiv: "002",
 			},
 			{
-				Date:                           "2023-03-22",
-				Code:                           "130060019",
-				PutCallDivision:                "2", // Call
-				StrikePrice:                    21000.0,
-				EmergencyMarginTriggerDivision: "002",
+				Date:         "2023-03-22",
+				Code:         "130060019",
+				PCDiv:        "2", // Call
+				Strike:       21000.0,
+				EmMrgnTrgDiv: "002",
 			},
 			{
-				Date:                           "2023-03-22",
-				Code:                           "130060020",
-				PutCallDivision:                "2", // Call
-				StrikePrice:                    22000.0,
-				EmergencyMarginTriggerDivision: "002",
+				Date:         "2023-03-22",
+				Code:         "130060020",
+				PCDiv:        "2", // Call
+				Strike:       22000.0,
+				EmMrgnTrgDiv: "002",
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/option/index_option?date=20230322", mockResponse)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/options/225?date=20230322", mockResponse)
 
 	// Execute
 	callOptions, err := service.GetCallOptions("20230322")
@@ -214,9 +214,9 @@ func TestIndexOptionService_GetCallOptions(t *testing.T) {
 		t.Errorf("GetCallOptions() returned %d options, want 2", len(callOptions))
 	}
 	for _, option := range callOptions {
-		if option.PutCallDivision != PutCallDivisionCall {
-			t.Errorf("GetCallOptions() returned option with PutCallDivision %v, want %v",
-				option.PutCallDivision, PutCallDivisionCall)
+		if option.PCDiv != PutCallDivisionCall {
+			t.Errorf("GetCallOptions() returned option with PCDiv %v, want %v",
+				option.PCDiv, PutCallDivisionCall)
 		}
 	}
 }
@@ -228,32 +228,32 @@ func TestIndexOptionService_GetPutOptions(t *testing.T) {
 
 	// Mock response with both call and put options
 	mockResponse := IndexOptionResponse{
-		IndexOptions: []IndexOption{
+		Data: []IndexOption{
 			{
-				Date:                           "2023-03-22",
-				Code:                           "130060018",
-				PutCallDivision:                "1", // Put
-				StrikePrice:                    20000.0,
-				EmergencyMarginTriggerDivision: "002",
+				Date:         "2023-03-22",
+				Code:         "130060018",
+				PCDiv:        "1", // Put
+				Strike:       20000.0,
+				EmMrgnTrgDiv: "002",
 			},
 			{
-				Date:                           "2023-03-22",
-				Code:                           "130060019",
-				PutCallDivision:                "2", // Call
-				StrikePrice:                    21000.0,
-				EmergencyMarginTriggerDivision: "002",
+				Date:         "2023-03-22",
+				Code:         "130060019",
+				PCDiv:        "2", // Call
+				Strike:       21000.0,
+				EmMrgnTrgDiv: "002",
 			},
 			{
-				Date:                           "2023-03-22",
-				Code:                           "130060020",
-				PutCallDivision:                "1", // Put
-				StrikePrice:                    22000.0,
-				EmergencyMarginTriggerDivision: "002",
+				Date:         "2023-03-22",
+				Code:         "130060020",
+				PCDiv:        "1", // Put
+				Strike:       22000.0,
+				EmMrgnTrgDiv: "002",
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/option/index_option?date=20230322", mockResponse)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/options/225?date=20230322", mockResponse)
 
 	// Execute
 	putOptions, err := service.GetPutOptions("20230322")
@@ -266,9 +266,9 @@ func TestIndexOptionService_GetPutOptions(t *testing.T) {
 		t.Errorf("GetPutOptions() returned %d options, want 2", len(putOptions))
 	}
 	for _, option := range putOptions {
-		if option.PutCallDivision != PutCallDivisionPut {
-			t.Errorf("GetPutOptions() returned option with PutCallDivision %v, want %v",
-				option.PutCallDivision, PutCallDivisionPut)
+		if option.PCDiv != PutCallDivisionPut {
+			t.Errorf("GetPutOptions() returned option with PCDiv %v, want %v",
+				option.PCDiv, PutCallDivisionPut)
 		}
 	}
 }
@@ -280,25 +280,25 @@ func TestIndexOptionService_GetOptionChain(t *testing.T) {
 
 	// Mock response
 	mockResponse := IndexOptionResponse{
-		IndexOptions: []IndexOption{
+		Data: []IndexOption{
 			{
-				Date:                           "2023-03-22",
-				Code:                           "130060018",
-				PutCallDivision:                "1",
-				StrikePrice:                    20000.0,
-				EmergencyMarginTriggerDivision: "002",
+				Date:         "2023-03-22",
+				Code:         "130060018",
+				PCDiv:        "1",
+				Strike:       20000.0,
+				EmMrgnTrgDiv: "002",
 			},
 			{
-				Date:                           "2023-03-22",
-				Code:                           "130060019",
-				PutCallDivision:                "2",
-				StrikePrice:                    20000.0,
-				EmergencyMarginTriggerDivision: "002",
+				Date:         "2023-03-22",
+				Code:         "130060019",
+				PCDiv:        "2",
+				Strike:       20000.0,
+				EmMrgnTrgDiv: "002",
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/option/index_option?date=20230322", mockResponse)
+	mockClient.SetResponse("GET", "/derivatives/bars/daily/options/225?date=20230322", mockResponse)
 
 	// Execute
 	options, err := service.GetOptionChain("20230322")
@@ -321,14 +321,14 @@ func TestIndexOption_IsCall(t *testing.T) {
 		{
 			name: "call option",
 			option: IndexOption{
-				PutCallDivision: PutCallDivisionCall,
+				PCDiv: PutCallDivisionCall,
 			},
 			want: true,
 		},
 		{
 			name: "put option",
 			option: IndexOption{
-				PutCallDivision: PutCallDivisionPut,
+				PCDiv: PutCallDivisionPut,
 			},
 			want: false,
 		},
@@ -353,14 +353,14 @@ func TestIndexOption_IsPut(t *testing.T) {
 		{
 			name: "put option",
 			option: IndexOption{
-				PutCallDivision: PutCallDivisionPut,
+				PCDiv: PutCallDivisionPut,
 			},
 			want: true,
 		},
 		{
 			name: "call option",
 			option: IndexOption{
-				PutCallDivision: PutCallDivisionCall,
+				PCDiv: PutCallDivisionCall,
 			},
 			want: false,
 		},
@@ -385,14 +385,14 @@ func TestIndexOption_IsEmergencyMarginTriggered(t *testing.T) {
 		{
 			name: "emergency margin triggered",
 			option: IndexOption{
-				EmergencyMarginTriggerDivision: EmergencyMarginTriggerDivisionEmergency,
+				EmMrgnTrgDiv: EmergencyMarginTriggerDivisionEmergency,
 			},
 			want: true,
 		},
 		{
 			name: "normal settlement",
 			option: IndexOption{
-				EmergencyMarginTriggerDivision: EmergencyMarginTriggerDivisionNormal,
+				EmMrgnTrgDiv: EmergencyMarginTriggerDivisionNormal,
 			},
 			want: false,
 		},
@@ -417,14 +417,14 @@ func TestIndexOption_HasNightSession(t *testing.T) {
 		{
 			name: "has night session data",
 			option: IndexOption{
-				NightSessionOpen: floatPtr(100.0),
+				EO: floatPtr(100.0),
 			},
 			want: true,
 		},
 		{
 			name: "no night session data",
 			option: IndexOption{
-				NightSessionOpen: nil,
+				EO: nil,
 			},
 			want: false,
 		},
@@ -446,7 +446,7 @@ func TestIndexOptionService_GetIndexOptions_Error(t *testing.T) {
 	service := NewIndexOptionService(mockClient)
 
 	// Set error response
-	mockClient.SetError("GET", "/option/index_option?date=20230322", fmt.Errorf("unauthorized"))
+	mockClient.SetError("GET", "/derivatives/bars/daily/options/225?date=20230322", fmt.Errorf("unauthorized"))
 
 	// Execute
 	_, err := service.GetIndexOptions(IndexOptionParams{Date: "20230322"})

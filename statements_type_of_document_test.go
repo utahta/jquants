@@ -346,11 +346,11 @@ func TestTypeOfDocument_JSON(t *testing.T) {
 	}
 }
 
-func TestStatement_TypeOfDocument_JSON(t *testing.T) {
+func TestStatement_DocType_JSON(t *testing.T) {
 	// Statement構造体でのJSON変換テスト
 	stmt := Statement{
-		TypeOfDocument: TypeOfDocumentFYConsolidatedIFRS,
-		LocalCode:      "12345",
+		DocType: TypeOfDocumentFYConsolidatedIFRS,
+		Code:    "12345",
 	}
 
 	// Marshal
@@ -360,8 +360,8 @@ func TestStatement_TypeOfDocument_JSON(t *testing.T) {
 	}
 
 	// JSONに正しい文字列が含まれているか確認
-	if !strings.Contains(string(data), `"TypeOfDocument":"FYFinancialStatements_Consolidated_IFRS"`) {
-		t.Errorf("JSON does not contain expected TypeOfDocument string: %s", data)
+	if !strings.Contains(string(data), `"DocType":"FYFinancialStatements_Consolidated_IFRS"`) {
+		t.Errorf("JSON does not contain expected DocType string: %s", data)
 	}
 
 	// Unmarshal
@@ -370,7 +370,7 @@ func TestStatement_TypeOfDocument_JSON(t *testing.T) {
 		t.Fatalf("Unmarshal failed: %v", err)
 	}
 
-	if decoded.TypeOfDocument != TypeOfDocumentFYConsolidatedIFRS {
-		t.Errorf("Unmarshal TypeOfDocument = %v, want %v", decoded.TypeOfDocument, TypeOfDocumentFYConsolidatedIFRS)
+	if decoded.DocType != TypeOfDocumentFYConsolidatedIFRS {
+		t.Errorf("Unmarshal DocType = %v, want %v", decoded.DocType, TypeOfDocumentFYConsolidatedIFRS)
 	}
 }

@@ -23,7 +23,7 @@ func TestIndicesService_GetIndices(t *testing.T) {
 				To:            "20240131",
 				PaginationKey: "key123",
 			},
-			wantPath: "/indices?code=0000&date=20240101&from=20240101&to=20240131&pagination_key=key123",
+			wantPath: "/indices/bars/daily?code=0000&date=20240101&from=20240101&to=20240131&pagination_key=key123",
 		},
 		{
 			name: "with code and date range",
@@ -32,26 +32,26 @@ func TestIndicesService_GetIndices(t *testing.T) {
 				From: "20240101",
 				To:   "20240131",
 			},
-			wantPath: "/indices?code=0000&from=20240101&to=20240131",
+			wantPath: "/indices/bars/daily?code=0000&from=20240101&to=20240131",
 		},
 		{
 			name: "with code only",
 			params: IndicesParams{
 				Code: "0028",
 			},
-			wantPath: "/indices?code=0028",
+			wantPath: "/indices/bars/daily?code=0028",
 		},
 		{
 			name: "with date only",
 			params: IndicesParams{
 				Date: "20240101",
 			},
-			wantPath: "/indices?date=20240101",
+			wantPath: "/indices/bars/daily?date=20240101",
 		},
 		{
 			name:     "with no parameters",
 			params:   IndicesParams{},
-			wantPath: "/indices",
+			wantPath: "/indices/bars/daily",
 		},
 	}
 
@@ -63,14 +63,14 @@ func TestIndicesService_GetIndices(t *testing.T) {
 
 			// Mock response
 			mockResponse := IndicesResponse{
-				Indices: []Index{
+				Data: []Index{
 					{
-						Date:  "2024-01-31",
-						Code:  "0000",
-						Open:  2400.0,
-						High:  2420.0,
-						Low:   2390.0,
-						Close: 2410.0,
+						Date: "2024-01-31",
+						Code: "0000",
+						O:    2400.0,
+						H:    2420.0,
+						L:    2390.0,
+						C:    2410.0,
 					},
 				},
 				PaginationKey: "",
@@ -88,7 +88,7 @@ func TestIndicesService_GetIndices(t *testing.T) {
 				t.Fatal("GetIndices() returned nil response")
 				return
 			}
-			if len(resp.Indices) == 0 {
+			if len(resp.Data) == 0 {
 				t.Error("GetIndices() returned empty data")
 			}
 			if mockClient.LastPath != tt.wantPath {
@@ -106,19 +106,19 @@ func TestIndicesService_GetIndicesByCode(t *testing.T) {
 	// Calculate expected dates
 	to := time.Now()
 	from := to.AddDate(0, 0, -30)
-	expectedPath := fmt.Sprintf("/indices?code=0000&from=%s&to=%s",
+	expectedPath := fmt.Sprintf("/indices/bars/daily?code=0000&from=%s&to=%s",
 		from.Format("20060102"), to.Format("20060102"))
 
 	// Mock response
 	mockResponse := IndicesResponse{
-		Indices: []Index{
+		Data: []Index{
 			{
-				Date:  "2024-02-01",
-				Code:  "0000",
-				Open:  2400.0,
-				High:  2420.0,
-				Low:   2390.0,
-				Close: 2410.0,
+				Date: "2024-02-01",
+				Code: "0000",
+				O:    2400.0,
+				H:    2420.0,
+				L:    2390.0,
+				C:    2410.0,
 			},
 		},
 		PaginationKey: "",
@@ -147,16 +147,16 @@ func TestIndicesService_GetIndicesByDate(t *testing.T) {
 
 	// Mock response - 最初のページ
 	mockResponse1 := IndicesResponse{
-		Indices: []Index{
+		Data: []Index{
 			{
-				Date:  "2024-01-01",
-				Code:  "0000",
-				Close: 2400.0,
+				Date: "2024-01-01",
+				Code: "0000",
+				C:    2400.0,
 			},
 			{
-				Date:  "2024-01-01",
-				Code:  "0028",
-				Close: 1200.0,
+				Date: "2024-01-01",
+				Code: "0028",
+				C:    1200.0,
 			},
 		},
 		PaginationKey: "next_page_key",
@@ -164,18 +164,18 @@ func TestIndicesService_GetIndicesByDate(t *testing.T) {
 
 	// Mock response - 2ページ目
 	mockResponse2 := IndicesResponse{
-		Indices: []Index{
+		Data: []Index{
 			{
-				Date:  "2024-01-01",
-				Code:  "0050",
-				Close: 1600.0,
+				Date: "2024-01-01",
+				Code: "0050",
+				C:    1600.0,
 			},
 		},
 		PaginationKey: "", // 最後のページ
 	}
 
-	mockClient.SetResponse("GET", "/indices?date=20240101", mockResponse1)
-	mockClient.SetResponse("GET", "/indices?date=20240101&pagination_key=next_page_key", mockResponse2)
+	mockClient.SetResponse("GET", "/indices/bars/daily?date=20240101", mockResponse1)
+	mockClient.SetResponse("GET", "/indices/bars/daily?date=20240101&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
 	indices, err := service.GetIndicesByDate("20240101")
@@ -197,16 +197,16 @@ func TestIndicesService_GetTOPIX(t *testing.T) {
 	// Calculate expected dates
 	to := time.Now()
 	from := to.AddDate(0, 0, -30)
-	expectedPath := fmt.Sprintf("/indices?code=0000&from=%s&to=%s",
+	expectedPath := fmt.Sprintf("/indices/bars/daily?code=0000&from=%s&to=%s",
 		from.Format("20060102"), to.Format("20060102"))
 
 	// Mock response
 	mockResponse := IndicesResponse{
-		Indices: []Index{
+		Data: []Index{
 			{
-				Date:  "2024-02-01",
-				Code:  "0000",
-				Close: 2400.0,
+				Date: "2024-02-01",
+				Code: "0000",
+				C:    2400.0,
 			},
 		},
 		PaginationKey: "",
@@ -236,19 +236,19 @@ func TestIndicesService_GetSectorIndex(t *testing.T) {
 	// Calculate expected dates
 	to := time.Now()
 	from := to.AddDate(0, 0, -30)
-	expectedPath := fmt.Sprintf("/indices?code=0058&from=%s&to=%s",
+	expectedPath := fmt.Sprintf("/indices/bars/daily?code=0058&from=%s&to=%s",
 		from.Format("20060102"), to.Format("20060102"))
 
 	// Mock response - 情報・通信業
 	mockResponse := IndicesResponse{
-		Indices: []Index{
+		Data: []Index{
 			{
-				Date:  "2024-02-01",
-				Code:  "0058",
-				Open:  3000.0,
-				High:  3050.0,
-				Low:   2980.0,
-				Close: 3020.0,
+				Date: "2024-02-01",
+				Code: "0058",
+				O:    3000.0,
+				H:    3050.0,
+				L:    2980.0,
+				C:    3020.0,
 			},
 		},
 		PaginationKey: "",
@@ -278,16 +278,16 @@ func TestIndicesService_GetPrimeMarketIndex(t *testing.T) {
 	// Calculate expected dates
 	to := time.Now()
 	from := to.AddDate(0, 0, -30)
-	expectedPath := fmt.Sprintf("/indices?code=0500&from=%s&to=%s",
+	expectedPath := fmt.Sprintf("/indices/bars/daily?code=0500&from=%s&to=%s",
 		from.Format("20060102"), to.Format("20060102"))
 
 	// Mock response
 	mockResponse := IndicesResponse{
-		Indices: []Index{
+		Data: []Index{
 			{
-				Date:  "2024-02-01",
-				Code:  "0500",
-				Close: 1800.0,
+				Date: "2024-02-01",
+				Code: "0500",
+				C:    1800.0,
 			},
 		},
 		PaginationKey: "",
@@ -312,7 +312,7 @@ func TestIndicesService_GetIndices_Error(t *testing.T) {
 	service := NewIndicesService(mockClient)
 
 	// Set error response
-	mockClient.SetError("GET", "/indices?code=0000", fmt.Errorf("unauthorized"))
+	mockClient.SetError("GET", "/indices/bars/daily?code=0000", fmt.Errorf("unauthorized"))
 
 	// Execute
 	_, err := service.GetIndices(IndicesParams{Code: "0000"})
@@ -331,22 +331,22 @@ func TestIndicesService_GetIndicesByCode_WithPagination(t *testing.T) {
 	// Calculate expected dates
 	to := time.Now()
 	from := to.AddDate(0, 0, -100)
-	basePath := fmt.Sprintf("/indices?code=0000&from=%s&to=%s",
+	basePath := fmt.Sprintf("/indices/bars/daily?code=0000&from=%s&to=%s",
 		from.Format("20060102"), to.Format("20060102"))
 
 	// Mock response - 最初のページ
 	mockResponse1 := IndicesResponse{
-		Indices: []Index{
-			{Date: "2024-01-01", Code: "0000", Close: 2400.0},
-			{Date: "2024-01-02", Code: "0000", Close: 2410.0},
+		Data: []Index{
+			{Date: "2024-01-01", Code: "0000", C: 2400.0},
+			{Date: "2024-01-02", Code: "0000", C: 2410.0},
 		},
 		PaginationKey: "next_page_key",
 	}
 
 	// Mock response - 2ページ目
 	mockResponse2 := IndicesResponse{
-		Indices: []Index{
-			{Date: "2024-01-03", Code: "0000", Close: 2420.0},
+		Data: []Index{
+			{Date: "2024-01-03", Code: "0000", C: 2420.0},
 		},
 		PaginationKey: "", // 最後のページ
 	}

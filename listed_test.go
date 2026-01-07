@@ -18,25 +18,25 @@ func TestListedService_GetListedInfo(t *testing.T) {
 			name:     "with code and date",
 			code:     "7203",
 			date:     "20240101",
-			wantPath: "/listed/info?code=7203&date=20240101",
+			wantPath: "/equities/master?code=7203&date=20240101",
 		},
 		{
 			name:     "with code only",
 			code:     "7203",
 			date:     "",
-			wantPath: "/listed/info?code=7203",
+			wantPath: "/equities/master?code=7203",
 		},
 		{
 			name:     "with date only",
 			code:     "",
 			date:     "20240101",
-			wantPath: "/listed/info?date=20240101",
+			wantPath: "/equities/master?date=20240101",
 		},
 		{
 			name:     "with no parameters",
 			code:     "",
 			date:     "",
-			wantPath: "/listed/info",
+			wantPath: "/equities/master",
 		},
 	}
 
@@ -48,21 +48,19 @@ func TestListedService_GetListedInfo(t *testing.T) {
 
 			// Mock response
 			mockResponse := ListedInfoResponse{
-				Info: []ListedInfo{
+				Data: []ListedInfo{
 					{
-						Date:               "20240101",
-						Code:               "7203",
-						CompanyName:        "トヨタ自動車",
-						CompanyNameEnglish: "TOYOTA MOTOR CORPORATION",
-						LocalCode:          "72030",
-						Sector17Code:       "6",
-						Sector17CodeName:   "自動車・輸送機",
-						Sector33Code:       "3700",
-						Sector33CodeName:   "輸送用機器",
-						ScaleCategory:      "TOPIX Core30",
-						MarketCode:         "0111",
-						MarketCodeName:     "プライム",
-						IsDelisted:         "false",
+						Date:     "20240101",
+						Code:     "7203",
+						CoName:   "トヨタ自動車",
+						CoNameEn: "TOYOTA MOTOR CORPORATION",
+						S17:      "6",
+						S17Nm:    "自動車・輸送機",
+						S33:      "3700",
+						S33Nm:    "輸送用機器",
+						ScaleCat: "TOPIX Core30",
+						Mkt:      "0111",
+						MktNm:    "プライム",
 					},
 				},
 			}
@@ -97,25 +95,23 @@ func TestListedService_GetCompanyInfo(t *testing.T) {
 
 	// Mock response
 	mockResponse := ListedInfoResponse{
-		Info: []ListedInfo{
+		Data: []ListedInfo{
 			{
-				Date:               "20240101",
-				Code:               "7203",
-				CompanyName:        "トヨタ自動車",
-				CompanyNameEnglish: "TOYOTA MOTOR CORPORATION",
-				LocalCode:          "72030",
-				Sector17Code:       "6",
-				Sector17CodeName:   "自動車・輸送機",
-				Sector33Code:       "3700",
-				Sector33CodeName:   "輸送用機器",
-				ScaleCategory:      "TOPIX Core30",
-				MarketCode:         "0111",
-				MarketCodeName:     "プライム",
-				IsDelisted:         "false",
+				Date:     "20240101",
+				Code:     "7203",
+				CoName:   "トヨタ自動車",
+				CoNameEn: "TOYOTA MOTOR CORPORATION",
+				S17:      "6",
+				S17Nm:    "自動車・輸送機",
+				S33:      "3700",
+				S33Nm:    "輸送用機器",
+				ScaleCat: "TOPIX Core30",
+				Mkt:      "0111",
+				MktNm:    "プライム",
 			},
 		},
 	}
-	mockClient.SetResponse("GET", "/listed/info?code=7203", mockResponse)
+	mockClient.SetResponse("GET", "/equities/master?code=7203", mockResponse)
 
 	// Test
 	info, err := service.GetCompanyInfo("7203")
@@ -133,12 +129,12 @@ func TestListedService_GetCompanyInfo(t *testing.T) {
 		t.Errorf("Expected code 7203, got %s", info.Code)
 	}
 
-	if info.CompanyName != "トヨタ自動車" {
-		t.Errorf("Expected company name トヨタ自動車, got %s", info.CompanyName)
+	if info.CoName != "トヨタ自動車" {
+		t.Errorf("Expected company name トヨタ自動車, got %s", info.CoName)
 	}
 
-	if info.MarketCodeName != "プライム" {
-		t.Errorf("Expected market code name プライム, got %s", info.MarketCodeName)
+	if info.MktNm != "プライム" {
+		t.Errorf("Expected market code name プライム, got %s", info.MktNm)
 	}
 }
 
@@ -149,9 +145,9 @@ func TestListedService_GetCompanyInfo_NotFound(t *testing.T) {
 
 	// Mock empty response
 	mockResponse := ListedInfoResponse{
-		Info: []ListedInfo{},
+		Data: []ListedInfo{},
 	}
-	mockClient.SetResponse("GET", "/listed/info?code=9999", mockResponse)
+	mockClient.SetResponse("GET", "/equities/master?code=9999", mockResponse)
 
 	// Test
 	_, err := service.GetCompanyInfo("9999")
@@ -166,7 +162,7 @@ func TestListedService_GetListedInfo_Error(t *testing.T) {
 	service := NewListedService(mockClient)
 
 	// Mock error
-	mockClient.SetError("GET", "/listed/info?code=7203", fmt.Errorf("API error"))
+	mockClient.SetError("GET", "/equities/master?code=7203", fmt.Errorf("API error"))
 
 	// Test
 	_, err := service.GetListedInfo("7203", "")
@@ -182,37 +178,31 @@ func TestListedService_GetListedBySector17(t *testing.T) {
 
 	// Mock response with multiple companies
 	mockResponse := ListedInfoResponse{
-		Info: []ListedInfo{
+		Data: []ListedInfo{
 			{
-				Code:             "7203",
-				CompanyName:      "トヨタ自動車",
-				LocalCode:        "72030",
-				Sector17Code:     "6",
-				Sector17CodeName: "自動車・輸送機",
-				MarketCodeName:   "プライム",
-				IsDelisted:       "false",
+				Code:   "7203",
+				CoName: "トヨタ自動車",
+				S17:    "6",
+				S17Nm:  "自動車・輸送機",
+				MktNm:  "プライム",
 			},
 			{
-				Code:             "7267",
-				CompanyName:      "本田技研工業",
-				LocalCode:        "72670",
-				Sector17Code:     "6",
-				Sector17CodeName: "自動車・輸送機",
-				MarketCodeName:   "プライム",
-				IsDelisted:       "false",
+				Code:   "7267",
+				CoName: "本田技研工業",
+				S17:    "6",
+				S17Nm:  "自動車・輸送機",
+				MktNm:  "プライム",
 			},
 			{
-				Code:             "9984",
-				CompanyName:      "ソフトバンクグループ",
-				LocalCode:        "99840",
-				Sector17Code:     "10",
-				Sector17CodeName: "情報通信・サービスその他",
-				MarketCodeName:   "プライム",
-				IsDelisted:       "false",
+				Code:   "9984",
+				CoName: "ソフトバンクグループ",
+				S17:    "10",
+				S17Nm:  "情報通信・サービスその他",
+				MktNm:  "プライム",
 			},
 		},
 	}
-	mockClient.SetResponse("GET", "/listed/info", mockResponse)
+	mockClient.SetResponse("GET", "/equities/master", mockResponse)
 
 	// Test - 自動車・輸送機セクターの銘柄を取得
 	infos, err := service.GetListedBySector17(Sector17Auto, "")
@@ -226,8 +216,8 @@ func TestListedService_GetListedBySector17(t *testing.T) {
 	}
 
 	for _, info := range infos {
-		if info.Sector17Code != "6" {
-			t.Errorf("Expected sector17Code 6, got %s for %s", info.Sector17Code, info.CompanyName)
+		if info.S17 != "6" {
+			t.Errorf("Expected S17 6, got %s for %s", info.S17, info.CoName)
 		}
 	}
 }
@@ -239,34 +229,31 @@ func TestListedService_GetListedBySector33(t *testing.T) {
 
 	// Mock response
 	mockResponse := ListedInfoResponse{
-		Info: []ListedInfo{
+		Data: []ListedInfo{
 			{
-				Code:             "4755",
-				CompanyName:      "楽天グループ",
-				LocalCode:        "47550",
-				Sector33Code:     "5250",
-				Sector33CodeName: "情報・通信業",
-				MarketCodeName:   "プライム",
+				Code:   "4755",
+				CoName: "楽天グループ",
+				S33:    "5250",
+				S33Nm:  "情報・通信業",
+				MktNm:  "プライム",
 			},
 			{
-				Code:             "9984",
-				CompanyName:      "ソフトバンクグループ",
-				LocalCode:        "99840",
-				Sector33Code:     "5250",
-				Sector33CodeName: "情報・通信業",
-				MarketCodeName:   "プライム",
+				Code:   "9984",
+				CoName: "ソフトバンクグループ",
+				S33:    "5250",
+				S33Nm:  "情報・通信業",
+				MktNm:  "プライム",
 			},
 			{
-				Code:             "7203",
-				CompanyName:      "トヨタ自動車",
-				LocalCode:        "72030",
-				Sector33Code:     "3700",
-				Sector33CodeName: "輸送用機器",
-				MarketCodeName:   "プライム",
+				Code:   "7203",
+				CoName: "トヨタ自動車",
+				S33:    "3700",
+				S33Nm:  "輸送用機器",
+				MktNm:  "プライム",
 			},
 		},
 	}
-	mockClient.SetResponse("GET", "/listed/info", mockResponse)
+	mockClient.SetResponse("GET", "/equities/master", mockResponse)
 
 	// Test - 情報・通信業の銘柄を取得
 	infos, err := service.GetListedBySector33(Sector33IT, "")
@@ -287,34 +274,34 @@ func TestListedService_GetListedByMarket(t *testing.T) {
 
 	// Mock response
 	mockResponse := ListedInfoResponse{
-		Info: []ListedInfo{
+		Data: []ListedInfo{
 			{
-				Code:           "7203",
-				CompanyName:    "トヨタ自動車",
-				MarketCode:     MarketPrime,
-				MarketCodeName: "プライム",
+				Code:   "7203",
+				CoName: "トヨタ自動車",
+				Mkt:    MarketPrime,
+				MktNm:  "プライム",
 			},
 			{
-				Code:           "9984",
-				CompanyName:    "ソフトバンクグループ",
-				MarketCode:     MarketPrime,
-				MarketCodeName: "プライム",
+				Code:   "9984",
+				CoName: "ソフトバンクグループ",
+				Mkt:    MarketPrime,
+				MktNm:  "プライム",
 			},
 			{
-				Code:           "4755",
-				CompanyName:    "楽天グループ",
-				MarketCode:     MarketPrime,
-				MarketCodeName: "プライム",
+				Code:   "4755",
+				CoName: "楽天グループ",
+				Mkt:    MarketPrime,
+				MktNm:  "プライム",
 			},
 			{
-				Code:           "3994",
-				CompanyName:    "マネーフォワード",
-				MarketCode:     MarketGrowth,
-				MarketCodeName: "グロース",
+				Code:   "3994",
+				CoName: "マネーフォワード",
+				Mkt:    MarketGrowth,
+				MktNm:  "グロース",
 			},
 		},
 	}
-	mockClient.SetResponse("GET", "/listed/info", mockResponse)
+	mockClient.SetResponse("GET", "/equities/master", mockResponse)
 
 	// Test - プライム市場の銘柄を取得
 	infos, err := service.GetListedByMarket(MarketPrime, "")
@@ -328,31 +315,8 @@ func TestListedService_GetListedByMarket(t *testing.T) {
 	}
 
 	for _, info := range infos {
-		if info.MarketCode != MarketPrime {
-			t.Errorf("Expected market code %s, got %s", MarketPrime, info.MarketCode)
+		if info.Mkt != MarketPrime {
+			t.Errorf("Expected market code %s, got %s", MarketPrime, info.Mkt)
 		}
-	}
-}
-
-func TestListedInfo_IsDelistedBool(t *testing.T) {
-	tests := []struct {
-		name       string
-		isDelisted string
-		want       bool
-	}{
-		{"上場中", "false", false},
-		{"上場廃止", "true", true},
-		{"空文字", "", false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			info := &ListedInfo{
-				IsDelisted: tt.isDelisted,
-			}
-			if got := info.IsDelistedBool(); got != tt.want {
-				t.Errorf("IsDelistedBool() = %v, want %v", got, tt.want)
-			}
-		})
 	}
 }

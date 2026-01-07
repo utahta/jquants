@@ -18,7 +18,7 @@ func TestPricesAMService_GetPricesAM(t *testing.T) {
 			params: PricesAMParams{
 				Code: "39400",
 			},
-			wantPath: "/prices/prices_am?code=39400",
+			wantPath: "/equities/bars/daily/am?code=39400",
 		},
 		{
 			name: "with code and pagination key",
@@ -26,19 +26,19 @@ func TestPricesAMService_GetPricesAM(t *testing.T) {
 				Code:          "27800",
 				PaginationKey: "key123",
 			},
-			wantPath: "/prices/prices_am?code=27800&pagination_key=key123",
+			wantPath: "/equities/bars/daily/am?code=27800&pagination_key=key123",
 		},
 		{
 			name:     "with no parameters",
 			params:   PricesAMParams{},
-			wantPath: "/prices/prices_am",
+			wantPath: "/equities/bars/daily/am",
 		},
 		{
 			name: "with pagination key only",
 			params: PricesAMParams{
 				PaginationKey: "key456",
 			},
-			wantPath: "/prices/prices_am?pagination_key=key456",
+			wantPath: "/equities/bars/daily/am?pagination_key=key456",
 		},
 	}
 
@@ -50,16 +50,16 @@ func TestPricesAMService_GetPricesAM(t *testing.T) {
 
 			// Mock response based on documentation sample
 			mockResponse := PricesAMResponse{
-				PricesAM: []PriceAM{
+				Data: []PriceAM{
 					{
-						Date:                 "2023-03-20",
-						Code:                 "39400",
-						MorningOpen:          floatPtr(232.0),
-						MorningHigh:          floatPtr(244.0),
-						MorningLow:           floatPtr(232.0),
-						MorningClose:         floatPtr(240.0),
-						MorningVolume:        floatPtr(52600.0),
-						MorningTurnoverValue: floatPtr(12518800.0),
+						Date: "2023-03-20",
+						Code: "39400",
+						MO:   floatPtr(232.0),
+						MH:   floatPtr(244.0),
+						ML:   floatPtr(232.0),
+						MC:   floatPtr(240.0),
+						MVo:  floatPtr(52600.0),
+						MVa:  floatPtr(12518800.0),
 					},
 				},
 				PaginationKey: "",
@@ -77,7 +77,7 @@ func TestPricesAMService_GetPricesAM(t *testing.T) {
 				t.Fatal("GetPricesAM() returned nil response")
 				return
 			}
-			if len(resp.PricesAM) == 0 {
+			if len(resp.Data) == 0 {
 				t.Error("GetPricesAM() returned empty data")
 			}
 			if mockClient.LastPath != tt.wantPath {
@@ -94,21 +94,21 @@ func TestPricesAMService_GetPricesAMByCode(t *testing.T) {
 
 	// Mock response
 	mockResponse := PricesAMResponse{
-		PricesAM: []PriceAM{
+		Data: []PriceAM{
 			{
-				Date:                 "2023-03-20",
-				Code:                 "39400",
-				MorningOpen:          floatPtr(232.0),
-				MorningHigh:          floatPtr(244.0),
-				MorningLow:           floatPtr(232.0),
-				MorningClose:         floatPtr(240.0),
-				MorningVolume:        floatPtr(52600.0),
-				MorningTurnoverValue: floatPtr(12518800.0),
+				Date: "2023-03-20",
+				Code: "39400",
+				MO:   floatPtr(232.0),
+				MH:   floatPtr(244.0),
+				ML:   floatPtr(232.0),
+				MC:   floatPtr(240.0),
+				MVo:  floatPtr(52600.0),
+				MVa:  floatPtr(12518800.0),
 			},
 		},
 		PaginationKey: "",
 	}
-	mockClient.SetResponse("GET", "/prices/prices_am?code=39400", mockResponse)
+	mockClient.SetResponse("GET", "/equities/bars/daily/am?code=39400", mockResponse)
 
 	// Execute
 	resp, err := service.GetPricesAMByCode("39400")
@@ -117,11 +117,11 @@ func TestPricesAMService_GetPricesAMByCode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetPricesAMByCode() error = %v", err)
 	}
-	if len(resp.PricesAM) != 1 {
-		t.Errorf("GetPricesAMByCode() returned %d items, want 1", len(resp.PricesAM))
+	if len(resp.Data) != 1 {
+		t.Errorf("GetPricesAMByCode() returned %d items, want 1", len(resp.Data))
 	}
-	if resp.PricesAM[0].Code != "39400" {
-		t.Errorf("GetPricesAMByCode() returned code %v, want 39400", resp.PricesAM[0].Code)
+	if resp.Data[0].Code != "39400" {
+		t.Errorf("GetPricesAMByCode() returned code %v, want 39400", resp.Data[0].Code)
 	}
 }
 
@@ -132,16 +132,16 @@ func TestPricesAMService_GetAllPricesAM(t *testing.T) {
 
 	// Mock response - 最初のページ
 	mockResponse1 := PricesAMResponse{
-		PricesAM: []PriceAM{
+		Data: []PriceAM{
 			{
-				Date:         "2023-03-20",
-				Code:         "13010",
-				MorningClose: floatPtr(2000.0),
+				Date: "2023-03-20",
+				Code: "13010",
+				MC:   floatPtr(2000.0),
 			},
 			{
-				Date:         "2023-03-20",
-				Code:         "13020",
-				MorningClose: floatPtr(1500.0),
+				Date: "2023-03-20",
+				Code: "13020",
+				MC:   floatPtr(1500.0),
 			},
 		},
 		PaginationKey: "next_page_key",
@@ -149,18 +149,18 @@ func TestPricesAMService_GetAllPricesAM(t *testing.T) {
 
 	// Mock response - 2ページ目
 	mockResponse2 := PricesAMResponse{
-		PricesAM: []PriceAM{
+		Data: []PriceAM{
 			{
-				Date:         "2023-03-20",
-				Code:         "13030",
-				MorningClose: floatPtr(1800.0),
+				Date: "2023-03-20",
+				Code: "13030",
+				MC:   floatPtr(1800.0),
 			},
 		},
 		PaginationKey: "", // 最後のページ
 	}
 
-	mockClient.SetResponse("GET", "/prices/prices_am", mockResponse1)
-	mockClient.SetResponse("GET", "/prices/prices_am?pagination_key=next_page_key", mockResponse2)
+	mockClient.SetResponse("GET", "/equities/bars/daily/am", mockResponse1)
+	mockClient.SetResponse("GET", "/equities/bars/daily/am?pagination_key=next_page_key", mockResponse2)
 
 	// Execute
 	data, err := service.GetAllPricesAM()
@@ -183,22 +183,22 @@ func TestPriceAM_GetMorningRange(t *testing.T) {
 		{
 			name: "normal case",
 			price: PriceAM{
-				MorningHigh: floatPtr(244.0),
-				MorningLow:  floatPtr(232.0),
+				MH: floatPtr(244.0),
+				ML: floatPtr(232.0),
 			},
 			want: floatPtr(12.0),
 		},
 		{
 			name: "missing high",
 			price: PriceAM{
-				MorningLow: floatPtr(232.0),
+				ML: floatPtr(232.0),
 			},
 			want: nil,
 		},
 		{
 			name: "missing low",
 			price: PriceAM{
-				MorningHigh: floatPtr(244.0),
+				MH: floatPtr(244.0),
 			},
 			want: nil,
 		},
@@ -223,23 +223,23 @@ func TestPriceAM_GetMorningChangeFromOpen(t *testing.T) {
 		{
 			name: "positive change",
 			price: PriceAM{
-				MorningOpen:  floatPtr(232.0),
-				MorningClose: floatPtr(240.0),
+				MO: floatPtr(232.0),
+				MC: floatPtr(240.0),
 			},
 			want: floatPtr(8.0),
 		},
 		{
 			name: "negative change",
 			price: PriceAM{
-				MorningOpen:  floatPtr(240.0),
-				MorningClose: floatPtr(232.0),
+				MO: floatPtr(240.0),
+				MC: floatPtr(232.0),
 			},
 			want: floatPtr(-8.0),
 		},
 		{
 			name: "missing open",
 			price: PriceAM{
-				MorningClose: floatPtr(240.0),
+				MC: floatPtr(240.0),
 			},
 			want: nil,
 		},
@@ -264,24 +264,24 @@ func TestPriceAM_GetMorningChangeRate(t *testing.T) {
 		{
 			name: "positive rate",
 			price: PriceAM{
-				MorningOpen:  floatPtr(232.0),
-				MorningClose: floatPtr(240.0),
+				MO: floatPtr(232.0),
+				MC: floatPtr(240.0),
 			},
 			want: floatPtr((8.0 / 232.0) * 100),
 		},
 		{
 			name: "negative rate",
 			price: PriceAM{
-				MorningOpen:  floatPtr(240.0),
-				MorningClose: floatPtr(232.0),
+				MO: floatPtr(240.0),
+				MC: floatPtr(232.0),
 			},
 			want: floatPtr((-8.0 / 240.0) * 100),
 		},
 		{
 			name: "zero open",
 			price: PriceAM{
-				MorningOpen:  floatPtr(0.0),
-				MorningClose: floatPtr(240.0),
+				MO: floatPtr(0.0),
+				MC: floatPtr(240.0),
 			},
 			want: nil,
 		},
@@ -306,21 +306,21 @@ func TestPriceAM_HasMorningTrade(t *testing.T) {
 		{
 			name: "has trade",
 			price: PriceAM{
-				MorningVolume: floatPtr(52600.0),
+				MVo: floatPtr(52600.0),
 			},
 			want: true,
 		},
 		{
 			name: "no trade",
 			price: PriceAM{
-				MorningVolume: floatPtr(0.0),
+				MVo: floatPtr(0.0),
 			},
 			want: false,
 		},
 		{
 			name: "null volume",
 			price: PriceAM{
-				MorningVolume: nil,
+				MVo: nil,
 			},
 			want: false,
 		},
@@ -344,28 +344,28 @@ func TestPriceAM_IsActiveTrading(t *testing.T) {
 		{
 			name: "active trading",
 			price: PriceAM{
-				MorningTurnoverValue: floatPtr(150000000.0), // 1.5億円
+				MVa: floatPtr(150000000.0), // 1.5億円
 			},
 			want: true,
 		},
 		{
 			name: "exactly 100M",
 			price: PriceAM{
-				MorningTurnoverValue: floatPtr(100000000.0), // 1億円
+				MVa: floatPtr(100000000.0), // 1億円
 			},
 			want: true,
 		},
 		{
 			name: "below threshold",
 			price: PriceAM{
-				MorningTurnoverValue: floatPtr(50000000.0), // 5千万円
+				MVa: floatPtr(50000000.0), // 5千万円
 			},
 			want: false,
 		},
 		{
 			name: "null turnover",
 			price: PriceAM{
-				MorningTurnoverValue: nil,
+				MVa: nil,
 			},
 			want: false,
 		},
@@ -389,24 +389,24 @@ func TestPriceAM_GetAveragePrice(t *testing.T) {
 		{
 			name: "normal case",
 			price: PriceAM{
-				MorningTurnoverValue: floatPtr(12518800.0),
-				MorningVolume:        floatPtr(52600.0),
+				MVa: floatPtr(12518800.0),
+				MVo: floatPtr(52600.0),
 			},
 			want: floatPtr(238.0),
 		},
 		{
 			name: "zero volume",
 			price: PriceAM{
-				MorningTurnoverValue: floatPtr(12518800.0),
-				MorningVolume:        floatPtr(0.0),
+				MVa: floatPtr(12518800.0),
+				MVo: floatPtr(0.0),
 			},
 			want: nil,
 		},
 		{
 			name: "null turnover",
 			price: PriceAM{
-				MorningTurnoverValue: nil,
-				MorningVolume:        floatPtr(52600.0),
+				MVa: nil,
+				MVo: floatPtr(52600.0),
 			},
 			want: nil,
 		},
@@ -431,30 +431,30 @@ func TestPriceAM_IsUpperLimit(t *testing.T) {
 		{
 			name: "upper limit",
 			price: PriceAM{
-				MorningOpen:  floatPtr(1000.0),
-				MorningHigh:  floatPtr(1000.0),
-				MorningLow:   floatPtr(1000.0),
-				MorningClose: floatPtr(1000.0),
+				MO: floatPtr(1000.0),
+				MH: floatPtr(1000.0),
+				ML: floatPtr(1000.0),
+				MC: floatPtr(1000.0),
 			},
 			want: true,
 		},
 		{
 			name: "not upper limit",
 			price: PriceAM{
-				MorningOpen:  floatPtr(232.0),
-				MorningHigh:  floatPtr(244.0),
-				MorningLow:   floatPtr(232.0),
-				MorningClose: floatPtr(240.0),
+				MO: floatPtr(232.0),
+				MH: floatPtr(244.0),
+				ML: floatPtr(232.0),
+				MC: floatPtr(240.0),
 			},
 			want: false,
 		},
 		{
 			name: "missing data",
 			price: PriceAM{
-				MorningOpen:  floatPtr(1000.0),
-				MorningHigh:  floatPtr(1000.0),
-				MorningLow:   floatPtr(1000.0),
-				MorningClose: nil,
+				MO: floatPtr(1000.0),
+				MH: floatPtr(1000.0),
+				ML: floatPtr(1000.0),
+				MC: nil,
 			},
 			want: false,
 		},
@@ -475,7 +475,7 @@ func TestPricesAMService_GetPricesAM_Error(t *testing.T) {
 	service := NewPricesAMService(mockClient)
 
 	// Set error response
-	mockClient.SetError("GET", "/prices/prices_am", fmt.Errorf("unauthorized"))
+	mockClient.SetError("GET", "/equities/bars/daily/am", fmt.Errorf("unauthorized"))
 
 	// Execute
 	_, err := service.GetPricesAM(PricesAMParams{})

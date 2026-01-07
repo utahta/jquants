@@ -19,19 +19,19 @@ func TestStatementsService_GetStatements(t *testing.T) {
 			name:     "with code and date",
 			code:     "7203",
 			date:     "20240101",
-			wantPath: "/fins/statements?code=7203&date=20240101",
+			wantPath: "/fins/summary?code=7203&date=20240101",
 		},
 		{
 			name:     "with code only",
 			code:     "7203",
 			date:     "",
-			wantPath: "/fins/statements?code=7203",
+			wantPath: "/fins/summary?code=7203",
 		},
 		{
 			name:     "with no parameters",
 			code:     "",
 			date:     "",
-			wantPath: "/fins/statements",
+			wantPath: "/fins/summary",
 		},
 	}
 
@@ -41,50 +41,50 @@ func TestStatementsService_GetStatements(t *testing.T) {
 			mockClient := client.NewMockClient()
 			service := NewStatementsService(mockClient)
 
-			// Mock response
+			// Mock response (v2 format)
 			mockResponse := StatementsResponse{
-				Statements: []Statement{
+				Data: []Statement{
 					{
 						// 基本情報
-						DisclosedDate:              "2024-01-15",
-						DisclosedTime:              "14:30:00",
-						LocalCode:                  "72030",
-						DisclosureNumber:           "20240115123456",
-						TypeOfDocument:             "3QFinancialStatements_Consolidated_IFRS",
-						TypeOfCurrentPeriod:        "3Q",
-						CurrentPeriodStartDate:     "2023-10-01",
-						CurrentPeriodEndDate:       "2023-12-31",
-						CurrentFiscalYearStartDate: "2023-04-01",
-						CurrentFiscalYearEndDate:   "2024-03-31",
+						DiscDate:   "2024-01-15",
+						DiscTime:   "14:30:00",
+						Code:       "72030",
+						DiscNo:     "20240115123456",
+						DocType:    "3QFinancialStatements_Consolidated_IFRS",
+						CurPerType: "3Q",
+						CurPerSt:   "2023-10-01",
+						CurPerEn:   "2023-12-31",
+						CurFYSt:    "2023-04-01",
+						CurFYEn:    "2024-03-31",
 						// 連結財務数値
-						NetSales:                         floatPtr(10000000000),
-						OperatingProfit:                  floatPtr(2000000000),
-						OrdinaryProfit:                   floatPtr(2100000000),
-						Profit:                           floatPtr(1500000000),
-						TotalAssets:                      floatPtr(50000000000),
-						Equity:                           floatPtr(30000000000),
-						CashAndEquivalents:               floatPtr(5000000000),
-						CashFlowsFromOperatingActivities: floatPtr(3000000000),
-						CashFlowsFromInvestingActivities: floatPtr(-1500000000),
-						CashFlowsFromFinancingActivities: floatPtr(-500000000),
+						Sales:  floatPtr(10000000000),
+						OP:     floatPtr(2000000000),
+						OdP:    floatPtr(2100000000),
+						NP:     floatPtr(1500000000),
+						TA:     floatPtr(50000000000),
+						Eq:     floatPtr(30000000000),
+						CashEq: floatPtr(5000000000),
+						CFO:    floatPtr(3000000000),
+						CFI:    floatPtr(-1500000000),
+						CFF:    floatPtr(-500000000),
 						// 財務指標
-						EarningsPerShare:        floatPtr(150.5),
-						DilutedEarningsPerShare: floatPtr(149.8),
-						BookValuePerShare:       floatPtr(3000.0),
-						EquityToAssetRatio:      floatPtr(60.0),
+						EPS:  floatPtr(150.5),
+						DEPS: floatPtr(149.8),
+						BPS:  floatPtr(3000.0),
+						EqAR: floatPtr(60.0),
 						// 配当情報
-						ResultDividendPerShareAnnual:        floatPtr(60.0),
-						ResultPayoutRatioAnnual:             floatPtr(39.9),
-						ForecastDividendPerShareAnnual:      floatPtr(65.0),
-						ForecastPayoutRatioAnnual:           floatPtr(40.0),
-						ResultDividendPerShare2ndQuarter:    floatPtr(25.0),
-						ResultDividendPerShareFiscalYearEnd: floatPtr(35.0),
+						DivAnn:        floatPtr(60.0),
+						PayoutRatioAn: floatPtr(39.9),
+						FDivAnn:       floatPtr(65.0),
+						FPayoutRatioAn: floatPtr(40.0),
+						Div2Q:         floatPtr(25.0),
+						DivFY:         floatPtr(35.0),
 						// 業績予想
-						ForecastNetSales:         floatPtr(15000000000),
-						ForecastOperatingProfit:  floatPtr(3000000000),
-						ForecastOrdinaryProfit:   floatPtr(3100000000),
-						ForecastProfit:           floatPtr(2200000000),
-						ForecastEarningsPerShare: floatPtr(220.0),
+						FSales: floatPtr(15000000000),
+						FOP:    floatPtr(3000000000),
+						FOdP:   floatPtr(3100000000),
+						FNP:    floatPtr(2200000000),
+						FEPS:   floatPtr(220.0),
 					},
 				},
 			}
@@ -119,27 +119,27 @@ func TestStatementsService_GetLatestStatements(t *testing.T) {
 
 	// Mock response
 	mockResponse := StatementsResponse{
-		Statements: []Statement{
+		Data: []Statement{
 			{
-				DisclosedDate:                  "2024-01-15",
-				DisclosedTime:                  "14:30:00",
-				LocalCode:                      "72030",
-				DisclosureNumber:               "20240115123456",
-				TypeOfDocument:                 "3QFinancialStatements_Consolidated_IFRS",
-				TypeOfCurrentPeriod:            "3Q",
-				CurrentFiscalYearEndDate:       "2024-03-31",
-				NetSales:                       floatPtr(10000000000),
-				OperatingProfit:                floatPtr(2000000000),
-				OrdinaryProfit:                 floatPtr(2100000000),
-				Profit:                         floatPtr(1500000000),
-				ResultDividendPerShareAnnual:   floatPtr(50.0),
-				ForecastDividendPerShareAnnual: floatPtr(55.0),
-				EarningsPerShare:               floatPtr(150.5),
-				DilutedEarningsPerShare:        floatPtr(149.8),
+				DiscDate:   "2024-01-15",
+				DiscTime:   "14:30:00",
+				Code:       "72030",
+				DiscNo:     "20240115123456",
+				DocType:    "3QFinancialStatements_Consolidated_IFRS",
+				CurPerType: "3Q",
+				CurFYEn:    "2024-03-31",
+				Sales:      floatPtr(10000000000),
+				OP:         floatPtr(2000000000),
+				OdP:        floatPtr(2100000000),
+				NP:         floatPtr(1500000000),
+				DivAnn:     floatPtr(50.0),
+				FDivAnn:    floatPtr(55.0),
+				EPS:        floatPtr(150.5),
+				DEPS:       floatPtr(149.8),
 			},
 		},
 	}
-	mockClient.SetResponse("GET", "/fins/statements?code=7203", mockResponse)
+	mockClient.SetResponse("GET", "/fins/summary?code=7203", mockResponse)
 
 	// Test
 	statement, err := service.GetLatestStatements("7203")
@@ -153,12 +153,12 @@ func TestStatementsService_GetLatestStatements(t *testing.T) {
 		return
 	}
 
-	if statement.NetSales == nil || *statement.NetSales != 10000000000 {
-		t.Errorf("Expected NetSales 10000000000, got %v", statement.NetSales)
+	if statement.Sales == nil || *statement.Sales != 10000000000 {
+		t.Errorf("Expected Sales 10000000000, got %v", statement.Sales)
 	}
 
-	if statement.EarningsPerShare == nil || *statement.EarningsPerShare != 150.5 {
-		t.Errorf("Expected EarningsPerShare 150.5, got %v", statement.EarningsPerShare)
+	if statement.EPS == nil || *statement.EPS != 150.5 {
+		t.Errorf("Expected EPS 150.5, got %v", statement.EPS)
 	}
 }
 
@@ -169,9 +169,9 @@ func TestStatementsService_GetLatestStatements_NotFound(t *testing.T) {
 
 	// Mock empty response
 	mockResponse := StatementsResponse{
-		Statements: []Statement{},
+		Data: []Statement{},
 	}
-	mockClient.SetResponse("GET", "/fins/statements?code=9999", mockResponse)
+	mockClient.SetResponse("GET", "/fins/summary?code=9999", mockResponse)
 
 	// Test
 	_, err := service.GetLatestStatements("9999")
@@ -186,7 +186,7 @@ func TestStatementsService_GetStatements_Error(t *testing.T) {
 	service := NewStatementsService(mockClient)
 
 	// Mock error
-	mockClient.SetError("GET", "/fins/statements?code=7203", fmt.Errorf("API error"))
+	mockClient.SetError("GET", "/fins/summary?code=7203", fmt.Errorf("API error"))
 
 	// Test
 	_, err := service.GetStatements("7203", "")
@@ -202,22 +202,22 @@ func TestStatementsService_GetStatementsByDate(t *testing.T) {
 
 	// Mock response
 	mockResponse := StatementsResponse{
-		Statements: []Statement{
+		Data: []Statement{
 			{
-				DisclosedDate:    "2024-01-15",
-				LocalCode:        "72030",
-				NetSales:         floatPtr(10000000000),
-				OperatingProfit:  floatPtr(2000000000),
+				DiscDate: "2024-01-15",
+				Code:     "72030",
+				Sales:    floatPtr(10000000000),
+				OP:       floatPtr(2000000000),
 			},
 			{
-				DisclosedDate:    "2024-01-15",
-				LocalCode:        "86970",
-				NetSales:         floatPtr(5000000000),
-				OperatingProfit:  floatPtr(1000000000),
+				DiscDate: "2024-01-15",
+				Code:     "86970",
+				Sales:    floatPtr(5000000000),
+				OP:       floatPtr(1000000000),
 			},
 		},
 	}
-	mockClient.SetResponse("GET", "/fins/statements?date=2024-01-15", mockResponse)
+	mockClient.SetResponse("GET", "/fins/summary?date=2024-01-15", mockResponse)
 
 	// Test
 	statements, err := service.GetStatementsByDate("2024-01-15")
@@ -230,98 +230,99 @@ func TestStatementsService_GetStatementsByDate(t *testing.T) {
 		t.Errorf("Expected 2 statements, got %d", len(statements))
 	}
 
-	if mockClient.LastPath != "/fins/statements?date=2024-01-15" {
-		t.Errorf("Expected path /fins/statements?date=2024-01-15, got %s", mockClient.LastPath)
+	if mockClient.LastPath != "/fins/summary?date=2024-01-15" {
+		t.Errorf("Expected path /fins/summary?date=2024-01-15, got %s", mockClient.LastPath)
 	}
 }
 
 func TestStatementsResponse_UnmarshalJSON(t *testing.T) {
-	// Test JSON with mixed types (strings that should be converted to float64/int64/bool)
+	// Test JSON with mixed types (strings that should be converted to float64/int64)
+	// Using v2 API field names
 	jsonData := `{
-		"statements": [
+		"data": [
 			{
-				"DisclosedDate": "2024-01-15",
-				"DisclosedTime": "14:30:00",
-				"LocalCode": "72030",
-				"DisclosureNumber": "20240115123456",
-				"TypeOfDocument": "3QFinancialStatements_Consolidated_IFRS",
-				"TypeOfCurrentPeriod": "3Q",
-				"CurrentPeriodStartDate": "2023-10-01",
-				"CurrentPeriodEndDate": "2023-12-31",
-				"CurrentFiscalYearStartDate": "2023-04-01",
-				"CurrentFiscalYearEndDate": "2024-03-31",
-				"NetSales": "10000000000",
-				"OperatingProfit": "2000000000",
-				"OrdinaryProfit": "2100000000",
-				"Profit": "1500000000",
-				"EarningsPerShare": "150.5",
-				"DilutedEarningsPerShare": "149.8",
-				"TotalAssets": "50000000000",
-				"Equity": "30000000000",
-				"EquityToAssetRatio": "60.0",
-				"BookValuePerShare": "3000.0",
-				"CashAndEquivalents": "5000000000",
-				"CashFlowsFromOperatingActivities": "3000000000",
-				"CashFlowsFromInvestingActivities": "-1500000000",
-				"CashFlowsFromFinancingActivities": "-500000000",
-				"MaterialChangesInSubsidiaries": "false",
-				"SignificantChangesInTheScopeOfConsolidation": "true",
-				"ChangesInAccountingEstimates": "false",
-				"ChangesOtherThanOnesBasedOnRevisionsOfAccountingStandard": "false",
-				"RetrospectiveRestatement": "false",
-				"NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": "1000000000",
-				"NumberOfTreasuryStockAtTheEndOfFiscalYear": "50000000",
-				"AverageNumberOfShares": "975000000",
-				"ResultDividendPerShareAnnual": "60.0",
-				"ResultPayoutRatioAnnual": "39.9",
-				"DistributionsPerUnit(REIT)": "1000.0",
-				"ResultTotalDividendPaidAnnual": "58500000000",
-				"ForecastDividendPerShareAnnual": "65.0",
-				"ForecastPayoutRatioAnnual": "40.0",
-				"ForecastDistributionsPerUnit(REIT)": "1100.0",
-				"ForecastTotalDividendPaidAnnual": "63375000000",
-				"ForecastNetSales": "15000000000",
-				"ForecastOperatingProfit": "3000000000",
-				"ForecastEarningsPerShare": "220.0",
-				"NextYearForecastDividendPerShare1stQuarter": "15.0",
-				"NextYearForecastDividendPerShare2ndQuarter": "17.5",
-				"NextYearForecastDividendPerShare3rdQuarter": "17.5",
-				"NextYearForecastDividendPerShareFiscalYearEnd": "20.0",
-				"NextYearForecastDividendPerShareAnnual": "70.0",
-				"NextYearForecastDistributionsPerUnit(REIT)": "1200.0",
-				"NextYearForecastPayoutRatioAnnual": "35.0",
-				"NextYearForecastNetSales2ndQuarter": "8000000000",
-				"NextYearForecastOperatingProfit2ndQuarter": "1600000000",
-				"NextYearForecastOrdinaryProfit2ndQuarter": "1650000000",
-				"NextYearForecastProfit2ndQuarter": "1200000000",
-				"NextYearForecastEarningsPerShare2ndQuarter": "125.0",
-				"NextYearForecastNetSales": "16000000000",
-				"NextYearForecastEarningsPerShare": "250.0",
-				"ChangesBasedOnRevisionsOfAccountingStandard": "true",
-				"NonConsolidatedNetSales": "8000000000",
-				"NonConsolidatedOperatingProfit": "1600000000",
-				"NonConsolidatedProfit": "1200000000",
-				"NonConsolidatedEarningsPerShare": "120.0",
-				"ForecastNonConsolidatedNetSales2ndQuarter": "4000000000",
-				"ForecastNonConsolidatedOperatingProfit2ndQuarter": "800000000",
-				"ForecastNonConsolidatedOrdinaryProfit2ndQuarter": "820000000",
-				"ForecastNonConsolidatedProfit2ndQuarter": "600000000",
-				"ForecastNonConsolidatedEarningsPerShare2ndQuarter": "60.0",
-				"NextYearForecastNonConsolidatedNetSales2ndQuarter": "4200000000",
-				"NextYearForecastNonConsolidatedOperatingProfit2ndQuarter": "840000000",
-				"NextYearForecastNonConsolidatedOrdinaryProfit2ndQuarter": "860000000",
-				"NextYearForecastNonConsolidatedProfit2ndQuarter": "630000000",
-				"NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter": "63.0",
-				"ForecastNonConsolidatedNetSales": "8500000000",
-				"ForecastNonConsolidatedOperatingProfit": "1700000000",
-				"ForecastNonConsolidatedOrdinaryProfit": "1750000000",
-				"ForecastNonConsolidatedProfit": "1300000000",
-				"ForecastNonConsolidatedEarningsPerShare": "130.0",
-				"NextYearForecastNonConsolidatedNetSales": "9000000000",
-				"NextYearForecastNonConsolidatedOperatingProfit": "1800000000",
-				"NextYearForecastNonConsolidatedOrdinaryProfit": "1850000000",
-				"NextYearForecastNonConsolidatedProfit": "1400000000",
-				"NextYearForecastNonConsolidatedEarningsPerShare": "140.0"
+				"DiscDate": "2024-01-15",
+				"DiscTime": "14:30:00",
+				"Code": "72030",
+				"DiscNo": "20240115123456",
+				"DocType": "3QFinancialStatements_Consolidated_IFRS",
+				"CurPerType": "3Q",
+				"CurPerSt": "2023-10-01",
+				"CurPerEn": "2023-12-31",
+				"CurFYSt": "2023-04-01",
+				"CurFYEn": "2024-03-31",
+				"Sales": "10000000000",
+				"OP": "2000000000",
+				"OdP": "2100000000",
+				"NP": "1500000000",
+				"EPS": "150.5",
+				"DEPS": "149.8",
+				"TA": "50000000000",
+				"Eq": "30000000000",
+				"EqAR": "60.0",
+				"BPS": "3000.0",
+				"CashEq": "5000000000",
+				"CFO": "3000000000",
+				"CFI": "-1500000000",
+				"CFF": "-500000000",
+				"MatChgSub": "false",
+				"SigChgInC": "true",
+				"ChgAcEst": "false",
+				"ChgNoASRev": "false",
+				"RetroRst": "false",
+				"ShOutFY": "1000000000",
+				"TrShFY": "50000000",
+				"AvgSh": "975000000",
+				"DivAnn": "60.0",
+				"PayoutRatioAnn": "39.9",
+				"DivUnit": "1000.0",
+				"DivTotalAnn": "58500000000",
+				"FDivAnn": "65.0",
+				"FPayoutRatioAnn": "40.0",
+				"FDivUnit": "1100.0",
+				"FDivTotalAnn": "63375000000",
+				"FSales": "15000000000",
+				"FOP": "3000000000",
+				"FEPS": "220.0",
+				"NxFDiv1Q": "15.0",
+				"NxFDiv2Q": "17.5",
+				"NxFDiv3Q": "17.5",
+				"NxFDivFY": "20.0",
+				"NxFDivAnn": "70.0",
+				"NxFDivUnit": "1200.0",
+				"NxFPayoutRatioAnn": "35.0",
+				"NxFSales2Q": "8000000000",
+				"NxFOP2Q": "1600000000",
+				"NxFOdP2Q": "1650000000",
+				"NxFNp2Q": "1200000000",
+				"NxFEPS2Q": "125.0",
+				"NxFSales": "16000000000",
+				"NxFEPS": "250.0",
+				"ChgByASRev": "true",
+				"NCSales": "8000000000",
+				"NCOP": "1600000000",
+				"NCNP": "1200000000",
+				"NCEPS": "120.0",
+				"FNCSales2Q": "4000000000",
+				"FNCOP2Q": "800000000",
+				"FNCOdP2Q": "820000000",
+				"FNCNP2Q": "600000000",
+				"FNCEPS2Q": "60.0",
+				"NxFNCSales2Q": "4200000000",
+				"NxFNCOP2Q": "840000000",
+				"NxFNCOdP2Q": "860000000",
+				"NxFNCNP2Q": "630000000",
+				"NxFNCEPS2Q": "63.0",
+				"FNCSales": "8500000000",
+				"FNCOP": "1700000000",
+				"FNCOdP": "1750000000",
+				"FNCNP": "1300000000",
+				"FNCEPS": "130.0",
+				"NxFNCSales": "9000000000",
+				"NxFNCOP": "1800000000",
+				"NxFNCOdP": "1850000000",
+				"NxFNCNP": "1400000000",
+				"NxFNCEPS": "140.0"
 			}
 		]
 	}`
@@ -333,163 +334,162 @@ func TestStatementsResponse_UnmarshalJSON(t *testing.T) {
 	}
 
 	// Verify the conversion
-	if len(resp.Statements) != 1 {
-		t.Fatalf("Expected 1 statement, got %d", len(resp.Statements))
+	if len(resp.Data) != 1 {
+		t.Fatalf("Expected 1 statement, got %d", len(resp.Data))
 	}
 
-	s := resp.Statements[0]
+	s := resp.Data[0]
 
 	// Check basic info
-	if s.DisclosedDate != "2024-01-15" {
-		t.Errorf("Expected DisclosedDate 2024-01-15, got %s", s.DisclosedDate)
+	if s.DiscDate != "2024-01-15" {
+		t.Errorf("Expected DiscDate 2024-01-15, got %s", s.DiscDate)
 	}
-	if s.LocalCode != "72030" {
-		t.Errorf("Expected LocalCode 72030, got %s", s.LocalCode)
+	if s.Code != "72030" {
+		t.Errorf("Expected Code 72030, got %s", s.Code)
 	}
-	if s.TypeOfCurrentPeriod != "3Q" {
-		t.Errorf("Expected TypeOfCurrentPeriod 3Q, got %s", s.TypeOfCurrentPeriod)
+	if s.CurPerType != "3Q" {
+		t.Errorf("Expected CurPerType 3Q, got %s", s.CurPerType)
 	}
 
 	// Check float64 conversions
-	if s.NetSales == nil || *s.NetSales != 10000000000 {
-		t.Errorf("Expected NetSales 10000000000, got %v", s.NetSales)
+	if s.Sales == nil || *s.Sales != 10000000000 {
+		t.Errorf("Expected Sales 10000000000, got %v", s.Sales)
 	}
-	if s.EarningsPerShare == nil || *s.EarningsPerShare != 150.5 {
-		t.Errorf("Expected EarningsPerShare 150.5, got %v", s.EarningsPerShare)
+	if s.EPS == nil || *s.EPS != 150.5 {
+		t.Errorf("Expected EPS 150.5, got %v", s.EPS)
 	}
-	if s.CashFlowsFromInvestingActivities == nil || *s.CashFlowsFromInvestingActivities != -1500000000 {
-		t.Errorf("Expected CashFlowsFromInvestingActivities -1500000000, got %v", s.CashFlowsFromInvestingActivities)
+	if s.CFI == nil || *s.CFI != -1500000000 {
+		t.Errorf("Expected CFI -1500000000, got %v", s.CFI)
 	}
 
-	// Check bool conversions
-	if s.MaterialChangesInSubsidiaries != false {
-		t.Errorf("Expected MaterialChangesInSubsidiaries false, got %v", s.MaterialChangesInSubsidiaries)
+	// Check string fields (bool values are now strings in v2)
+	if s.MatChgSub != "false" {
+		t.Errorf("Expected MatChgSub 'false', got %s", s.MatChgSub)
 	}
-	if s.SignificantChangesInTheScopeOfConsolidation != true {
-		t.Errorf("Expected SignificantChangesInTheScopeOfConsolidation true, got %v", s.SignificantChangesInTheScopeOfConsolidation)
+	if s.SigChgInC != "true" {
+		t.Errorf("Expected SigChgInC 'true', got %s", s.SigChgInC)
 	}
 
 	// Check int64 conversions
-	if s.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock == nil || *s.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock != 1000000000 {
-		t.Errorf("Expected NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock 1000000000, got %v", s.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock)
+	if s.ShOutFY == nil || *s.ShOutFY != 1000000000 {
+		t.Errorf("Expected ShOutFY 1000000000, got %v", s.ShOutFY)
 	}
-	if s.AverageNumberOfShares == nil || *s.AverageNumberOfShares != 975000000 {
-		t.Errorf("Expected AverageNumberOfShares 975000000, got %v", s.AverageNumberOfShares)
-	}
-
-	// Check new REIT fields
-	if s.DistributionsPerUnitREIT == nil || *s.DistributionsPerUnitREIT != 1000.0 {
-		t.Errorf("Expected DistributionsPerUnitREIT 1000.0, got %v", s.DistributionsPerUnitREIT)
-	}
-	if s.ResultTotalDividendPaidAnnual == nil || *s.ResultTotalDividendPaidAnnual != 58500000000 {
-		t.Errorf("Expected ResultTotalDividendPaidAnnual 58500000000, got %v", s.ResultTotalDividendPaidAnnual)
-	}
-	if s.ForecastDistributionsPerUnitREIT == nil || *s.ForecastDistributionsPerUnitREIT != 1100.0 {
-		t.Errorf("Expected ForecastDistributionsPerUnitREIT 1100.0, got %v", s.ForecastDistributionsPerUnitREIT)
-	}
-	if s.ForecastTotalDividendPaidAnnual == nil || *s.ForecastTotalDividendPaidAnnual != 63375000000 {
-		t.Errorf("Expected ForecastTotalDividendPaidAnnual 63375000000, got %v", s.ForecastTotalDividendPaidAnnual)
+	if s.AvgSh == nil || *s.AvgSh != 975000000 {
+		t.Errorf("Expected AvgSh 975000000, got %v", s.AvgSh)
 	}
 
-	// Check new NextYear quarterly dividend fields
-	if s.NextYearForecastDividendPerShare1stQuarter == nil || *s.NextYearForecastDividendPerShare1stQuarter != 15.0 {
-		t.Errorf("Expected NextYearForecastDividendPerShare1stQuarter 15.0, got %v", s.NextYearForecastDividendPerShare1stQuarter)
+	// Check dividend fields
+	if s.DivUnit == nil || *s.DivUnit != 1000.0 {
+		t.Errorf("Expected DivUnit 1000.0, got %v", s.DivUnit)
 	}
-	if s.NextYearForecastDividendPerShare2ndQuarter == nil || *s.NextYearForecastDividendPerShare2ndQuarter != 17.5 {
-		t.Errorf("Expected NextYearForecastDividendPerShare2ndQuarter 17.5, got %v", s.NextYearForecastDividendPerShare2ndQuarter)
+	if s.DivTotalAnn == nil || *s.DivTotalAnn != 58500000000 {
+		t.Errorf("Expected DivTotalAnn 58500000000, got %v", s.DivTotalAnn)
 	}
-	if s.NextYearForecastDividendPerShare3rdQuarter == nil || *s.NextYearForecastDividendPerShare3rdQuarter != 17.5 {
-		t.Errorf("Expected NextYearForecastDividendPerShare3rdQuarter 17.5, got %v", s.NextYearForecastDividendPerShare3rdQuarter)
+	if s.FDivUnit == nil || *s.FDivUnit != 1100.0 {
+		t.Errorf("Expected FDivUnit 1100.0, got %v", s.FDivUnit)
 	}
-	if s.NextYearForecastDividendPerShareFiscalYearEnd == nil || *s.NextYearForecastDividendPerShareFiscalYearEnd != 20.0 {
-		t.Errorf("Expected NextYearForecastDividendPerShareFiscalYearEnd 20.0, got %v", s.NextYearForecastDividendPerShareFiscalYearEnd)
-	}
-	if s.NextYearForecastDistributionsPerUnitREIT == nil || *s.NextYearForecastDistributionsPerUnitREIT != 1200.0 {
-		t.Errorf("Expected NextYearForecastDistributionsPerUnitREIT 1200.0, got %v", s.NextYearForecastDistributionsPerUnitREIT)
+	if s.FDivTotalAnn == nil || *s.FDivTotalAnn != 63375000000 {
+		t.Errorf("Expected FDivTotalAnn 63375000000, got %v", s.FDivTotalAnn)
 	}
 
-	// Check new NextYear quarterly forecast fields
-	if s.NextYearForecastNetSales2ndQuarter == nil || *s.NextYearForecastNetSales2ndQuarter != 8000000000 {
-		t.Errorf("Expected NextYearForecastNetSales2ndQuarter 8000000000, got %v", s.NextYearForecastNetSales2ndQuarter)
+	// Check NextYear quarterly dividend fields
+	if s.NxFDiv1Q == nil || *s.NxFDiv1Q != 15.0 {
+		t.Errorf("Expected NxFDiv1Q 15.0, got %v", s.NxFDiv1Q)
 	}
-	if s.NextYearForecastOperatingProfit2ndQuarter == nil || *s.NextYearForecastOperatingProfit2ndQuarter != 1600000000 {
-		t.Errorf("Expected NextYearForecastOperatingProfit2ndQuarter 1600000000, got %v", s.NextYearForecastOperatingProfit2ndQuarter)
+	if s.NxFDiv2Q == nil || *s.NxFDiv2Q != 17.5 {
+		t.Errorf("Expected NxFDiv2Q 17.5, got %v", s.NxFDiv2Q)
 	}
-	if s.NextYearForecastOrdinaryProfit2ndQuarter == nil || *s.NextYearForecastOrdinaryProfit2ndQuarter != 1650000000 {
-		t.Errorf("Expected NextYearForecastOrdinaryProfit2ndQuarter 1650000000, got %v", s.NextYearForecastOrdinaryProfit2ndQuarter)
+	if s.NxFDiv3Q == nil || *s.NxFDiv3Q != 17.5 {
+		t.Errorf("Expected NxFDiv3Q 17.5, got %v", s.NxFDiv3Q)
 	}
-	if s.NextYearForecastProfit2ndQuarter == nil || *s.NextYearForecastProfit2ndQuarter != 1200000000 {
-		t.Errorf("Expected NextYearForecastProfit2ndQuarter 1200000000, got %v", s.NextYearForecastProfit2ndQuarter)
+	if s.NxFDivFY == nil || *s.NxFDivFY != 20.0 {
+		t.Errorf("Expected NxFDivFY 20.0, got %v", s.NxFDivFY)
 	}
-	if s.NextYearForecastEarningsPerShare2ndQuarter == nil || *s.NextYearForecastEarningsPerShare2ndQuarter != 125.0 {
-		t.Errorf("Expected NextYearForecastEarningsPerShare2ndQuarter 125.0, got %v", s.NextYearForecastEarningsPerShare2ndQuarter)
+	if s.NxFDivUnit == nil || *s.NxFDivUnit != 1200.0 {
+		t.Errorf("Expected NxFDivUnit 1200.0, got %v", s.NxFDivUnit)
 	}
 
-	// Check new accounting standard field
-	if s.ChangesBasedOnRevisionsOfAccountingStandard != true {
-		t.Errorf("Expected ChangesBasedOnRevisionsOfAccountingStandard true, got %v", s.ChangesBasedOnRevisionsOfAccountingStandard)
+	// Check NextYear quarterly forecast fields
+	if s.NxFSales2Q == nil || *s.NxFSales2Q != 8000000000 {
+		t.Errorf("Expected NxFSales2Q 8000000000, got %v", s.NxFSales2Q)
+	}
+	if s.NxFOP2Q == nil || *s.NxFOP2Q != 1600000000 {
+		t.Errorf("Expected NxFOP2Q 1600000000, got %v", s.NxFOP2Q)
+	}
+	if s.NxFOdP2Q == nil || *s.NxFOdP2Q != 1650000000 {
+		t.Errorf("Expected NxFOdP2Q 1650000000, got %v", s.NxFOdP2Q)
+	}
+	if s.NxFNp2Q == nil || *s.NxFNp2Q != 1200000000 {
+		t.Errorf("Expected NxFNp2Q 1200000000, got %v", s.NxFNp2Q)
+	}
+	if s.NxFEPS2Q == nil || *s.NxFEPS2Q != 125.0 {
+		t.Errorf("Expected NxFEPS2Q 125.0, got %v", s.NxFEPS2Q)
+	}
+
+	// Check accounting standard field
+	if s.ChgByASRev != "true" {
+		t.Errorf("Expected ChgByASRev 'true', got %s", s.ChgByASRev)
 	}
 
 	// Check NonConsolidated forecast fields
-	if s.ForecastNonConsolidatedNetSales2ndQuarter == nil || *s.ForecastNonConsolidatedNetSales2ndQuarter != 4000000000 {
-		t.Errorf("Expected ForecastNonConsolidatedNetSales2ndQuarter 4000000000, got %v", s.ForecastNonConsolidatedNetSales2ndQuarter)
+	if s.FNCSales2Q == nil || *s.FNCSales2Q != 4000000000 {
+		t.Errorf("Expected FNCSales2Q 4000000000, got %v", s.FNCSales2Q)
 	}
-	if s.ForecastNonConsolidatedOperatingProfit2ndQuarter == nil || *s.ForecastNonConsolidatedOperatingProfit2ndQuarter != 800000000 {
-		t.Errorf("Expected ForecastNonConsolidatedOperatingProfit2ndQuarter 800000000, got %v", s.ForecastNonConsolidatedOperatingProfit2ndQuarter)
+	if s.FNCOP2Q == nil || *s.FNCOP2Q != 800000000 {
+		t.Errorf("Expected FNCOP2Q 800000000, got %v", s.FNCOP2Q)
 	}
-	if s.ForecastNonConsolidatedOrdinaryProfit2ndQuarter == nil || *s.ForecastNonConsolidatedOrdinaryProfit2ndQuarter != 820000000 {
-		t.Errorf("Expected ForecastNonConsolidatedOrdinaryProfit2ndQuarter 820000000, got %v", s.ForecastNonConsolidatedOrdinaryProfit2ndQuarter)
+	if s.FNCOdP2Q == nil || *s.FNCOdP2Q != 820000000 {
+		t.Errorf("Expected FNCOdP2Q 820000000, got %v", s.FNCOdP2Q)
 	}
-	if s.ForecastNonConsolidatedProfit2ndQuarter == nil || *s.ForecastNonConsolidatedProfit2ndQuarter != 600000000 {
-		t.Errorf("Expected ForecastNonConsolidatedProfit2ndQuarter 600000000, got %v", s.ForecastNonConsolidatedProfit2ndQuarter)
+	if s.FNCNP2Q == nil || *s.FNCNP2Q != 600000000 {
+		t.Errorf("Expected FNCNP2Q 600000000, got %v", s.FNCNP2Q)
 	}
-	if s.ForecastNonConsolidatedEarningsPerShare2ndQuarter == nil || *s.ForecastNonConsolidatedEarningsPerShare2ndQuarter != 60.0 {
-		t.Errorf("Expected ForecastNonConsolidatedEarningsPerShare2ndQuarter 60.0, got %v", s.ForecastNonConsolidatedEarningsPerShare2ndQuarter)
+	if s.FNCEPS2Q == nil || *s.FNCEPS2Q != 60.0 {
+		t.Errorf("Expected FNCEPS2Q 60.0, got %v", s.FNCEPS2Q)
 	}
 
 	// Check NextYear NonConsolidated forecast fields
-	if s.NextYearForecastNonConsolidatedNetSales2ndQuarter == nil || *s.NextYearForecastNonConsolidatedNetSales2ndQuarter != 4200000000 {
-		t.Errorf("Expected NextYearForecastNonConsolidatedNetSales2ndQuarter 4200000000, got %v", s.NextYearForecastNonConsolidatedNetSales2ndQuarter)
+	if s.NxFNCSales2Q == nil || *s.NxFNCSales2Q != 4200000000 {
+		t.Errorf("Expected NxFNCSales2Q 4200000000, got %v", s.NxFNCSales2Q)
 	}
-	if s.NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter == nil || *s.NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter != 63.0 {
-		t.Errorf("Expected NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter 63.0, got %v", s.NextYearForecastNonConsolidatedEarningsPerShare2ndQuarter)
+	if s.NxFNCEPS2Q == nil || *s.NxFNCEPS2Q != 63.0 {
+		t.Errorf("Expected NxFNCEPS2Q 63.0, got %v", s.NxFNCEPS2Q)
 	}
 
 	// Check NonConsolidated annual forecast fields
-	if s.ForecastNonConsolidatedNetSales == nil || *s.ForecastNonConsolidatedNetSales != 8500000000 {
-		t.Errorf("Expected ForecastNonConsolidatedNetSales 8500000000, got %v", s.ForecastNonConsolidatedNetSales)
+	if s.FNCSales == nil || *s.FNCSales != 8500000000 {
+		t.Errorf("Expected FNCSales 8500000000, got %v", s.FNCSales)
 	}
-	if s.ForecastNonConsolidatedOperatingProfit == nil || *s.ForecastNonConsolidatedOperatingProfit != 1700000000 {
-		t.Errorf("Expected ForecastNonConsolidatedOperatingProfit 1700000000, got %v", s.ForecastNonConsolidatedOperatingProfit)
+	if s.FNCOP == nil || *s.FNCOP != 1700000000 {
+		t.Errorf("Expected FNCOP 1700000000, got %v", s.FNCOP)
 	}
-	if s.ForecastNonConsolidatedOrdinaryProfit == nil || *s.ForecastNonConsolidatedOrdinaryProfit != 1750000000 {
-		t.Errorf("Expected ForecastNonConsolidatedOrdinaryProfit 1750000000, got %v", s.ForecastNonConsolidatedOrdinaryProfit)
+	if s.FNCOdP == nil || *s.FNCOdP != 1750000000 {
+		t.Errorf("Expected FNCOdP 1750000000, got %v", s.FNCOdP)
 	}
-	if s.ForecastNonConsolidatedProfit == nil || *s.ForecastNonConsolidatedProfit != 1300000000 {
-		t.Errorf("Expected ForecastNonConsolidatedProfit 1300000000, got %v", s.ForecastNonConsolidatedProfit)
+	if s.FNCNP == nil || *s.FNCNP != 1300000000 {
+		t.Errorf("Expected FNCNP 1300000000, got %v", s.FNCNP)
 	}
-	if s.ForecastNonConsolidatedEarningsPerShare == nil || *s.ForecastNonConsolidatedEarningsPerShare != 130.0 {
-		t.Errorf("Expected ForecastNonConsolidatedEarningsPerShare 130.0, got %v", s.ForecastNonConsolidatedEarningsPerShare)
+	if s.FNCEPS == nil || *s.FNCEPS != 130.0 {
+		t.Errorf("Expected FNCEPS 130.0, got %v", s.FNCEPS)
 	}
 
 	// Check NextYear NonConsolidated annual forecast fields
-	if s.NextYearForecastNonConsolidatedNetSales == nil || *s.NextYearForecastNonConsolidatedNetSales != 9000000000 {
-		t.Errorf("Expected NextYearForecastNonConsolidatedNetSales 9000000000, got %v", s.NextYearForecastNonConsolidatedNetSales)
+	if s.NxFNCSales == nil || *s.NxFNCSales != 9000000000 {
+		t.Errorf("Expected NxFNCSales 9000000000, got %v", s.NxFNCSales)
 	}
-	if s.NextYearForecastNonConsolidatedEarningsPerShare == nil || *s.NextYearForecastNonConsolidatedEarningsPerShare != 140.0 {
-		t.Errorf("Expected NextYearForecastNonConsolidatedEarningsPerShare 140.0, got %v", s.NextYearForecastNonConsolidatedEarningsPerShare)
+	if s.NxFNCEPS == nil || *s.NxFNCEPS != 140.0 {
+		t.Errorf("Expected NxFNCEPS 140.0, got %v", s.NxFNCEPS)
 	}
 
 	// Check empty string handling
-	// Note: Due to UnmarshalJSON implementation, empty strings are converted to 0 for numeric types
 	jsonDataEmpty := `{
-		"statements": [
+		"data": [
 			{
-				"DisclosedDate": "2024-01-15",
-				"LocalCode": "72030",
-				"NetSales": "",
-				"MaterialChangesInSubsidiaries": "",
-				"NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock": ""
+				"DiscDate": "2024-01-15",
+				"Code": "72030",
+				"Sales": "",
+				"MatChgSub": "",
+				"ShOutFY": ""
 			}
 		]
 	}`
@@ -500,16 +500,16 @@ func TestStatementsResponse_UnmarshalJSON(t *testing.T) {
 		t.Fatalf("UnmarshalJSON with empty strings failed: %v", err)
 	}
 
-	sEmpty := respEmpty.Statements[0]
+	sEmpty := respEmpty.Data[0]
 	// Empty string is converted to 0 for numeric types in current implementation
-	if sEmpty.NetSales == nil || *sEmpty.NetSales != 0 {
-		t.Errorf("Expected NetSales 0 for empty string, got %v", sEmpty.NetSales)
+	if sEmpty.Sales == nil || *sEmpty.Sales != 0 {
+		t.Errorf("Expected Sales 0 for empty string, got %v", sEmpty.Sales)
 	}
-	if sEmpty.MaterialChangesInSubsidiaries != false {
-		t.Errorf("Expected MaterialChangesInSubsidiaries false for empty string, got %v", sEmpty.MaterialChangesInSubsidiaries)
+	if sEmpty.MatChgSub != "" {
+		t.Errorf("Expected MatChgSub '' for empty string, got %s", sEmpty.MatChgSub)
 	}
 	// Empty string is converted to 0 for numeric types in current implementation
-	if sEmpty.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock == nil || *sEmpty.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock != 0 {
-		t.Errorf("Expected NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock 0 for empty string, got %v", sEmpty.NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock)
+	if sEmpty.ShOutFY == nil || *sEmpty.ShOutFY != 0 {
+		t.Errorf("Expected ShOutFY 0 for empty string, got %v", sEmpty.ShOutFY)
 	}
 }

@@ -17,27 +17,27 @@ func TestQuotesService_GetDailyQuotes(t *testing.T) {
 		{
 			name:     "with all parameters",
 			params:   DailyQuotesParams{Code: "7203", From: "20240101", To: "20240131"},
-			wantPath: "/prices/daily_quotes?code=7203&from=20240101&to=20240131",
+			wantPath: "/equities/bars/daily?code=7203&from=20240101&to=20240131",
 		},
 		{
 			name:     "with code only",
 			params:   DailyQuotesParams{Code: "7203"},
-			wantPath: "/prices/daily_quotes?code=7203",
+			wantPath: "/equities/bars/daily?code=7203",
 		},
 		{
 			name:     "with date only",
 			params:   DailyQuotesParams{Date: "20240101"},
-			wantPath: "/prices/daily_quotes?date=20240101",
+			wantPath: "/equities/bars/daily?date=20240101",
 		},
 		{
 			name:     "with pagination key",
 			params:   DailyQuotesParams{Date: "20240101", PaginationKey: "key123"},
-			wantPath: "/prices/daily_quotes?date=20240101&pagination_key=key123",
+			wantPath: "/equities/bars/daily?date=20240101&pagination_key=key123",
 		},
 		{
 			name:     "with no parameters",
 			params:   DailyQuotesParams{},
-			wantPath: "/prices/daily_quotes",
+			wantPath: "/equities/bars/daily",
 		},
 	}
 
@@ -49,26 +49,26 @@ func TestQuotesService_GetDailyQuotes(t *testing.T) {
 
 			// Mock response
 			mockResponse := DailyQuotesResponse{
-				DailyQuotes: []DailyQuote{
+				Data: []DailyQuote{
 					{
-						Date:             "20240101",
-						Code:             "7203",
-						Open:             floatPtr(2490.0),
-						High:             floatPtr(2510.0),
-						Low:              floatPtr(2480.0),
-						Close:            floatPtr(2500.0),
-						UpperLimit:       "0",
-						LowerLimit:       "0",
-						Volume:           floatPtr(1000000),
-						AdjustmentFactor: 1.0,
-						AdjustmentClose:  floatPtr(2500.0),
+						Date:      "20240101",
+						Code:      "7203",
+						O:         floatPtr(2490.0),
+						H:         floatPtr(2510.0),
+						L:         floatPtr(2480.0),
+						C:         floatPtr(2500.0),
+						UL:        "0",
+						LL:        "0",
+						Vo:        floatPtr(1000000),
+						AdjFactor: 1.0,
+						AdjC:      floatPtr(2500.0),
 					},
 					{
-						Date:       "20240102",
-						Code:       "7203",
-						Close:      floatPtr(2520.0),
-						UpperLimit: "1", // ストップ高
-						LowerLimit: "0",
+						Date: "20240102",
+						Code: "7203",
+						C:    floatPtr(2520.0),
+						UL:   "1", // ストップ高
+						LL:   "0",
 					},
 				},
 				PaginationKey: "",
@@ -82,8 +82,8 @@ func TestQuotesService_GetDailyQuotes(t *testing.T) {
 			}
 
 			// Verify
-			if len(resp.DailyQuotes) != 2 {
-				t.Errorf("Expected 2 quotes, got %d", len(resp.DailyQuotes))
+			if len(resp.Data) != 2 {
+				t.Errorf("Expected 2 quotes, got %d", len(resp.Data))
 			}
 
 			if mockClient.LastMethod != "GET" {
@@ -105,21 +105,21 @@ func TestQuotesService_GetDailyQuotesByCode(t *testing.T) {
 	// Calculate expected dates
 	to := time.Now()
 	from := to.AddDate(0, 0, -30)
-	expectedPath := fmt.Sprintf("/prices/daily_quotes?code=7203&from=%s&to=%s",
+	expectedPath := fmt.Sprintf("/equities/bars/daily?code=7203&from=%s&to=%s",
 		from.Format("20060102"), to.Format("20060102"))
 
 	// Mock response
 	mockResponse := DailyQuotesResponse{
-		DailyQuotes: []DailyQuote{
+		Data: []DailyQuote{
 			{
-				Date:            "20240101",
-				Code:            "7203",
-				Open:            floatPtr(2480.0),
-				High:            floatPtr(2510.0),
-				Low:             floatPtr(2470.0),
-				Close:           floatPtr(2500.0),
-				Volume:          floatPtr(1000000),
-				AdjustmentClose: floatPtr(2500.0),
+				Date:  "20240101",
+				Code:  "7203",
+				O:     floatPtr(2480.0),
+				H:     floatPtr(2510.0),
+				L:     floatPtr(2470.0),
+				C:     floatPtr(2500.0),
+				Vo:    floatPtr(1000000),
+				AdjC:  floatPtr(2500.0),
 			},
 		},
 		PaginationKey: "", // ページネーションなし
@@ -158,7 +158,7 @@ func TestQuotesService_GetDailyQuotes_Error(t *testing.T) {
 	service := NewQuotesService(mockClient)
 
 	// Mock error
-	mockClient.SetError("GET", "/prices/daily_quotes?code=7203", fmt.Errorf("API error"))
+	mockClient.SetError("GET", "/equities/bars/daily?code=7203", fmt.Errorf("API error"))
 
 	// Test
 	_, err := service.GetDailyQuotes(DailyQuotesParams{Code: "7203"})
@@ -174,16 +174,16 @@ func TestQuotesService_GetDailyQuotesByDate(t *testing.T) {
 
 	// Mock response - 最初のページ
 	mockResponse1 := DailyQuotesResponse{
-		DailyQuotes: []DailyQuote{
+		Data: []DailyQuote{
 			{
-				Date:  "20240101",
-				Code:  "1301",
-				Close: floatPtr(1000.0),
+				Date: "20240101",
+				Code: "1301",
+				C:    floatPtr(1000.0),
 			},
 			{
-				Date:  "20240101",
-				Code:  "1332",
-				Close: floatPtr(2000.0),
+				Date: "20240101",
+				Code: "1332",
+				C:    floatPtr(2000.0),
 			},
 		},
 		PaginationKey: "next_page_key",
@@ -191,18 +191,18 @@ func TestQuotesService_GetDailyQuotesByDate(t *testing.T) {
 
 	// Mock response - 2ページ目
 	mockResponse2 := DailyQuotesResponse{
-		DailyQuotes: []DailyQuote{
+		Data: []DailyQuote{
 			{
-				Date:  "20240101",
-				Code:  "7203",
-				Close: floatPtr(2500.0),
+				Date: "20240101",
+				Code: "7203",
+				C:    floatPtr(2500.0),
 			},
 		},
 		PaginationKey: "", // 最後のページ
 	}
 
-	mockClient.SetResponse("GET", "/prices/daily_quotes?date=20240101", mockResponse1)
-	mockClient.SetResponse("GET", "/prices/daily_quotes?date=20240101&pagination_key=next_page_key", mockResponse2)
+	mockClient.SetResponse("GET", "/equities/bars/daily?date=20240101", mockResponse1)
+	mockClient.SetResponse("GET", "/equities/bars/daily?date=20240101&pagination_key=next_page_key", mockResponse2)
 
 	// Test
 	quotes, err := service.GetDailyQuotesByDate("20240101")
@@ -225,31 +225,31 @@ func TestDailyQuote_StopLimitMethods(t *testing.T) {
 	}{
 		{
 			name:   "ストップ高",
-			quote:  DailyQuote{UpperLimit: "1", LowerLimit: "0"},
+			quote:  DailyQuote{UL: "1", LL: "0"},
 			method: "IsStopHigh",
 			want:   true,
 		},
 		{
 			name:   "ストップ安",
-			quote:  DailyQuote{UpperLimit: "0", LowerLimit: "1"},
+			quote:  DailyQuote{UL: "0", LL: "1"},
 			method: "IsStopLow",
 			want:   true,
 		},
 		{
 			name:   "通常",
-			quote:  DailyQuote{UpperLimit: "0", LowerLimit: "0"},
+			quote:  DailyQuote{UL: "0", LL: "0"},
 			method: "IsStopHigh",
 			want:   false,
 		},
 		{
 			name:   "前場ストップ高",
-			quote:  DailyQuote{MorningUpperLimit: "1", MorningLowerLimit: "0"},
+			quote:  DailyQuote{MUL: "1", MLL: "0"},
 			method: "IsMorningStopHigh",
 			want:   true,
 		},
 		{
 			name:   "後場ストップ安",
-			quote:  DailyQuote{AfternoonUpperLimit: "0", AfternoonLowerLimit: "1"},
+			quote:  DailyQuote{AUL: "0", ALL: "1"},
 			method: "IsAfternoonStopLow",
 			want:   true,
 		},
@@ -285,18 +285,18 @@ func TestDailyQuote_HasData(t *testing.T) {
 		{
 			name: "前場データあり",
 			quote: DailyQuote{
-				MorningOpen:  floatPtr(1000),
-				MorningHigh:  floatPtr(1010),
-				MorningLow:   floatPtr(990),
-				MorningClose: floatPtr(1005),
+				MO: floatPtr(1000),
+				MH: floatPtr(1010),
+				ML: floatPtr(990),
+				MC: floatPtr(1005),
 			},
 			want: true,
 		},
 		{
 			name: "前場データなし",
 			quote: DailyQuote{
-				Open:  floatPtr(1000),
-				Close: floatPtr(1005),
+				O: floatPtr(1000),
+				C: floatPtr(1005),
 			},
 			want: false,
 		},
@@ -336,21 +336,21 @@ func TestQuotesService_GetDailyQuotesByCode_WithPagination(t *testing.T) {
 	// Calculate expected dates
 	to := time.Now()
 	from := to.AddDate(0, 0, -30)
-	basePath := fmt.Sprintf("/prices/daily_quotes?code=7203&from=%s&to=%s",
+	basePath := fmt.Sprintf("/equities/bars/daily?code=7203&from=%s&to=%s",
 		from.Format("20060102"), to.Format("20060102"))
 
 	// Mock response - 最初のページ
 	mockResponse1 := DailyQuotesResponse{
-		DailyQuotes: []DailyQuote{
+		Data: []DailyQuote{
 			{
-				Date:  "20240101",
-				Code:  "7203",
-				Close: floatPtr(2500.0),
+				Date: "20240101",
+				Code: "7203",
+				C:    floatPtr(2500.0),
 			},
 			{
-				Date:  "20240102",
-				Code:  "7203",
-				Close: floatPtr(2510.0),
+				Date: "20240102",
+				Code: "7203",
+				C:    floatPtr(2510.0),
 			},
 		},
 		PaginationKey: "next_page_key",
@@ -358,11 +358,11 @@ func TestQuotesService_GetDailyQuotesByCode_WithPagination(t *testing.T) {
 
 	// Mock response - 2ページ目
 	mockResponse2 := DailyQuotesResponse{
-		DailyQuotes: []DailyQuote{
+		Data: []DailyQuote{
 			{
-				Date:  "20240103",
-				Code:  "7203",
-				Close: floatPtr(2520.0),
+				Date: "20240103",
+				Code: "7203",
+				C:    floatPtr(2520.0),
 			},
 		},
 		PaginationKey: "", // 最後のページ
@@ -383,10 +383,10 @@ func TestQuotesService_GetDailyQuotesByCode_WithPagination(t *testing.T) {
 	}
 
 	// 各データの確認
-	if quotes[0].Date != "20240101" || *quotes[0].Close != 2500.0 {
+	if quotes[0].Date != "20240101" || *quotes[0].C != 2500.0 {
 		t.Errorf("First quote data mismatch")
 	}
-	if quotes[2].Date != "20240103" || *quotes[2].Close != 2520.0 {
+	if quotes[2].Date != "20240103" || *quotes[2].C != 2520.0 {
 		t.Errorf("Last quote data mismatch")
 	}
 }

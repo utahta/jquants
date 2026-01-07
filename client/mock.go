@@ -10,7 +10,6 @@ import (
 type MockClient struct {
 	Responses    map[string]interface{}
 	Errors       map[string]error
-	AccessToken  string
 	RequestCount int
 	LastMethod   string
 	LastPath     string
@@ -33,7 +32,7 @@ func (m *MockClient) DoRequest(method, path string, body interface{}, result int
 	m.LastBody = body
 
 	key := fmt.Sprintf("%s:%s", method, path)
-	
+
 	// Check if error is set for this request
 	if err, ok := m.Errors[key]; ok {
 		return err
@@ -61,11 +60,6 @@ func (m *MockClient) DoRequest(method, path string, body interface{}, result int
 	}
 
 	return fmt.Errorf("no mock response set for %s", key)
-}
-
-// SetAccessToken implements HTTPClient interface
-func (m *MockClient) SetAccessToken(token string) {
-	m.AccessToken = token
 }
 
 // SetResponse sets a mock response for a specific method and path

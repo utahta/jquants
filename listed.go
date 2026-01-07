@@ -8,16 +8,16 @@ import (
 
 // 市場区分コード定義
 const (
-	MarketTSE1st           = "0101" // 東証一部
-	MarketTSE2nd           = "0102" // 東証二部
-	MarketMothers          = "0104" // マザーズ
-	MarketTokyoProMarket   = "0105" // TOKYO PRO MARKET
-	MarketJASDAQStandard   = "0106" // JASDAQ スタンダード
-	MarketJASDAQGrowth     = "0107" // JASDAQ グロース
-	MarketOther            = "0109" // その他
-	MarketPrime            = "0111" // プライム
-	MarketStandard         = "0112" // スタンダード
-	MarketGrowth           = "0113" // グロース
+	MarketTSE1st         = "0101" // 東証一部
+	MarketTSE2nd         = "0102" // 東証二部
+	MarketMothers        = "0104" // マザーズ
+	MarketTokyoProMarket = "0105" // TOKYO PRO MARKET
+	MarketJASDAQStandard = "0106" // JASDAQ スタンダード
+	MarketJASDAQGrowth   = "0107" // JASDAQ グロース
+	MarketOther          = "0109" // その他
+	MarketPrime          = "0111" // プライム
+	MarketStandard       = "0112" // スタンダード
+	MarketGrowth         = "0113" // グロース
 )
 
 // 17業種コード定義
@@ -93,39 +93,39 @@ func NewListedService(c client.HTTPClient) *ListedService {
 }
 
 // ListedInfo は上場企業の基本情報を表します。
-// J-Quants API /listed/info エンドポイントのレスポンスデータ。
+// J-Quants API /equities/master エンドポイントのレスポンスデータ。
 // 過去時点、当日、翌営業日時点の銘柄情報が取得可能（翌営業日は17:30以降）。
 type ListedInfo struct {
-	Date               string `json:"Date"`               // 日付（YYYY-MM-DD形式）
-	Code               string `json:"Code"`               // 銘柄コード（4桁または5桁）
-	CompanyName        string `json:"CompanyName"`        // 企業名（日本語）
-	CompanyNameEnglish string `json:"CompanyNameEnglish"` // 企業名（英語）
-	LocalCode          string `json:"LocalCode"`          // ローカルコード（5桁の銘柄コード）
-	MarketCode         string `json:"MarketCode"`         // 市場区分コード
-	MarketCodeName     string `json:"MarketCodeName"`     // 市場区分名（プライム、スタンダード、グロース等）
-	Sector17Code       string `json:"Sector17Code"`       // 17業種コード
-	Sector17CodeName   string `json:"Sector17CodeName"`   // 17業種コード名
-	Sector33Code       string `json:"Sector33Code"`       // 33業種コード
-	Sector33CodeName   string `json:"Sector33CodeName"`   // 33業種コード名
-	ScaleCategory      string `json:"ScaleCategory"`      // 規模コード（TOPIX Core30、Large70等）
-	IsDelisted         string `json:"IsDelisted"`         // 上場廃止フラグ（true/false）
+	Date     string `json:"Date"`     // 情報適用年月日（YYYY-MM-DD形式）
+	Code     string `json:"Code"`     // 銘柄コード（4桁または5桁）
+	CoName   string `json:"CoName"`   // 企業名（日本語）
+	CoNameEn string `json:"CoNameEn"` // 企業名（英語）
+	S17      string `json:"S17"`      // 17業種コード
+	S17Nm    string `json:"S17Nm"`    // 17業種コード名
+	S33      string `json:"S33"`      // 33業種コード
+	S33Nm    string `json:"S33Nm"`    // 33業種コード名
+	ScaleCat string `json:"ScaleCat"` // 規模コード（TOPIX Core30、Large70等）
+	Mkt      string `json:"Mkt"`      // 市場区分コード
+	MktNm    string `json:"MktNm"`    // 市場区分名（プライム、スタンダード、グロース等）
+	Mrgn     string `json:"Mrgn"`     // 貸借信用区分（1: 信用 / 2: 貸借 / 3: その他）（Standard/Premiumのみ）
+	MrgnNm   string `json:"MrgnNm"`   // 貸借信用区分名（Standard/Premiumのみ）
 }
 
 type ListedInfoResponse struct {
-	Info []ListedInfo `json:"info"`
+	Data []ListedInfo `json:"data"`
 }
 
 // GetListedInfo は上場企業情報を取得します。
 // パラメータ:
 // - code: 銘柄コード（空の場合は全銘柄）4桁または5桁形式をサポート
 // - date: 基準日（YYYYMMDD または YYYY-MM-DD 形式、空の場合は最新）
-// 
+//
 // 使用例:
 // - 特定銘柄: GetListedInfo("7203", "")
 // - 全銘柄（最新）: GetListedInfo("", "")
 // - 過去時点: GetListedInfo("", "20210907")
 func (s *ListedService) GetListedInfo(code string, date string) ([]ListedInfo, error) {
-	path := "/listed/info"
+	path := "/equities/master"
 
 	query := "?"
 	if code != "" {
@@ -144,7 +144,7 @@ func (s *ListedService) GetListedInfo(code string, date string) ([]ListedInfo, e
 		return nil, fmt.Errorf("failed to get listed info: %w", err)
 	}
 
-	return resp.Info, nil
+	return resp.Data, nil
 }
 
 // GetCompanyInfo は指定銘柄の最新企業情報を取得します。
@@ -172,7 +172,7 @@ func (s *ListedService) GetListedBySector17(sector17Code string, date string) ([
 
 	var filtered []ListedInfo
 	for _, info := range allInfo {
-		if info.Sector17Code == sector17Code {
+		if info.S17 == sector17Code {
 			filtered = append(filtered, info)
 		}
 	}
@@ -190,7 +190,7 @@ func (s *ListedService) GetListedBySector33(sector33Code string, date string) ([
 
 	var filtered []ListedInfo
 	for _, info := range allInfo {
-		if info.Sector33Code == sector33Code {
+		if info.S33 == sector33Code {
 			filtered = append(filtered, info)
 		}
 	}
@@ -208,15 +208,10 @@ func (s *ListedService) GetListedByMarket(marketCode string, date string) ([]Lis
 
 	var filtered []ListedInfo
 	for _, info := range allInfo {
-		if info.MarketCode == marketCode {
+		if info.Mkt == marketCode {
 			filtered = append(filtered, info)
 		}
 	}
 
 	return filtered, nil
-}
-
-// IsDelisted は銘柄が上場廃止かどうかを確認します。
-func (info *ListedInfo) IsDelistedBool() bool {
-	return info.IsDelisted == "true"
 }

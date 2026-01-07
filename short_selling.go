@@ -20,8 +20,8 @@ func NewShortSellingService(c client.HTTPClient) *ShortSellingService {
 
 // ShortSellingParams は業種別空売り比率のリクエストパラメータです。
 type ShortSellingParams struct {
-	Sector33Code  string // 33業種コード（sector33codeまたはdateのいずれかが必須）
-	Date          string // 日付（YYYYMMDD または YYYY-MM-DD）（sector33codeまたはdateのいずれかが必須）
+	Sector33Code  string // 33業種コード（s33またはdateのいずれかが必須）
+	Date          string // 日付（YYYYMMDD または YYYY-MM-DD）（s33またはdateのいずれかが必須）
 	From          string // 期間の開始日（YYYYMMDD または YYYY-MM-DD）
 	To            string // 期間の終了日（YYYYMMDD または YYYY-MM-DD）
 	PaginationKey string // ページネーションキー
@@ -29,40 +29,40 @@ type ShortSellingParams struct {
 
 // ShortSellingResponse は業種別空売り比率のレスポンスです。
 type ShortSellingResponse struct {
-	ShortSelling  []ShortSelling `json:"short_selling"`
+	Data          []ShortSelling `json:"data"`
 	PaginationKey string         `json:"pagination_key"` // ページネーションキー
 }
 
 // ShortSelling は業種別空売り比率のデータを表します。
-// J-Quants API /markets/short_selling エンドポイントのレスポンスデータ。
+// J-Quants API /markets/short-ratio エンドポイントのレスポンスデータ。
 type ShortSelling struct {
 	// 基本情報
-	Date         string `json:"Date"`         // 日付（YYYY-MM-DD形式）
-	Sector33Code string `json:"Sector33Code"` // 33業種コード
+	Date string `json:"Date"` // 日付（YYYY-MM-DD形式）
+	S33  string `json:"S33"`  // 33業種コード
 
 	// 売買代金データ（単位：円）
-	SellingExcludingShortSellingTurnoverValue    float64 `json:"SellingExcludingShortSellingTurnoverValue"`    // 実注文の売買代金（空売り以外の通常売り注文）
-	ShortSellingWithRestrictionsTurnoverValue    float64 `json:"ShortSellingWithRestrictionsTurnoverValue"`    // 価格規制有りの空売り売買代金（アップティック・ルール等）
-	ShortSellingWithoutRestrictionsTurnoverValue float64 `json:"ShortSellingWithoutRestrictionsTurnoverValue"` // 価格規制無しの空売り売買代金（ETF、REIT、裁定取引等）
+	SellExShortVa float64 `json:"SellExShortVa"` // 実注文の売買代金（空売り以外の通常売り注文）
+	ShrtWithResVa float64 `json:"ShrtWithResVa"` // 価格規制有りの空売り売買代金（アップティック・ルール等）
+	ShrtNoResVa   float64 `json:"ShrtNoResVa"`   // 価格規制無しの空売り売買代金（ETF、REIT、裁定取引等）
 }
 
 // RawShortSelling is used for unmarshaling JSON response with mixed types
 type RawShortSelling struct {
 	// 基本情報
-	Date         string `json:"Date"`
-	Sector33Code string `json:"Sector33Code"`
+	Date string `json:"Date"`
+	S33  string `json:"S33"`
 
 	// 売買代金データ
-	SellingExcludingShortSellingTurnoverValue    types.Float64String `json:"SellingExcludingShortSellingTurnoverValue"`
-	ShortSellingWithRestrictionsTurnoverValue    types.Float64String `json:"ShortSellingWithRestrictionsTurnoverValue"`
-	ShortSellingWithoutRestrictionsTurnoverValue types.Float64String `json:"ShortSellingWithoutRestrictionsTurnoverValue"`
+	SellExShortVa types.Float64String `json:"SellExShortVa"`
+	ShrtWithResVa types.Float64String `json:"ShrtWithResVa"`
+	ShrtNoResVa   types.Float64String `json:"ShrtNoResVa"`
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling for ShortSellingResponse
 func (r *ShortSellingResponse) UnmarshalJSON(data []byte) error {
 	// First unmarshal into RawShortSelling
 	type rawResponse struct {
-		ShortSelling  []RawShortSelling `json:"short_selling"`
+		Data          []RawShortSelling `json:"data"`
 		PaginationKey string            `json:"pagination_key"`
 	}
 
@@ -75,17 +75,17 @@ func (r *ShortSellingResponse) UnmarshalJSON(data []byte) error {
 	r.PaginationKey = raw.PaginationKey
 
 	// Convert RawShortSelling to ShortSelling
-	r.ShortSelling = make([]ShortSelling, len(raw.ShortSelling))
-	for idx, rs := range raw.ShortSelling {
-		r.ShortSelling[idx] = ShortSelling{
+	r.Data = make([]ShortSelling, len(raw.Data))
+	for idx, rs := range raw.Data {
+		r.Data[idx] = ShortSelling{
 			// 基本情報
-			Date:         rs.Date,
-			Sector33Code: rs.Sector33Code,
+			Date: rs.Date,
+			S33:  rs.S33,
 
 			// 売買代金データ
-			SellingExcludingShortSellingTurnoverValue:    float64(rs.SellingExcludingShortSellingTurnoverValue),
-			ShortSellingWithRestrictionsTurnoverValue:    float64(rs.ShortSellingWithRestrictionsTurnoverValue),
-			ShortSellingWithoutRestrictionsTurnoverValue: float64(rs.ShortSellingWithoutRestrictionsTurnoverValue),
+			SellExShortVa: float64(rs.SellExShortVa),
+			ShrtWithResVa: float64(rs.ShrtWithResVa),
+			ShrtNoResVa:   float64(rs.ShrtNoResVa),
 		}
 	}
 
@@ -94,16 +94,16 @@ func (r *ShortSellingResponse) UnmarshalJSON(data []byte) error {
 
 // GetShortSelling は業種別空売り比率を取得します。
 func (s *ShortSellingService) GetShortSelling(params ShortSellingParams) (*ShortSellingResponse, error) {
-	// sector33codeまたはdateのいずれかが必須
+	// s33またはdateのいずれかが必須
 	if params.Sector33Code == "" && params.Date == "" {
-		return nil, fmt.Errorf("either sector33code or date parameter is required")
+		return nil, fmt.Errorf("either s33 or date parameter is required")
 	}
 
-	path := "/markets/short_selling"
+	path := "/markets/short-ratio"
 
 	query := "?"
 	if params.Sector33Code != "" {
-		query += fmt.Sprintf("sector33code=%s&", params.Sector33Code)
+		query += fmt.Sprintf("s33=%s&", params.Sector33Code)
 	}
 	if params.Date != "" {
 		query += fmt.Sprintf("date=%s&", params.Date)
@@ -147,7 +147,7 @@ func (s *ShortSellingService) GetShortSellingBySector(sector33Code string) ([]Sh
 			return nil, err
 		}
 
-		allData = append(allData, resp.ShortSelling...)
+		allData = append(allData, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -176,7 +176,7 @@ func (s *ShortSellingService) GetShortSellingByDate(date string) ([]ShortSelling
 			return nil, err
 		}
 
-		allData = append(allData, resp.ShortSelling...)
+		allData = append(allData, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -206,7 +206,7 @@ func (s *ShortSellingService) GetShortSellingBySectorAndDateRange(sector33Code, 
 			return nil, err
 		}
 
-		allData = append(allData, resp.ShortSelling...)
+		allData = append(allData, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -220,12 +220,12 @@ func (s *ShortSellingService) GetShortSellingBySectorAndDateRange(sector33Code, 
 
 // GetTotalShortSellingValue は空売り合計金額を計算します。
 func (ss *ShortSelling) GetTotalShortSellingValue() float64 {
-	return ss.ShortSellingWithRestrictionsTurnoverValue + ss.ShortSellingWithoutRestrictionsTurnoverValue
+	return ss.ShrtWithResVa + ss.ShrtNoResVa
 }
 
 // GetTotalTurnoverValue は総売買代金を計算します。
 func (ss *ShortSelling) GetTotalTurnoverValue() float64 {
-	return ss.SellingExcludingShortSellingTurnoverValue + ss.GetTotalShortSellingValue()
+	return ss.SellExShortVa + ss.GetTotalShortSellingValue()
 }
 
 // GetShortSellingRatio は空売り比率を計算します（パーセント）。
@@ -243,7 +243,7 @@ func (ss *ShortSelling) GetRestrictedShortSellingRatio() float64 {
 	if totalShortSelling == 0 {
 		return 0
 	}
-	return (ss.ShortSellingWithRestrictionsTurnoverValue / totalShortSelling) * 100
+	return (ss.ShrtWithResVa / totalShortSelling) * 100
 }
 
 // GetUnrestrictedShortSellingRatio は価格規制なし空売りの割合を計算します（パーセント）。
@@ -252,5 +252,5 @@ func (ss *ShortSelling) GetUnrestrictedShortSellingRatio() float64 {
 	if totalShortSelling == 0 {
 		return 0
 	}
-	return (ss.ShortSellingWithoutRestrictionsTurnoverValue / totalShortSelling) * 100
+	return (ss.ShrtNoResVa / totalShortSelling) * 100
 }

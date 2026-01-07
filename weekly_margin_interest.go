@@ -29,8 +29,8 @@ type WeeklyMarginInterestParams struct {
 
 // WeeklyMarginInterestResponse は信用取引週末残高のレスポンスです。
 type WeeklyMarginInterestResponse struct {
-	WeeklyMarginInterest []WeeklyMarginInterest `json:"weekly_margin_interest"`
-	PaginationKey        string                 `json:"pagination_key"` // ページネーションキー
+	Data          []WeeklyMarginInterest `json:"data"`
+	PaginationKey string                 `json:"pagination_key"` // ページネーションキー
 }
 
 // 銘柄区分定数
@@ -41,48 +41,48 @@ const (
 )
 
 // WeeklyMarginInterest は信用取引週末残高のデータを表します。
-// J-Quants API /markets/weekly_margin_interest エンドポイントのレスポンスデータ。
+// J-Quants API /markets/margin-interest エンドポイントのレスポンスデータ。
 type WeeklyMarginInterest struct {
 	// 基本情報
-	Date      string `json:"Date"`      // 申込日付（YYYY-MM-DD形式）
-	Code      string `json:"Code"`      // 銘柄コード
-	IssueType string `json:"IssueType"` // 銘柄区分（1: 信用銘柄、2: 貸借銘柄、3: その他）
+	Date    string `json:"Date"`    // 申込日付（YYYY-MM-DD形式）
+	Code    string `json:"Code"`    // 銘柄コード
+	IssType string `json:"IssType"` // 銘柄区分（1: 信用銘柄、2: 貸借銘柄、3: その他）
 
 	// 信用取引残高（売建）
-	ShortMarginTradeVolume             float64 `json:"ShortMarginTradeVolume"`             // 売合計信用取引週末残高
-	ShortNegotiableMarginTradeVolume   float64 `json:"ShortNegotiableMarginTradeVolume"`   // 売一般信用取引週末残高
-	ShortStandardizedMarginTradeVolume float64 `json:"ShortStandardizedMarginTradeVolume"` // 売制度信用取引週末残高
+	ShrtVol    float64 `json:"ShrtVol"`    // 売合計信用取引週末残高
+	ShrtNegVol float64 `json:"ShrtNegVol"` // 売一般信用取引週末残高
+	ShrtStdVol float64 `json:"ShrtStdVol"` // 売制度信用取引週末残高
 
 	// 信用取引残高（買建）
-	LongMarginTradeVolume             float64 `json:"LongMarginTradeVolume"`             // 買合計信用取引週末残高
-	LongNegotiableMarginTradeVolume   float64 `json:"LongNegotiableMarginTradeVolume"`   // 買一般信用取引週末残高
-	LongStandardizedMarginTradeVolume float64 `json:"LongStandardizedMarginTradeVolume"` // 買制度信用取引週末残高
+	LongVol    float64 `json:"LongVol"`    // 買合計信用取引週末残高
+	LongNegVol float64 `json:"LongNegVol"` // 買一般信用取引週末残高
+	LongStdVol float64 `json:"LongStdVol"` // 買制度信用取引週末残高
 }
 
 // RawWeeklyMarginInterest is used for unmarshaling JSON response with mixed types
 type RawWeeklyMarginInterest struct {
 	// 基本情報
-	Date      string `json:"Date"`
-	Code      string `json:"Code"`
-	IssueType string `json:"IssueType"`
+	Date    string `json:"Date"`
+	Code    string `json:"Code"`
+	IssType string `json:"IssType"`
 
 	// 信用取引残高（売建）
-	ShortMarginTradeVolume             types.Float64String `json:"ShortMarginTradeVolume"`
-	ShortNegotiableMarginTradeVolume   types.Float64String `json:"ShortNegotiableMarginTradeVolume"`
-	ShortStandardizedMarginTradeVolume types.Float64String `json:"ShortStandardizedMarginTradeVolume"`
+	ShrtVol    types.Float64String `json:"ShrtVol"`
+	ShrtNegVol types.Float64String `json:"ShrtNegVol"`
+	ShrtStdVol types.Float64String `json:"ShrtStdVol"`
 
 	// 信用取引残高（買建）
-	LongMarginTradeVolume             types.Float64String `json:"LongMarginTradeVolume"`
-	LongNegotiableMarginTradeVolume   types.Float64String `json:"LongNegotiableMarginTradeVolume"`
-	LongStandardizedMarginTradeVolume types.Float64String `json:"LongStandardizedMarginTradeVolume"`
+	LongVol    types.Float64String `json:"LongVol"`
+	LongNegVol types.Float64String `json:"LongNegVol"`
+	LongStdVol types.Float64String `json:"LongStdVol"`
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling for WeeklyMarginInterestResponse
 func (r *WeeklyMarginInterestResponse) UnmarshalJSON(data []byte) error {
 	// First unmarshal into RawWeeklyMarginInterest
 	type rawResponse struct {
-		WeeklyMarginInterest []RawWeeklyMarginInterest `json:"weekly_margin_interest"`
-		PaginationKey        string                    `json:"pagination_key"`
+		Data          []RawWeeklyMarginInterest `json:"data"`
+		PaginationKey string                    `json:"pagination_key"`
 	}
 
 	var raw rawResponse
@@ -94,23 +94,23 @@ func (r *WeeklyMarginInterestResponse) UnmarshalJSON(data []byte) error {
 	r.PaginationKey = raw.PaginationKey
 
 	// Convert RawWeeklyMarginInterest to WeeklyMarginInterest
-	r.WeeklyMarginInterest = make([]WeeklyMarginInterest, len(raw.WeeklyMarginInterest))
-	for idx, rm := range raw.WeeklyMarginInterest {
-		r.WeeklyMarginInterest[idx] = WeeklyMarginInterest{
+	r.Data = make([]WeeklyMarginInterest, len(raw.Data))
+	for idx, rm := range raw.Data {
+		r.Data[idx] = WeeklyMarginInterest{
 			// 基本情報
-			Date:      rm.Date,
-			Code:      rm.Code,
-			IssueType: rm.IssueType,
+			Date:    rm.Date,
+			Code:    rm.Code,
+			IssType: rm.IssType,
 
 			// 信用取引残高（売建）
-			ShortMarginTradeVolume:             float64(rm.ShortMarginTradeVolume),
-			ShortNegotiableMarginTradeVolume:   float64(rm.ShortNegotiableMarginTradeVolume),
-			ShortStandardizedMarginTradeVolume: float64(rm.ShortStandardizedMarginTradeVolume),
+			ShrtVol:    float64(rm.ShrtVol),
+			ShrtNegVol: float64(rm.ShrtNegVol),
+			ShrtStdVol: float64(rm.ShrtStdVol),
 
 			// 信用取引残高（買建）
-			LongMarginTradeVolume:             float64(rm.LongMarginTradeVolume),
-			LongNegotiableMarginTradeVolume:   float64(rm.LongNegotiableMarginTradeVolume),
-			LongStandardizedMarginTradeVolume: float64(rm.LongStandardizedMarginTradeVolume),
+			LongVol:    float64(rm.LongVol),
+			LongNegVol: float64(rm.LongNegVol),
+			LongStdVol: float64(rm.LongStdVol),
 		}
 	}
 
@@ -124,7 +124,7 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterest(params WeeklyMargi
 		return nil, fmt.Errorf("either code or date parameter is required")
 	}
 
-	path := "/markets/weekly_margin_interest"
+	path := "/markets/margin-interest"
 
 	query := "?"
 	if params.Code != "" {
@@ -172,7 +172,7 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCode(code string)
 			return nil, err
 		}
 
-		allData = append(allData, resp.WeeklyMarginInterest...)
+		allData = append(allData, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -201,7 +201,7 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByDate(date string)
 			return nil, err
 		}
 
-		allData = append(allData, resp.WeeklyMarginInterest...)
+		allData = append(allData, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -231,7 +231,7 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCodeAndDateRange(
 			return nil, err
 		}
 
-		allData = append(allData, resp.WeeklyMarginInterest...)
+		allData = append(allData, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -245,34 +245,34 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCodeAndDateRange(
 
 // IsCredit は信用銘柄かどうかを判定します。
 func (wmi *WeeklyMarginInterest) IsCredit() bool {
-	return wmi.IssueType == IssueTypeCredit
+	return wmi.IssType == IssueTypeCredit
 }
 
 // IsLendable は貸借銘柄かどうかを判定します。
 func (wmi *WeeklyMarginInterest) IsLendable() bool {
-	return wmi.IssueType == IssueTypeLendable
+	return wmi.IssType == IssueTypeLendable
 }
 
 // GetShortLongRatio は売建残高と買建残高の比率を計算します（売建/買建）。
 func (wmi *WeeklyMarginInterest) GetShortLongRatio() float64 {
-	if wmi.LongMarginTradeVolume == 0 {
+	if wmi.LongVol == 0 {
 		return 0
 	}
-	return wmi.ShortMarginTradeVolume / wmi.LongMarginTradeVolume
+	return wmi.ShrtVol / wmi.LongVol
 }
 
 // GetStandardizedRatio は制度信用の割合を計算します（制度信用/合計）。
 func (wmi *WeeklyMarginInterest) GetStandardizedRatio() (float64, float64) {
 	// 売建の制度信用比率
 	shortStandardizedRatio := float64(0)
-	if wmi.ShortMarginTradeVolume > 0 {
-		shortStandardizedRatio = wmi.ShortStandardizedMarginTradeVolume / wmi.ShortMarginTradeVolume
+	if wmi.ShrtVol > 0 {
+		shortStandardizedRatio = wmi.ShrtStdVol / wmi.ShrtVol
 	}
 
 	// 買建の制度信用比率
 	longStandardizedRatio := float64(0)
-	if wmi.LongMarginTradeVolume > 0 {
-		longStandardizedRatio = wmi.LongStandardizedMarginTradeVolume / wmi.LongMarginTradeVolume
+	if wmi.LongVol > 0 {
+		longStandardizedRatio = wmi.LongStdVol / wmi.LongVol
 	}
 
 	return shortStandardizedRatio, longStandardizedRatio

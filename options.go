@@ -33,113 +33,113 @@ type OptionsParams struct {
 
 // OptionsResponse はオプション四本値のレスポンスです。
 type OptionsResponse struct {
-	Options       []Option `json:"options"`
+	Data          []Option `json:"data"`
 	PaginationKey string   `json:"pagination_key"` // ページネーションキー
 }
 
 // Option はオプション四本値データを表します。
-// J-Quants API /derivatives/options エンドポイントのレスポンスデータ。
+// J-Quants API /derivatives/bars/daily/options エンドポイントのレスポンスデータ。
 //
 // 注意: このデータはプレミアムプラン専用APIで取得されます。
 type Option struct {
 	// 基本情報
-	Code                           string  `json:"Code"`                           // 銘柄コード
-	DerivativesProductCategory     string  `json:"DerivativesProductCategory"`     // オプション商品区分
-	UnderlyingSSO                  string  `json:"UnderlyingSSO"`                  // 有価証券オプション対象銘柄（有価証券オプション以外は"-"）
-	Date                           string  `json:"Date"`                           // 取引日（YYYY-MM-DD形式）
-	ContractMonth                  string  `json:"ContractMonth"`                  // 限月（YYYY-MM形式、日経225miniオプションは週表記）
-	StrikePrice                    float64 `json:"StrikePrice"`                    // 権利行使価格
-	PutCallDivision                string  `json:"PutCallDivision"`                // プットコール区分（1: プット、2: コール）
-	EmergencyMarginTriggerDivision string  `json:"EmergencyMarginTriggerDivision"` // 緊急取引証拠金発動区分（001: 発動時、002: 清算価格算出時）
+	Code         string  `json:"Code"`         // 銘柄コード
+	ProdCat      string  `json:"ProdCat"`      // オプション商品区分
+	UndSSO       string  `json:"UndSSO"`       // 有価証券オプション対象銘柄（有価証券オプション以外は"-"）
+	Date         string  `json:"Date"`         // 取引日（YYYY-MM-DD形式）
+	CM           string  `json:"CM"`           // 限月（YYYY-MM形式、日経225miniオプションは週表記）
+	Strike       float64 `json:"Strike"`       // 権利行使価格
+	PCDiv        string  `json:"PCDiv"`        // プットコール区分（1: プット、2: コール）
+	EmMrgnTrgDiv string  `json:"EmMrgnTrgDiv"` // 緊急取引証拠金発動区分（001: 発動時、002: 清算価格算出時）
 
 	// 日通し四本値
-	WholeDayOpen  float64 `json:"WholeDayOpen"`  // 日通し始値
-	WholeDayHigh  float64 `json:"WholeDayHigh"`  // 日通し高値
-	WholeDayLow   float64 `json:"WholeDayLow"`   // 日通し安値
-	WholeDayClose float64 `json:"WholeDayClose"` // 日通し終値
+	O float64 `json:"O"` // 日通し始値
+	H float64 `json:"H"` // 日通し高値
+	L float64 `json:"L"` // 日通し安値
+	C float64 `json:"C"` // 日通し終値
 
 	// ナイト・セッション四本値（取引開始日初日は空文字）
-	NightSessionOpen  interface{} `json:"NightSessionOpen"`  // ナイト・セッション始値
-	NightSessionHigh  interface{} `json:"NightSessionHigh"`  // ナイト・セッション高値
-	NightSessionLow   interface{} `json:"NightSessionLow"`   // ナイト・セッション安値
-	NightSessionClose interface{} `json:"NightSessionClose"` // ナイト・セッション終値
+	EO interface{} `json:"EO"` // ナイト・セッション始値
+	EH interface{} `json:"EH"` // ナイト・セッション高値
+	EL interface{} `json:"EL"` // ナイト・セッション安値
+	EC interface{} `json:"EC"` // ナイト・セッション終値
 
 	// 日中セッション四本値
-	DaySessionOpen  float64 `json:"DaySessionOpen"`  // 日中始値
-	DaySessionHigh  float64 `json:"DaySessionHigh"`  // 日中高値
-	DaySessionLow   float64 `json:"DaySessionLow"`   // 日中安値
-	DaySessionClose float64 `json:"DaySessionClose"` // 日中終値
+	AO float64 `json:"AO"` // 日中始値
+	AH float64 `json:"AH"` // 日中高値
+	AL float64 `json:"AL"` // 日中安値
+	AC float64 `json:"AC"` // 日中終値
 
 	// 前場四本値（前後場取引対象銘柄でない場合、空文字）
-	MorningSessionOpen  interface{} `json:"MorningSessionOpen"`  // 前場始値
-	MorningSessionHigh  interface{} `json:"MorningSessionHigh"`  // 前場高値
-	MorningSessionLow   interface{} `json:"MorningSessionLow"`   // 前場安値
-	MorningSessionClose interface{} `json:"MorningSessionClose"` // 前場終値
+	MO interface{} `json:"MO"` // 前場始値
+	MH interface{} `json:"MH"` // 前場高値
+	ML interface{} `json:"ML"` // 前場安値
+	MC interface{} `json:"MC"` // 前場終値
 
 	// 取引情報
-	Volume        float64 `json:"Volume"`        // 取引高
-	OpenInterest  float64 `json:"OpenInterest"`  // 建玉
-	TurnoverValue float64 `json:"TurnoverValue"` // 取引代金
+	Vo float64 `json:"Vo"` // 取引高
+	OI float64 `json:"OI"` // 建玉
+	Va float64 `json:"Va"` // 取引代金
 
 	// 2016年7月19日以降のみ提供されるフィールド
-	VolumeOnlyAuction        *float64 `json:"Volume(OnlyAuction)"`      // 立会内取引高
-	SettlementPrice          *float64 `json:"SettlementPrice"`          // 清算値段
-	TheoreticalPrice         *float64 `json:"TheoreticalPrice"`         // 理論価格
-	BaseVolatility           *float64 `json:"BaseVolatility"`           // 基準ボラティリティ
-	UnderlyingPrice          *float64 `json:"UnderlyingPrice"`          // 原証券価格
-	ImpliedVolatility        *float64 `json:"ImpliedVolatility"`        // インプライドボラティリティ
-	InterestRate             *float64 `json:"InterestRate"`             // 理論価格計算用金利
-	LastTradingDay           *string  `json:"LastTradingDay"`           // 取引最終年月日（YYYY-MM-DD形式）
-	SpecialQuotationDay      *string  `json:"SpecialQuotationDay"`      // SQ日（YYYY-MM-DD形式）
-	CentralContractMonthFlag *string  `json:"CentralContractMonthFlag"` // 中心限月フラグ（1:中心限月、0:その他）
+	VoOA    *float64 `json:"VoOA"`    // 立会内取引高
+	Settle  *float64 `json:"Settle"`  // 清算値段
+	Theo    *float64 `json:"Theo"`    // 理論価格
+	BaseVol *float64 `json:"BaseVol"` // 基準ボラティリティ
+	UnderPx *float64 `json:"UnderPx"` // 原証券価格
+	IV      *float64 `json:"IV"`      // インプライドボラティリティ
+	IR      *float64 `json:"IR"`      // 理論価格計算用金利
+	LTD     *string  `json:"LTD"`     // 取引最終年月日（YYYY-MM-DD形式）
+	SQD     *string  `json:"SQD"`     // SQ日（YYYY-MM-DD形式）
+	CCMFlag *string  `json:"CCMFlag"` // 中心限月フラグ（1:中心限月、0:その他）
 }
 
 // RawOption is used for unmarshaling JSON response with mixed types
 type RawOption struct {
-	Code                           string      `json:"Code"`
-	DerivativesProductCategory     string      `json:"DerivativesProductCategory"`
-	UnderlyingSSO                  string      `json:"UnderlyingSSO"`
-	Date                           string      `json:"Date"`
-	ContractMonth                  string      `json:"ContractMonth"`
-	StrikePrice                    float64     `json:"StrikePrice"`
-	PutCallDivision                string      `json:"PutCallDivision"`
-	EmergencyMarginTriggerDivision string      `json:"EmergencyMarginTriggerDivision"`
-	WholeDayOpen                   float64     `json:"WholeDayOpen"`
-	WholeDayHigh                   float64     `json:"WholeDayHigh"`
-	WholeDayLow                    float64     `json:"WholeDayLow"`
-	WholeDayClose                  float64     `json:"WholeDayClose"`
-	NightSessionOpen               interface{} `json:"NightSessionOpen"`
-	NightSessionHigh               interface{} `json:"NightSessionHigh"`
-	NightSessionLow                interface{} `json:"NightSessionLow"`
-	NightSessionClose              interface{} `json:"NightSessionClose"`
-	DaySessionOpen                 float64     `json:"DaySessionOpen"`
-	DaySessionHigh                 float64     `json:"DaySessionHigh"`
-	DaySessionLow                  float64     `json:"DaySessionLow"`
-	DaySessionClose                float64     `json:"DaySessionClose"`
-	MorningSessionOpen             interface{} `json:"MorningSessionOpen"`
-	MorningSessionHigh             interface{} `json:"MorningSessionHigh"`
-	MorningSessionLow              interface{} `json:"MorningSessionLow"`
-	MorningSessionClose            interface{} `json:"MorningSessionClose"`
-	Volume                         float64     `json:"Volume"`
-	OpenInterest                   float64     `json:"OpenInterest"`
-	TurnoverValue                  float64     `json:"TurnoverValue"`
-	VolumeOnlyAuction              interface{} `json:"Volume(OnlyAuction)"`
-	SettlementPrice                interface{} `json:"SettlementPrice"`
-	TheoreticalPrice               interface{} `json:"TheoreticalPrice"`
-	BaseVolatility                 interface{} `json:"BaseVolatility"`
-	UnderlyingPrice                interface{} `json:"UnderlyingPrice"`
-	ImpliedVolatility              interface{} `json:"ImpliedVolatility"`
-	InterestRate                   interface{} `json:"InterestRate"`
-	LastTradingDay                 interface{} `json:"LastTradingDay"`
-	SpecialQuotationDay            interface{} `json:"SpecialQuotationDay"`
-	CentralContractMonthFlag       interface{} `json:"CentralContractMonthFlag"`
+	Code         string      `json:"Code"`
+	ProdCat      string      `json:"ProdCat"`
+	UndSSO       string      `json:"UndSSO"`
+	Date         string      `json:"Date"`
+	CM           string      `json:"CM"`
+	Strike       float64     `json:"Strike"`
+	PCDiv        string      `json:"PCDiv"`
+	EmMrgnTrgDiv string      `json:"EmMrgnTrgDiv"`
+	O            float64     `json:"O"`
+	H            float64     `json:"H"`
+	L            float64     `json:"L"`
+	C            float64     `json:"C"`
+	EO           interface{} `json:"EO"`
+	EH           interface{} `json:"EH"`
+	EL           interface{} `json:"EL"`
+	EC           interface{} `json:"EC"`
+	AO           float64     `json:"AO"`
+	AH           float64     `json:"AH"`
+	AL           float64     `json:"AL"`
+	AC           float64     `json:"AC"`
+	MO           interface{} `json:"MO"`
+	MH           interface{} `json:"MH"`
+	ML           interface{} `json:"ML"`
+	MC           interface{} `json:"MC"`
+	Vo           float64     `json:"Vo"`
+	OI           float64     `json:"OI"`
+	Va           float64     `json:"Va"`
+	VoOA         interface{} `json:"VoOA"`
+	Settle       interface{} `json:"Settle"`
+	Theo         interface{} `json:"Theo"`
+	BaseVol      interface{} `json:"BaseVol"`
+	UnderPx      interface{} `json:"UnderPx"`
+	IV           interface{} `json:"IV"`
+	IR           interface{} `json:"IR"`
+	LTD          interface{} `json:"LTD"`
+	SQD          interface{} `json:"SQD"`
+	CCMFlag      interface{} `json:"CCMFlag"`
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling for OptionsResponse
 func (r *OptionsResponse) UnmarshalJSON(data []byte) error {
 	// First unmarshal into RawOption
 	type rawResponse struct {
-		Options       []RawOption `json:"options"`
+		Data          []RawOption `json:"data"`
 		PaginationKey string      `json:"pagination_key"`
 	}
 
@@ -152,71 +152,71 @@ func (r *OptionsResponse) UnmarshalJSON(data []byte) error {
 	r.PaginationKey = raw.PaginationKey
 
 	// Convert RawOption to Option
-	r.Options = make([]Option, len(raw.Options))
-	for idx, ro := range raw.Options {
+	r.Data = make([]Option, len(raw.Data))
+	for idx, ro := range raw.Data {
 		o := Option{
-			Code:                           ro.Code,
-			DerivativesProductCategory:     ro.DerivativesProductCategory,
-			UnderlyingSSO:                  ro.UnderlyingSSO,
-			Date:                           ro.Date,
-			ContractMonth:                  ro.ContractMonth,
-			StrikePrice:                    ro.StrikePrice,
-			PutCallDivision:                ro.PutCallDivision,
-			EmergencyMarginTriggerDivision: ro.EmergencyMarginTriggerDivision,
-			WholeDayOpen:                   ro.WholeDayOpen,
-			WholeDayHigh:                   ro.WholeDayHigh,
-			WholeDayLow:                    ro.WholeDayLow,
-			WholeDayClose:                  ro.WholeDayClose,
-			NightSessionOpen:               ro.NightSessionOpen,
-			NightSessionHigh:               ro.NightSessionHigh,
-			NightSessionLow:                ro.NightSessionLow,
-			NightSessionClose:              ro.NightSessionClose,
-			DaySessionOpen:                 ro.DaySessionOpen,
-			DaySessionHigh:                 ro.DaySessionHigh,
-			DaySessionLow:                  ro.DaySessionLow,
-			DaySessionClose:                ro.DaySessionClose,
-			MorningSessionOpen:             ro.MorningSessionOpen,
-			MorningSessionHigh:             ro.MorningSessionHigh,
-			MorningSessionLow:              ro.MorningSessionLow,
-			MorningSessionClose:            ro.MorningSessionClose,
-			Volume:                         ro.Volume,
-			OpenInterest:                   ro.OpenInterest,
-			TurnoverValue:                  ro.TurnoverValue,
+			Code:         ro.Code,
+			ProdCat:      ro.ProdCat,
+			UndSSO:       ro.UndSSO,
+			Date:         ro.Date,
+			CM:           ro.CM,
+			Strike:       ro.Strike,
+			PCDiv:        ro.PCDiv,
+			EmMrgnTrgDiv: ro.EmMrgnTrgDiv,
+			O:            ro.O,
+			H:            ro.H,
+			L:            ro.L,
+			C:            ro.C,
+			EO:           ro.EO,
+			EH:           ro.EH,
+			EL:           ro.EL,
+			EC:           ro.EC,
+			AO:           ro.AO,
+			AH:           ro.AH,
+			AL:           ro.AL,
+			AC:           ro.AC,
+			MO:           ro.MO,
+			MH:           ro.MH,
+			ML:           ro.ML,
+			MC:           ro.MC,
+			Vo:           ro.Vo,
+			OI:           ro.OI,
+			Va:           ro.Va,
 		}
 
 		// Convert optional fields
-		if v, ok := parseOptionalFloatOpt(ro.VolumeOnlyAuction); ok {
-			o.VolumeOnlyAuction = &v
+		if v, ok := parseOptionalFloatOpt(ro.VoOA); ok {
+			o.VoOA = &v
 		}
-		if v, ok := parseOptionalFloatOpt(ro.SettlementPrice); ok {
-			o.SettlementPrice = &v
+		if v, ok := parseOptionalFloatOpt(ro.Settle); ok {
+			o.Settle = &v
 		}
-		if v, ok := parseOptionalFloatOpt(ro.TheoreticalPrice); ok {
-			o.TheoreticalPrice = &v
+		if v, ok := parseOptionalFloatOpt(ro.Theo); ok {
+			o.Theo = &v
 		}
-		if v, ok := parseOptionalFloatOpt(ro.BaseVolatility); ok {
-			o.BaseVolatility = &v
+		if v, ok := parseOptionalFloatOpt(ro.BaseVol); ok {
+			o.BaseVol = &v
 		}
-		if v, ok := parseOptionalFloatOpt(ro.UnderlyingPrice); ok {
-			o.UnderlyingPrice = &v
+		if v, ok := parseOptionalFloatOpt(ro.UnderPx); ok {
+			o.UnderPx = &v
 		}
-		if v, ok := parseOptionalFloatOpt(ro.ImpliedVolatility); ok {
-			o.ImpliedVolatility = &v
+		if v, ok := parseOptionalFloatOpt(ro.IV); ok {
+			o.IV = &v
 		}
-		if v, ok := parseOptionalFloatOpt(ro.InterestRate); ok {
-			o.InterestRate = &v
+		if v, ok := parseOptionalFloatOpt(ro.IR); ok {
+			o.IR = &v
 		}
-		if v, ok := parseOptionalStringOpt(ro.LastTradingDay); ok {
-			o.LastTradingDay = &v
+		if v, ok := parseOptionalStringOpt(ro.LTD); ok {
+			o.LTD = &v
 		}
-		if v, ok := parseOptionalStringOpt(ro.SpecialQuotationDay); ok {
-			o.SpecialQuotationDay = &v
+		if v, ok := parseOptionalStringOpt(ro.SQD); ok {
+			o.SQD = &v
 		}
-		if v, ok := parseOptionalStringOpt(ro.CentralContractMonthFlag); ok {
-			o.CentralContractMonthFlag = &v
+		if v, ok := parseOptionalStringOpt(ro.CCMFlag); ok {
+			o.CCMFlag = &v
 		}
 
-		r.Options[idx] = o
+		r.Data[idx] = o
 	}
 
 	return nil
@@ -232,7 +232,7 @@ func (s *OptionsService) GetOptions(params OptionsParams) (*OptionsResponse, err
 		return nil, fmt.Errorf("date parameter is required")
 	}
 
-	path := "/derivatives/options"
+	path := "/derivatives/bars/daily/options"
 
 	query := fmt.Sprintf("?date=%s", params.Date)
 	if params.Category != "" {
@@ -278,7 +278,7 @@ func (s *OptionsService) GetOptionsByDate(date string) ([]Option, error) {
 			return nil, err
 		}
 
-		allData = append(allData, resp.Options...)
+		allData = append(allData, resp.Data...)
 
 		// ページネーションキーがなければ終了
 		if resp.PaginationKey == "" {
@@ -310,7 +310,7 @@ func (s *OptionsService) GetOptionsByCategory(date, category string) ([]Option, 
 			return nil, err
 		}
 
-		allData = append(allData, resp.Options...)
+		allData = append(allData, resp.Data...)
 
 		if resp.PaginationKey == "" {
 			break
@@ -342,7 +342,7 @@ func (s *OptionsService) GetSecurityOptionsByCode(date, code string) ([]Option, 
 			return nil, err
 		}
 
-		allData = append(allData, resp.Options...)
+		allData = append(allData, resp.Data...)
 
 		if resp.PaginationKey == "" {
 			break
@@ -373,7 +373,7 @@ func (s *OptionsService) GetCentralContractMonthOptions(date string) ([]Option, 
 			return nil, err
 		}
 
-		allData = append(allData, resp.Options...)
+		allData = append(allData, resp.Data...)
 
 		if resp.PaginationKey == "" {
 			break
@@ -388,37 +388,37 @@ func (s *OptionsService) GetCentralContractMonthOptions(date string) ([]Option, 
 
 // IsCall はコールオプションかどうかを判定します。
 func (o *Option) IsCall() bool {
-	return o.PutCallDivision == "2"
+	return o.PCDiv == "2"
 }
 
 // IsPut はプットオプションかどうかを判定します。
 func (o *Option) IsPut() bool {
-	return o.PutCallDivision == "1"
+	return o.PCDiv == "1"
 }
 
 // IsEmergencyMarginTriggered は緊急取引証拠金が発動されたかどうかを判定します。
 func (o *Option) IsEmergencyMarginTriggered() bool {
-	return o.EmergencyMarginTriggerDivision == "001"
+	return o.EmMrgnTrgDiv == "001"
 }
 
 // IsCentralContractMonth は中心限月かどうかを判定します。
 func (o *Option) IsCentralContractMonth() bool {
-	return o.CentralContractMonthFlag != nil && *o.CentralContractMonthFlag == "1"
+	return o.CCMFlag != nil && *o.CCMFlag == "1"
 }
 
 // IsSecurityOption は有価証券オプションかどうかを判定します。
 func (o *Option) IsSecurityOption() bool {
-	return o.UnderlyingSSO != "-"
+	return o.UndSSO != "-"
 }
 
 // HasNightSession はナイトセッションデータがあるかを判定します。
 func (o *Option) HasNightSession() bool {
 	// interface{}型のフィールドが空文字列でないかチェック
-	if str, ok := o.NightSessionOpen.(string); ok && str == "" {
+	if str, ok := o.EO.(string); ok && str == "" {
 		return false
 	}
 	// 0の場合も取引なしと判定
-	if val, ok := o.NightSessionOpen.(float64); ok && val == 0 {
+	if val, ok := o.EO.(float64); ok && val == 0 {
 		return false
 	}
 	return true
@@ -427,7 +427,7 @@ func (o *Option) HasNightSession() bool {
 // HasMorningSession は前場データがあるかを判定します。
 func (o *Option) HasMorningSession() bool {
 	// interface{}型のフィールドが空文字列でないかチェック
-	if str, ok := o.MorningSessionOpen.(string); ok && str == "" {
+	if str, ok := o.MO.(string); ok && str == "" {
 		return false
 	}
 	return true
@@ -435,98 +435,98 @@ func (o *Option) HasMorningSession() bool {
 
 // GetNightSessionOpen はナイトセッション始値を取得します。
 func (o *Option) GetNightSessionOpen() *float64 {
-	return parseInterfaceToFloat64Opt(o.NightSessionOpen)
+	return parseInterfaceToFloat64Opt(o.EO)
 }
 
 // GetNightSessionHigh はナイトセッション高値を取得します。
 func (o *Option) GetNightSessionHigh() *float64 {
-	return parseInterfaceToFloat64Opt(o.NightSessionHigh)
+	return parseInterfaceToFloat64Opt(o.EH)
 }
 
 // GetNightSessionLow はナイトセッション安値を取得します。
 func (o *Option) GetNightSessionLow() *float64 {
-	return parseInterfaceToFloat64Opt(o.NightSessionLow)
+	return parseInterfaceToFloat64Opt(o.EL)
 }
 
 // GetNightSessionClose はナイトセッション終値を取得します。
 func (o *Option) GetNightSessionClose() *float64 {
-	return parseInterfaceToFloat64Opt(o.NightSessionClose)
+	return parseInterfaceToFloat64Opt(o.EC)
 }
 
 // GetMorningSessionOpen は前場始値を取得します。
 func (o *Option) GetMorningSessionOpen() *float64 {
-	return parseInterfaceToFloat64Opt(o.MorningSessionOpen)
+	return parseInterfaceToFloat64Opt(o.MO)
 }
 
 // GetMorningSessionHigh は前場高値を取得します。
 func (o *Option) GetMorningSessionHigh() *float64 {
-	return parseInterfaceToFloat64Opt(o.MorningSessionHigh)
+	return parseInterfaceToFloat64Opt(o.MH)
 }
 
 // GetMorningSessionLow は前場安値を取得します。
 func (o *Option) GetMorningSessionLow() *float64 {
-	return parseInterfaceToFloat64Opt(o.MorningSessionLow)
+	return parseInterfaceToFloat64Opt(o.ML)
 }
 
 // GetMorningSessionClose は前場終値を取得します。
 func (o *Option) GetMorningSessionClose() *float64 {
-	return parseInterfaceToFloat64Opt(o.MorningSessionClose)
+	return parseInterfaceToFloat64Opt(o.MC)
 }
 
 // IsITM はイン・ザ・マネーかどうかを判定します。
 func (o *Option) IsITM() bool {
-	if o.UnderlyingPrice == nil {
+	if o.UnderPx == nil {
 		return false
 	}
 	if o.IsCall() {
-		return *o.UnderlyingPrice > o.StrikePrice
+		return *o.UnderPx > o.Strike
 	}
-	return *o.UnderlyingPrice < o.StrikePrice
+	return *o.UnderPx < o.Strike
 }
 
 // IsOTM はアウト・オブ・ザ・マネーかどうかを判定します。
 func (o *Option) IsOTM() bool {
-	if o.UnderlyingPrice == nil {
+	if o.UnderPx == nil {
 		return false
 	}
 	if o.IsCall() {
-		return *o.UnderlyingPrice < o.StrikePrice
+		return *o.UnderPx < o.Strike
 	}
-	return *o.UnderlyingPrice > o.StrikePrice
+	return *o.UnderPx > o.Strike
 }
 
 // IsATM はアット・ザ・マネーかどうかを判定します（許容誤差0.1%）。
 func (o *Option) IsATM() bool {
-	if o.UnderlyingPrice == nil {
+	if o.UnderPx == nil {
 		return false
 	}
-	diff := (*o.UnderlyingPrice - o.StrikePrice) / o.StrikePrice
+	diff := (*o.UnderPx - o.Strike) / o.Strike
 	return diff > -0.001 && diff < 0.001
 }
 
 // GetMoneyness はマネーネスを計算します（原資産価格/権利行使価格）。
 func (o *Option) GetMoneyness() *float64 {
-	if o.UnderlyingPrice == nil || o.StrikePrice == 0 {
+	if o.UnderPx == nil || o.Strike == 0 {
 		return nil
 	}
-	moneyness := *o.UnderlyingPrice / o.StrikePrice
+	moneyness := *o.UnderPx / o.Strike
 	return &moneyness
 }
 
 // GetIntrinsicValue は本質的価値を計算します。
 func (o *Option) GetIntrinsicValue() float64 {
-	if o.UnderlyingPrice == nil {
+	if o.UnderPx == nil {
 		return 0
 	}
 	if o.IsCall() {
-		diff := *o.UnderlyingPrice - o.StrikePrice
+		diff := *o.UnderPx - o.Strike
 		if diff > 0 {
 			return diff
 		}
 		return 0
 	}
 	// Put option
-	diff := o.StrikePrice - *o.UnderlyingPrice
+	diff := o.Strike - *o.UnderPx
 	if diff > 0 {
 		return diff
 	}
@@ -535,11 +535,11 @@ func (o *Option) GetIntrinsicValue() float64 {
 
 // GetTimeValue は時間価値を計算します。
 func (o *Option) GetTimeValue() *float64 {
-	if o.TheoreticalPrice == nil {
+	if o.Theo == nil {
 		return nil
 	}
 	intrinsic := o.GetIntrinsicValue()
-	timeValue := *o.TheoreticalPrice - intrinsic
+	timeValue := *o.Theo - intrinsic
 	return &timeValue
 }
 
