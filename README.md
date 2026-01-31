@@ -7,6 +7,7 @@ J-Quants API v2のGo言語クライアントライブラリです。日本の株
 - 📊 包括的な市場データアクセス（株価、財務情報、指数など）
 - 🔐 APIキーによるシンプルな認証
 - 📄 ページネーション対応
+- 🚀 セッション単位のキャッシュ機能（オプション）
 - 🧪 充実したテストカバレッジ
 - 📝 詳細なドキュメント
 
@@ -68,6 +69,29 @@ APIキーは[J-Quantsダッシュボード](https://jpx-jquants.com/)から取�
 ```go
 httpClient := client.NewClient("your-api-key")
 ```
+
+## キャッシュ機能
+
+セッション単位のキャッシュを有効にすると、同じリクエストに対するAPI呼び出しを削減できます。
+
+```go
+// キャッシュを有効化
+httpClient := client.NewClient("your-api-key", client.WithCache())
+
+// または環境変数から
+httpClient, err := client.NewClientFromEnv(client.WithCache())
+
+// キャッシュをクリア
+httpClient.ClearCache()
+
+// キャッシュエントリ数を取得
+size := httpClient.CacheSize()
+```
+
+- キャッシュはGETリクエストのみに適用されます
+- キャッシュキーはリクエストパス（クエリパラメータ含む）で区別されます
+- 同時リクエストの重複排除（singleflight）により効率的に動作します
+- キャッシュはクライアントインスタンスの生存期間のみ有効です
 
 ## 利用可能なAPI
 
