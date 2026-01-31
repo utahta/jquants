@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-このリポジトリは、J-Quants API v2（日本の株式市場データを提供するAPI）のGoクライアントライブラリです。
+J-Quants API v2（日本の株式市場データを提供するAPI）のGoクライアントライブラリ。
 
 ## API仕様の確認方法
 
@@ -15,109 +15,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 開発コマンド
 
-### Makefileを使用した開発
 ```bash
-# 利用可能なコマンドを表示
-make help
-
-# コンパイルチェック（構文エラーの確認）
-make check
-
-# 単体テスト
-make test
-make test-v        # 詳細表示
-make test-cover    # カバレッジ付き
-
-# E2Eテスト（認証情報が必要）
-make test-e2e
-make test-e2e-v    # 詳細表示
-
-# リント
-make lint
-
-# 特定のテストを実行
-make test-run TEST=TestQuotesService_GetDailyQuotes
-
-# 開発ツールのインストール
-make install-tools
+make help          # 利用可能なコマンドを表示
+make check         # コンパイルチェック
+make test          # 単体テスト
+make test-cover    # カバレッジ付きテスト
+make lint          # リント
+make test-e2e      # E2Eテスト（JQUANTS_API_KEY が必要）
+make test-run TEST=TestQuotesService_GetDailyQuotes  # 特定のテスト
 ```
 
-### ツール
+## ディレクトリ構造
 
-#### gitbook2md
-GitBookのドキュメントをMarkdownに変換するツール。J-Quants APIの公式ドキュメントをローカルで参照する際に便利。
-
-```bash
-# ビルド
-cd cmd/gitbook2md && go build
-
-# 使用方法1: HTMLファイルから変換
-./gitbook2md input.html output.md
-
-# 使用方法2: URLから直接変換
-./gitbook2md --url https://jpx.gitbook.io/j-quants-ja/api-reference/statements --output statements.md
-```
-
-### 直接実行する場合
-```bash
-# 依存関係の取得
-go mod download
-
-# ビルド
-go build ./...
-
-# 単体テストの実行
-go test ./...
-
-# カバレッジ付きテスト
-go test -cover ./...
-
-# 特定のテストを実行
-go test -run TestQuotesService_GetDailyQuotes ./...
-
-# E2Eテスト（実際のAPIに接続、認証情報が必要）
-go test -tags=e2e ./test/e2e -v
-```
-
-### リント
-```bash
-# golangci-lintを使用
-golangci-lint run
-```
-
-## アーキテクチャ
-
-### ディレクトリ構造
-- `client/`: HTTPクライアント（API認証含む）とモック
+- `client/`: HTTPクライアント（認証、キャッシュ）とモック
 - `types/`: カスタム型（JSONの不整合な型を処理）
-- `docs/v1/`: v1 APIドキュメント（参照用）
 - `docs/v2/`: v2 APIドキュメント
-- `test/e2e/`: エンドツーエンドテスト
-- `cmd/gitbook2md/`: GitBook→Markdown変換ツール
+- `test/e2e/`: E2Eテスト
 
-### 主要な設計パターン
-
-1. **サービス指向**: 各APIエンドポイントごとに独立したサービス構造体
-   ```go
-   type QuotesService struct {
-       client client.HTTPClient
-   }
-   ```
-
-2. **パラメータ/レスポンス構造体**: 各APIメソッドは専用のパラメータとレスポンス構造体を使用
-   ```go
-   type DailyQuotesParams struct {
-       Code          string
-       Date          string
-       PaginationKey string
-   }
-   ```
-
-3. **カスタムJSON型**: APIの不整合な型を処理（例：`types.Float64String`）
-
-4. **ページネーション**: 大量データ取得時の自動ページネーション処理
-
-### 新しいAPIサービスの追加方法
+## 新しいAPIサービスの追加方法
 
 1. 新しいサービスファイルを作成（例：`new_service.go`）
 2. サービス構造体とメソッドを実装
@@ -125,62 +40,23 @@ golangci-lint run
 4. 対応するテストファイルを作成（例：`new_service_test.go`）
 5. `docs/v2/`ディレクトリにドキュメントを追加
 
-### テスト実装のパターン
+## テスト実装のパターン
 
 ```go
-// モッククライアントを使用したテスト
 func TestService_Method(t *testing.T) {
     mockClient := &client.MockClient{
         DoFunc: func(req *http.Request) (*http.Response, error) {
             // モックレスポンスを返す
         },
     }
-    
     service := &Service{client: mockClient}
     // テスト実行
 }
 ```
 
-### 認証の扱い（v2 API）
-
-v2 APIではAPIキー方式を使用します（v1のトークン方式は廃止）。
-
-```go
-// 環境変数から自動取得（推奨）
-httpClient, err := client.NewClientFromEnv()
-
-// 直接指定
-httpClient := client.NewClient("your-api-key")
-```
-
-- 環境変数: `JQUANTS_API_KEY`
-- APIキーは[J-Quantsダッシュボード](https://jpx-jquants.com/)から取得
-
-### v2 APIの特徴
-
-1. **レスポンス形式**: 統一された `data` キーでデータを返却
-   ```go
-   type Response struct {
-       Data          []Item `json:"data"`
-       PaginationKey string `json:"pagination_key"`
-   }
-   ```
-
-2. **短縮フィールド名**: v2では短縮形を使用
-   - 株価: `Open` → `O`, `High` → `H`, `Low` → `L`, `Close` → `C`
-   - 出来高: `Volume` → `Vo`
-   - その他: `AdjustmentOpen` → `AO`, `TurnoverValue` → `TnV` など
-
-3. **認証ヘッダー**: `x-api-key` ヘッダーでAPIキーを送信
-
-### 重要な実装上の注意点
+## 実装上の注意点
 
 1. **nil安全性**: APIレスポンスの欠損フィールドはポインタで表現
 2. **エラーハンドリング**: 一貫したエラーラップとコンテキスト情報の付与
 3. **型変換**: `types`パッケージのカスタム型を使用してJSONの不整合を処理
-4. **営業日**: 日本の株式市場の営業日を考慮したデータ取得
-5. **定数定義**: 市場区分コード、業種コード、開示書類種別などは定数として定義済み
-   - 市場区分: `MarketPrime`, `MarketStandard`, `MarketGrowth` など
-   - 業種コード: `Sector17Food`, `Sector33IT` など
-   - 開示書類種別: `TypeOfDocumentFYConsolidatedJP`, `TypeOfDocumentFYConsolidatedIFRS` など
-   - 公表理由: `PublishReason` 構造体のヘルパーメソッド
+4. **定数定義**: 市場区分コード、業種コード、開示書類種別などは定数として定義済み
