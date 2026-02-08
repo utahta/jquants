@@ -248,8 +248,8 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 	})
 
 	t.Run("GetDailyQuotesByCode_Convenience", func(t *testing.T) {
-		// 便利メソッドのテスト（過去30日分）
-		quotes, err := jq.Quotes.GetDailyQuotesByCode("7203", 30)
+		// 便利メソッドのテスト（全期間）
+		quotes, err := jq.Quotes.GetDailyQuotesByCode("7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")

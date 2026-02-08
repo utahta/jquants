@@ -253,6 +253,44 @@ func TestShortSellingService_GetShortSellingBySectorAndDateRange(t *testing.T) {
 	}
 }
 
+func TestShortSellingService_GetShortSellingBySectorAndDate(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewShortSellingService(mockClient)
+
+	// Mock response
+	mockResponse := ShortSellingResponse{
+		Data: []ShortSelling{
+			{
+				Date:          "2022-10-25",
+				S33:           "0050",
+				SellExShortVa: 1333126400.0,
+				ShrtWithResVa: 787355200.0,
+				ShrtNoResVa:   149084300.0,
+			},
+		},
+		PaginationKey: "",
+	}
+	mockClient.SetResponse("GET", "/markets/short-ratio?s33=0050&date=20221025", mockResponse)
+
+	// Execute
+	data, err := service.GetShortSellingBySectorAndDate("0050", "20221025")
+
+	// Verify
+	if err != nil {
+		t.Fatalf("GetShortSellingBySectorAndDate() error = %v", err)
+	}
+	if len(data) != 1 {
+		t.Errorf("GetShortSellingBySectorAndDate() returned %d items, want 1", len(data))
+	}
+	if data[0].S33 != "0050" {
+		t.Errorf("GetShortSellingBySectorAndDate() returned s33 %v, want 0050", data[0].S33)
+	}
+	if data[0].Date != "2022-10-25" {
+		t.Errorf("GetShortSellingBySectorAndDate() returned date %v, want 2022-10-25", data[0].Date)
+	}
+}
+
 func TestShortSelling_GetTotalShortSellingValue(t *testing.T) {
 	data := ShortSelling{
 		ShrtWithResVa: 787355200.0,

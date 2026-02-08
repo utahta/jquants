@@ -146,6 +146,18 @@ func (s *FSDetailsService) GetFSDetailsByDate(date string) ([]FSDetail, error) {
 	return allData, nil
 }
 
+// GetFSDetailsByCodeAndDate は指定銘柄の指定開示日の財務諸表詳細情報を取得します。
+func (s *FSDetailsService) GetFSDetailsByCodeAndDate(code, date string) ([]FSDetail, error) {
+	resp, err := s.GetFSDetails(FSDetailsParams{
+		Code: code,
+		Date: date,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Data, nil
+}
+
 // IsIFRS は財務諸表がIFRS基準かどうかを判定します。
 func (d *FSDetail) IsIFRS() bool {
 	if standards, ok := d.FS["Accounting standards, DEI"]; ok {

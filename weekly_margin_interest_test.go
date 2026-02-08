@@ -257,6 +257,44 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterestByCodeAndDateRange(t
 	}
 }
 
+func TestWeeklyMarginInterestService_GetWeeklyMarginInterestByCodeAndDate(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewWeeklyMarginInterestService(mockClient)
+
+	// Mock response
+	mockResponse := WeeklyMarginInterestResponse{
+		Data: []WeeklyMarginInterest{
+			{
+				Date:    "2023-03-24",
+				Code:    "86970",
+				IssType: "1",
+				ShrtVol: 2300.0,
+				LongVol: 15400.0,
+			},
+		},
+		PaginationKey: "",
+	}
+	mockClient.SetResponse("GET", "/markets/margin-interest?code=86970&date=20230324", mockResponse)
+
+	// Execute
+	data, err := service.GetWeeklyMarginInterestByCodeAndDate("86970", "20230324")
+
+	// Verify
+	if err != nil {
+		t.Fatalf("GetWeeklyMarginInterestByCodeAndDate() error = %v", err)
+	}
+	if len(data) != 1 {
+		t.Errorf("GetWeeklyMarginInterestByCodeAndDate() returned %d items, want 1", len(data))
+	}
+	if data[0].Code != "86970" {
+		t.Errorf("GetWeeklyMarginInterestByCodeAndDate() returned code %v, want 86970", data[0].Code)
+	}
+	if data[0].Date != "2023-03-24" {
+		t.Errorf("GetWeeklyMarginInterestByCodeAndDate() returned date %v, want 2023-03-24", data[0].Date)
+	}
+}
+
 func TestWeeklyMarginInterest_IsCredit(t *testing.T) {
 	tests := []struct {
 		name string

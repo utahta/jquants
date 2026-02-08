@@ -328,6 +328,84 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByCodeAndDateRange
 	}
 }
 
+func TestShortSellingPositionsService_GetShortSellingPositionsByCodeAndDisclosedDate(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewShortSellingPositionsService(mockClient)
+
+	// Mock response
+	mockResponse := ShortSellingPositionsResponse{
+		Data: []ShortSellingPosition{
+			{
+				DiscDate:      "2024-08-01",
+				CalcDate:      "2024-07-31",
+				Code:          "86970",
+				SSName:        "ABC Investment Management",
+				ShrtPosToSO:   0.0153,
+				ShrtPosShares: 520000,
+			},
+		},
+		PaginationKey: "",
+	}
+	mockClient.SetResponse("GET", "/markets/short-sale-report?code=86970&disc_date=20240801", mockResponse)
+
+	// Execute
+	data, err := service.GetShortSellingPositionsByCodeAndDisclosedDate("86970", "20240801")
+
+	// Verify
+	if err != nil {
+		t.Fatalf("GetShortSellingPositionsByCodeAndDisclosedDate() error = %v", err)
+	}
+	if len(data) != 1 {
+		t.Errorf("GetShortSellingPositionsByCodeAndDisclosedDate() returned %d items, want 1", len(data))
+	}
+	if data[0].Code != "86970" {
+		t.Errorf("GetShortSellingPositionsByCodeAndDisclosedDate() returned code %v, want 86970", data[0].Code)
+	}
+	if data[0].DiscDate != "2024-08-01" {
+		t.Errorf("GetShortSellingPositionsByCodeAndDisclosedDate() returned disc_date %v, want 2024-08-01", data[0].DiscDate)
+	}
+}
+
+func TestShortSellingPositionsService_GetShortSellingPositionsByCodeAndCalculatedDate(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewShortSellingPositionsService(mockClient)
+
+	// Mock response
+	mockResponse := ShortSellingPositionsResponse{
+		Data: []ShortSellingPosition{
+			{
+				DiscDate:      "2024-08-01",
+				CalcDate:      "2024-07-31",
+				Code:          "86970",
+				SSName:        "ABC Investment Management",
+				ShrtPosToSO:   0.0153,
+				ShrtPosShares: 520000,
+			},
+		},
+		PaginationKey: "",
+	}
+	mockClient.SetResponse("GET", "/markets/short-sale-report?code=86970&calc_date=20240731", mockResponse)
+
+	// Execute
+	data, err := service.GetShortSellingPositionsByCodeAndCalculatedDate("86970", "20240731")
+
+	// Verify
+	if err != nil {
+		t.Fatalf("GetShortSellingPositionsByCodeAndCalculatedDate() error = %v", err)
+	}
+	if len(data) != 1 {
+		t.Errorf("GetShortSellingPositionsByCodeAndCalculatedDate() returned %d items, want 1", len(data))
+	}
+	if data[0].Code != "86970" {
+		t.Errorf("GetShortSellingPositionsByCodeAndCalculatedDate() returned code %v, want 86970", data[0].Code)
+	}
+	if data[0].CalcDate != "2024-07-31" {
+		t.Errorf("GetShortSellingPositionsByCodeAndCalculatedDate() returned calc_date %v, want 2024-07-31", data[0].CalcDate)
+	}
+}
+
 func TestShortSellingPosition_GetPositionChange(t *testing.T) {
 	position := ShortSellingPosition{
 		ShrtPosToSO:   0.0053,

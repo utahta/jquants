@@ -218,6 +218,54 @@ func TestTradesSpecService_GetTradesSpecBySection(t *testing.T) {
 	}
 }
 
+func TestTradesSpecService_GetTradesSpecBySectionAndDateRange(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewTradesSpecService(mockClient)
+
+	// Mock response
+	mockResponse := TradesSpecResponse{
+		Data: []TradesSpec{
+			{
+				PubDate: "2023-04-07",
+				StDate:  "2023-03-27",
+				EnDate:  "2023-03-31",
+				Section: "TSEPrime",
+				TotBal:  1000000,
+				FrgnBal: 500000,
+				IndBal:  -200000,
+			},
+			{
+				PubDate: "2023-04-14",
+				StDate:  "2023-04-03",
+				EnDate:  "2023-04-07",
+				Section: "TSEPrime",
+				TotBal:  800000,
+				FrgnBal: 300000,
+				IndBal:  -100000,
+			},
+		},
+		PaginationKey: "",
+	}
+	mockClient.SetResponse("GET", "/equities/investor-types?section=TSEPrime&from=20230324&to=20230403", mockResponse)
+
+	// Execute
+	tradesSpec, err := service.GetTradesSpecBySectionAndDateRange("TSEPrime", "20230324", "20230403")
+
+	// Verify
+	if err != nil {
+		t.Fatalf("GetTradesSpecBySectionAndDateRange() error = %v", err)
+	}
+	if len(tradesSpec) != 2 {
+		t.Errorf("GetTradesSpecBySectionAndDateRange() returned %d items, want 2", len(tradesSpec))
+	}
+	for _, ts := range tradesSpec {
+		if ts.Section != "TSEPrime" {
+			t.Errorf("GetTradesSpecBySectionAndDateRange() returned section %v, want TSEPrime", ts.Section)
+		}
+	}
+}
+
 func TestTradesSpec_IsBuyerDominant(t *testing.T) {
 	tests := []struct {
 		name         string

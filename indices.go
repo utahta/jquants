@@ -3,7 +3,6 @@ package jquants
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/utahta/jquants/client"
 	"github.com/utahta/jquants/types"
@@ -127,31 +126,63 @@ func (s *IndicesService) GetIndices(params IndicesParams) (*IndicesResponse, err
 	return &resp, nil
 }
 
-// GetIndicesByCode は指定指数の過去N日間のデータを取得します。
+// GetIndicesByCode は指定指数の全期間のデータを取得します。
 // ページネーションを使用して全データを取得します。
-func (s *IndicesService) GetIndicesByCode(code string, days int) ([]Index, error) {
-	to := time.Now()
-	from := to.AddDate(0, 0, -days)
-
+func (s *IndicesService) GetIndicesByCode(code string) ([]Index, error) {
 	var allIndices []Index
 	paginationKey := ""
 
 	for {
-		params := IndicesParams{
+		resp, err := s.GetIndices(IndicesParams{
 			Code:          code,
-			From:          from.Format("20060102"),
-			To:            to.Format("20060102"),
 			PaginationKey: paginationKey,
-		}
-
-		resp, err := s.GetIndices(params)
+		})
 		if err != nil {
 			return nil, err
 		}
 
 		allIndices = append(allIndices, resp.Data...)
 
-		// ページネーションキーがなければ終了
+		if resp.PaginationKey == "" {
+			break
+		}
+		paginationKey = resp.PaginationKey
+	}
+
+	return allIndices, nil
+}
+
+// GetIndicesByCodeAndDate は指定指数の指定日のデータを取得します。
+func (s *IndicesService) GetIndicesByCodeAndDate(code, date string) ([]Index, error) {
+	resp, err := s.GetIndices(IndicesParams{
+		Code: code,
+		Date: date,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Data, nil
+}
+
+// GetIndicesByCodeAndDateRange は指定指数の指定期間のデータを取得します。
+// ページネーションを使用して全データを取得します。
+func (s *IndicesService) GetIndicesByCodeAndDateRange(code, from, to string) ([]Index, error) {
+	var allIndices []Index
+	paginationKey := ""
+
+	for {
+		resp, err := s.GetIndices(IndicesParams{
+			Code:          code,
+			From:          from,
+			To:            to,
+			PaginationKey: paginationKey,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		allIndices = append(allIndices, resp.Data...)
+
 		if resp.PaginationKey == "" {
 			break
 		}
@@ -162,7 +193,7 @@ func (s *IndicesService) GetIndicesByCode(code string, days int) ([]Index, error
 }
 
 // GetIndicesByDate は指定日の全指数データを取得します。
-// ページネーションを使用して大量データを分割取得します。
+// ページネーションを使用して全データを取得します。
 func (s *IndicesService) GetIndicesByDate(date string) ([]Index, error) {
 	var allIndices []Index
 	paginationKey := ""
@@ -214,24 +245,24 @@ const (
 	IndexJPXPrime150 = "0503" // JPXプライム150指数
 )
 
-// GetTOPIX はTOPIXのデータを取得します。
-func (s *IndicesService) GetTOPIX(days int) ([]Index, error) {
-	return s.GetIndicesByCode(IndexTOPIX, days)
+// GetTOPIX はTOPIXの全期間データを取得します。
+func (s *IndicesService) GetTOPIX() ([]Index, error) {
+	return s.GetIndicesByCode(IndexTOPIX)
 }
 
-// GetTOPIXCore30 はTOPIX Core30のデータを取得します。
-func (s *IndicesService) GetTOPIXCore30(days int) ([]Index, error) {
-	return s.GetIndicesByCode(IndexTOPIXCore30, days)
+// GetTOPIXCore30 はTOPIX Core30の全期間データを取得します。
+func (s *IndicesService) GetTOPIXCore30() ([]Index, error) {
+	return s.GetIndicesByCode(IndexTOPIXCore30)
 }
 
-// GetPrimeMarketIndex は東証プライム市場指数のデータを取得します。
-func (s *IndicesService) GetPrimeMarketIndex(days int) ([]Index, error) {
-	return s.GetIndicesByCode(IndexPrime, days)
+// GetPrimeMarketIndex は東証プライム市場指数の全期間データを取得します。
+func (s *IndicesService) GetPrimeMarketIndex() ([]Index, error) {
+	return s.GetIndicesByCode(IndexPrime)
 }
 
-// GetREIT はREIT指数のデータを取得します。
-func (s *IndicesService) GetREIT(days int) ([]Index, error) {
-	return s.GetIndicesByCode(IndexREIT, days)
+// GetREIT はREIT指数の全期間データを取得します。
+func (s *IndicesService) GetREIT() ([]Index, error) {
+	return s.GetIndicesByCode(IndexREIT)
 }
 
 // 業種別指数コード（東証33業種）
@@ -271,7 +302,7 @@ const (
 	IndexSectorServices     = "0060" // サービス業
 )
 
-// GetSectorIndex は指定した業種別指数のデータを取得します。
-func (s *IndicesService) GetSectorIndex(sectorCode string, days int) ([]Index, error) {
-	return s.GetIndicesByCode(sectorCode, days)
+// GetSectorIndex は指定した業種別指数の全期間データを取得します。
+func (s *IndicesService) GetSectorIndex(sectorCode string) ([]Index, error) {
+	return s.GetIndicesByCode(sectorCode)
 }

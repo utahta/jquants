@@ -243,6 +243,45 @@ func TestFSDetailsService_GetFSDetailsByDate(t *testing.T) {
 	}
 }
 
+func TestFSDetailsService_GetFSDetailsByCodeAndDate(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewFSDetailsService(mockClient)
+
+	// Mock response
+	mockResponse := FSDetailsResponse{
+		Data: []FSDetail{
+			{
+				DiscDate: "2023-01-30",
+				Code:     "86970",
+				DocType:  "3QFinancialStatements_Consolidated_IFRS",
+				FS: map[string]string{
+					"Accounting standards, DEI": "IFRS",
+				},
+			},
+		},
+		PaginationKey: "",
+	}
+	mockClient.SetResponse("GET", "/fins/details?code=86970&date=20230130", mockResponse)
+
+	// Execute
+	data, err := service.GetFSDetailsByCodeAndDate("86970", "20230130")
+
+	// Verify
+	if err != nil {
+		t.Fatalf("GetFSDetailsByCodeAndDate() error = %v", err)
+	}
+	if len(data) != 1 {
+		t.Errorf("GetFSDetailsByCodeAndDate() returned %d items, want 1", len(data))
+	}
+	if data[0].Code != "86970" {
+		t.Errorf("GetFSDetailsByCodeAndDate() returned code %v, want 86970", data[0].Code)
+	}
+	if data[0].DiscDate != "2023-01-30" {
+		t.Errorf("GetFSDetailsByCodeAndDate() returned date %v, want 2023-01-30", data[0].DiscDate)
+	}
+}
+
 func TestFSDetail_AccountingStandardsMethods(t *testing.T) {
 	tests := []struct {
 		name           string

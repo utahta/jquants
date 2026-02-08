@@ -76,6 +76,39 @@ func (s *TradingCalendarService) GetTradingCalendar(params TradingCalendarParams
 	return &resp, nil
 }
 
+// GetAllTradingCalendar は全期間・全区分の取引カレンダーを取得します。
+func (s *TradingCalendarService) GetAllTradingCalendar() ([]TradingCalendar, error) {
+	resp, err := s.GetTradingCalendar(TradingCalendarParams{})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Data, nil
+}
+
+// GetTradingCalendarByHolidayDivision は指定した休日区分の全期間の取引カレンダーを取得します。
+func (s *TradingCalendarService) GetTradingCalendarByHolidayDivision(holDiv string) ([]TradingCalendar, error) {
+	resp, err := s.GetTradingCalendar(TradingCalendarParams{
+		HolidayDivision: holDiv,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Data, nil
+}
+
+// GetTradingCalendarByHolidayDivisionAndDateRange は指定した休日区分・期間の取引カレンダーを取得します。
+func (s *TradingCalendarService) GetTradingCalendarByHolidayDivisionAndDateRange(holDiv, from, to string) ([]TradingCalendar, error) {
+	resp, err := s.GetTradingCalendar(TradingCalendarParams{
+		HolidayDivision: holDiv,
+		From:            from,
+		To:              to,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Data, nil
+}
+
 // GetTradingCalendarByDateRange は指定した期間の取引カレンダーを取得します。
 func (s *TradingCalendarService) GetTradingCalendarByDateRange(from, to string) ([]TradingCalendar, error) {
 	resp, err := s.GetTradingCalendar(TradingCalendarParams{

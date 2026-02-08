@@ -10,32 +10,34 @@ import (
 func TestListedService_GetListedInfo(t *testing.T) {
 	tests := []struct {
 		name     string
-		code     string
-		date     string
+		params   ListedInfoParams
 		wantPath string
 	}{
 		{
-			name:     "with code and date",
-			code:     "7203",
-			date:     "20240101",
+			name: "with code and date",
+			params: ListedInfoParams{
+				Code: "7203",
+				Date: "20240101",
+			},
 			wantPath: "/equities/master?code=7203&date=20240101",
 		},
 		{
-			name:     "with code only",
-			code:     "7203",
-			date:     "",
+			name: "with code only",
+			params: ListedInfoParams{
+				Code: "7203",
+			},
 			wantPath: "/equities/master?code=7203",
 		},
 		{
-			name:     "with date only",
-			code:     "",
-			date:     "20240101",
+			name: "with date only",
+			params: ListedInfoParams{
+				Date: "20240101",
+			},
 			wantPath: "/equities/master?date=20240101",
 		},
 		{
 			name:     "with no parameters",
-			code:     "",
-			date:     "",
+			params:   ListedInfoParams{},
 			wantPath: "/equities/master",
 		},
 	}
@@ -67,14 +69,17 @@ func TestListedService_GetListedInfo(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Test
-			infos, err := service.GetListedInfo(tt.code, tt.date)
+			resp, err := service.GetListedInfo(tt.params)
 			if err != nil {
-				t.Errorf("GetListedInfo failed: %v", err)
+				t.Fatalf("GetListedInfo() error = %v", err)
 			}
 
 			// Verify
-			if len(infos) != 1 {
-				t.Errorf("Expected 1 info, got %d", len(infos))
+			if resp == nil {
+				t.Fatal("GetListedInfo() returned nil response")
+			}
+			if len(resp.Data) != 1 {
+				t.Errorf("GetListedInfo() returned %d items, want 1", len(resp.Data))
 			}
 
 			if mockClient.LastMethod != "GET" {
@@ -88,7 +93,33 @@ func TestListedService_GetListedInfo(t *testing.T) {
 	}
 }
 
-func TestListedService_GetCompanyInfo(t *testing.T) {
+func TestListedService_GetAllListedInfo(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewListedService(mockClient)
+
+	// Mock response
+	mockResponse := ListedInfoResponse{
+		Data: []ListedInfo{
+			{Code: "7203", CoName: "トヨタ自動車"},
+			{Code: "9984", CoName: "ソフトバンクグループ"},
+		},
+	}
+	mockClient.SetResponse("GET", "/equities/master", mockResponse)
+
+	// Execute
+	infos, err := service.GetAllListedInfo()
+	if err != nil {
+		t.Fatalf("GetAllListedInfo() error = %v", err)
+	}
+
+	// Verify
+	if len(infos) != 2 {
+		t.Errorf("GetAllListedInfo() returned %d items, want 2", len(infos))
+	}
+}
+
+func TestListedService_GetListedInfoByCode(t *testing.T) {
 	// Setup
 	mockClient := client.NewMockClient()
 	service := NewListedService(mockClient)
@@ -113,46 +144,85 @@ func TestListedService_GetCompanyInfo(t *testing.T) {
 	}
 	mockClient.SetResponse("GET", "/equities/master?code=7203", mockResponse)
 
-	// Test
-	info, err := service.GetCompanyInfo("7203")
+	// Execute
+	infos, err := service.GetListedInfoByCode("7203")
 	if err != nil {
-		t.Errorf("GetCompanyInfo failed: %v", err)
+		t.Fatalf("GetListedInfoByCode() error = %v", err)
 	}
 
 	// Verify
-	if info == nil {
-		t.Errorf("Expected info, got nil")
-		return
+	if len(infos) != 1 {
+		t.Errorf("GetListedInfoByCode() returned %d items, want 1", len(infos))
 	}
-
-	if info.Code != "7203" {
-		t.Errorf("Expected code 7203, got %s", info.Code)
+	if infos[0].Code != "7203" {
+		t.Errorf("Expected code 7203, got %s", infos[0].Code)
 	}
-
-	if info.CoName != "トヨタ自動車" {
-		t.Errorf("Expected company name トヨタ自動車, got %s", info.CoName)
+	if infos[0].CoName != "トヨタ自動車" {
+		t.Errorf("Expected company name トヨタ自動車, got %s", infos[0].CoName)
 	}
-
-	if info.MktNm != "プライム" {
-		t.Errorf("Expected market code name プライム, got %s", info.MktNm)
+	if infos[0].MktNm != "プライム" {
+		t.Errorf("Expected market name プライム, got %s", infos[0].MktNm)
 	}
 }
 
-func TestListedService_GetCompanyInfo_NotFound(t *testing.T) {
+func TestListedService_GetListedInfoByDate(t *testing.T) {
 	// Setup
 	mockClient := client.NewMockClient()
 	service := NewListedService(mockClient)
 
-	// Mock empty response
+	// Mock response
 	mockResponse := ListedInfoResponse{
-		Data: []ListedInfo{},
+		Data: []ListedInfo{
+			{Code: "7203", CoName: "トヨタ自動車", Date: "2024-01-01"},
+			{Code: "9984", CoName: "ソフトバンクグループ", Date: "2024-01-01"},
+		},
 	}
-	mockClient.SetResponse("GET", "/equities/master?code=9999", mockResponse)
+	mockClient.SetResponse("GET", "/equities/master?date=20240101", mockResponse)
 
-	// Test
-	_, err := service.GetCompanyInfo("9999")
-	if err == nil {
-		t.Errorf("Expected error for non-existent company, got nil")
+	// Execute
+	infos, err := service.GetListedInfoByDate("20240101")
+	if err != nil {
+		t.Fatalf("GetListedInfoByDate() error = %v", err)
+	}
+
+	// Verify
+	if len(infos) != 2 {
+		t.Errorf("GetListedInfoByDate() returned %d items, want 2", len(infos))
+	}
+}
+
+func TestListedService_GetListedInfoByCodeAndDate(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewListedService(mockClient)
+
+	// Mock response
+	mockResponse := ListedInfoResponse{
+		Data: []ListedInfo{
+			{
+				Date:   "2024-01-01",
+				Code:   "7203",
+				CoName: "トヨタ自動車",
+			},
+		},
+	}
+	mockClient.SetResponse("GET", "/equities/master?code=7203&date=20240101", mockResponse)
+
+	// Execute
+	infos, err := service.GetListedInfoByCodeAndDate("7203", "20240101")
+	if err != nil {
+		t.Fatalf("GetListedInfoByCodeAndDate() error = %v", err)
+	}
+
+	// Verify
+	if len(infos) != 1 {
+		t.Errorf("GetListedInfoByCodeAndDate() returned %d items, want 1", len(infos))
+	}
+	if infos[0].Code != "7203" || infos[0].Date != "2024-01-01" {
+		t.Errorf("Data mismatch: code=%s, date=%s", infos[0].Code, infos[0].Date)
+	}
+	if mockClient.LastPath != "/equities/master?code=7203&date=20240101" {
+		t.Errorf("Expected path /equities/master?code=7203&date=20240101, got %s", mockClient.LastPath)
 	}
 }
 
@@ -165,9 +235,9 @@ func TestListedService_GetListedInfo_Error(t *testing.T) {
 	mockClient.SetError("GET", "/equities/master?code=7203", fmt.Errorf("API error"))
 
 	// Test
-	_, err := service.GetListedInfo("7203", "")
+	_, err := service.GetListedInfo(ListedInfoParams{Code: "7203"})
 	if err == nil {
-		t.Errorf("Expected error, got nil")
+		t.Error("GetListedInfo() expected error but got nil")
 	}
 }
 

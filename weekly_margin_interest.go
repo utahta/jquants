@@ -243,6 +243,18 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCodeAndDateRange(
 	return allData, nil
 }
 
+// GetWeeklyMarginInterestByCodeAndDate は指定銘柄の指定公表日の信用取引週末残高を取得します。
+func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCodeAndDate(code, date string) ([]WeeklyMarginInterest, error) {
+	resp, err := s.GetWeeklyMarginInterest(WeeklyMarginInterestParams{
+		Code: code,
+		Date: date,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Data, nil
+}
+
 // IsCredit は信用銘柄かどうかを判定します。
 func (wmi *WeeklyMarginInterest) IsCredit() bool {
 	return wmi.IssType == IssueTypeCredit

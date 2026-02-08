@@ -178,7 +178,7 @@ func TestIndicesEndpoint(t *testing.T) {
 
 	t.Run("GetTOPIXCore30", func(t *testing.T) {
 		// TOPIX Core30の便利メソッドテスト
-		indices, err := jq.Indices.GetTOPIXCore30(30) // 過去30日分
+		indices, err := jq.Indices.GetTOPIXCore30()
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -217,7 +217,7 @@ func TestIndicesEndpoint(t *testing.T) {
 
 	t.Run("GetTOPIX", func(t *testing.T) {
 		// TOPIXの便利メソッドテスト
-		indices, err := jq.Indices.GetTOPIX(30) // 過去30日分
+		indices, err := jq.Indices.GetTOPIX()
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
