@@ -102,53 +102,51 @@ func TestQuotesService_GetDailyQuotesByCode(t *testing.T) {
 	mockClient := client.NewMockClient()
 	service := NewQuotesService(mockClient)
 
-	// Calculate expected dates
-	to := time.Now()
-	from := to.AddDate(0, 0, -30)
-	expectedPath := fmt.Sprintf("/equities/bars/daily?code=7203&from=%s&to=%s",
-		from.Format("20060102"), to.Format("20060102"))
-
-	// Mock response
-	mockResponse := DailyQuotesResponse{
+	// Mock response - 最初のページ
+	mockResponse1 := DailyQuotesResponse{
 		Data: []DailyQuote{
 			{
-				Date:  "20240101",
-				Code:  "7203",
-				O:     floatPtr(2480.0),
-				H:     floatPtr(2510.0),
-				L:     floatPtr(2470.0),
-				C:     floatPtr(2500.0),
-				Vo:    floatPtr(1000000),
-				AdjC:  floatPtr(2500.0),
+				Date: "20240101",
+				Code: "7203",
+				O:    floatPtr(2480.0),
+				H:    floatPtr(2510.0),
+				L:    floatPtr(2470.0),
+				C:    floatPtr(2500.0),
+				Vo:   floatPtr(1000000),
+				AdjC: floatPtr(2500.0),
 			},
 		},
-		PaginationKey: "", // ページネーションなし
+		PaginationKey: "next_page_key",
 	}
 
-	mockClient.SetResponse("GET", expectedPath, mockResponse)
+	// Mock response - 2ページ目
+	mockResponse2 := DailyQuotesResponse{
+		Data: []DailyQuote{
+			{
+				Date: "20240102",
+				Code: "7203",
+				C:    floatPtr(2520.0),
+			},
+		},
+		PaginationKey: "",
+	}
+
+	mockClient.SetResponse("GET", "/equities/bars/daily?code=7203", mockResponse1)
+	mockClient.SetResponse("GET", "/equities/bars/daily?code=7203&pagination_key=next_page_key", mockResponse2)
 
 	// Test
-	quotes, err := service.GetDailyQuotesByCode("7203", 30)
+	quotes, err := service.GetDailyQuotesByCode("7203")
 	if err != nil {
 		t.Errorf("GetDailyQuotesByCode failed: %v", err)
 	}
 
 	// Verify
-	if len(quotes) != 1 {
-		t.Errorf("Expected 1 quote, got %d", len(quotes))
+	if len(quotes) != 2 {
+		t.Errorf("Expected 2 quotes, got %d", len(quotes))
 	}
 
 	if quotes[0].Code != "7203" {
 		t.Errorf("Expected code 7203, got %s", quotes[0].Code)
-	}
-
-	// Check that request was made with correct parameters
-	if mockClient.LastMethod != "GET" {
-		t.Errorf("Expected GET method, got %s", mockClient.LastMethod)
-	}
-
-	if mockClient.LastPath != expectedPath {
-		t.Errorf("Expected path %s, got %s", expectedPath, mockClient.LastPath)
 	}
 }
 
@@ -328,30 +326,58 @@ func TestQuotesService_DateFormatting(t *testing.T) {
 	}
 }
 
-func TestQuotesService_GetDailyQuotesByCode_WithPagination(t *testing.T) {
+func TestQuotesService_GetDailyQuotesByCodeAndDate(t *testing.T) {
 	// Setup
 	mockClient := client.NewMockClient()
 	service := NewQuotesService(mockClient)
 
-	// Calculate expected dates
-	to := time.Now()
-	from := to.AddDate(0, 0, -30)
-	basePath := fmt.Sprintf("/equities/bars/daily?code=7203&from=%s&to=%s",
-		from.Format("20060102"), to.Format("20060102"))
-
-	// Mock response - 最初のページ
-	mockResponse1 := DailyQuotesResponse{
+	// Mock response
+	mockResponse := DailyQuotesResponse{
 		Data: []DailyQuote{
 			{
 				Date: "20240101",
 				Code: "7203",
+				O:    floatPtr(2490.0),
+				H:    floatPtr(2510.0),
+				L:    floatPtr(2480.0),
 				C:    floatPtr(2500.0),
 			},
-			{
-				Date: "20240102",
-				Code: "7203",
-				C:    floatPtr(2510.0),
-			},
+		},
+	}
+	mockClient.SetResponse("GET", "/equities/bars/daily?code=7203&date=20240101", mockResponse)
+
+	// Test
+	quotes, err := service.GetDailyQuotesByCodeAndDate("7203", "20240101")
+	if err != nil {
+		t.Errorf("GetDailyQuotesByCodeAndDate failed: %v", err)
+	}
+
+	// Verify
+	if len(quotes) != 1 {
+		t.Errorf("Expected 1 quote, got %d", len(quotes))
+	}
+
+	if quotes[0].Code != "7203" || quotes[0].Date != "20240101" {
+		t.Errorf("Quote data mismatch: code=%s, date=%s", quotes[0].Code, quotes[0].Date)
+	}
+
+	if mockClient.LastPath != "/equities/bars/daily?code=7203&date=20240101" {
+		t.Errorf("Expected path /equities/bars/daily?code=7203&date=20240101, got %s", mockClient.LastPath)
+	}
+}
+
+func TestQuotesService_GetDailyQuotesByCodeAndDateRange(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewQuotesService(mockClient)
+
+	basePath := "/equities/bars/daily?code=7203&from=20240101&to=20240131"
+
+	// Mock response - 最初のページ
+	mockResponse1 := DailyQuotesResponse{
+		Data: []DailyQuote{
+			{Date: "20240101", Code: "7203", C: floatPtr(2500.0)},
+			{Date: "20240102", Code: "7203", C: floatPtr(2510.0)},
 		},
 		PaginationKey: "next_page_key",
 	}
@@ -359,22 +385,18 @@ func TestQuotesService_GetDailyQuotesByCode_WithPagination(t *testing.T) {
 	// Mock response - 2ページ目
 	mockResponse2 := DailyQuotesResponse{
 		Data: []DailyQuote{
-			{
-				Date: "20240103",
-				Code: "7203",
-				C:    floatPtr(2520.0),
-			},
+			{Date: "20240103", Code: "7203", C: floatPtr(2520.0)},
 		},
-		PaginationKey: "", // 最後のページ
+		PaginationKey: "",
 	}
 
 	mockClient.SetResponse("GET", basePath, mockResponse1)
 	mockClient.SetResponse("GET", basePath+"&pagination_key=next_page_key", mockResponse2)
 
 	// Test
-	quotes, err := service.GetDailyQuotesByCode("7203", 30)
+	quotes, err := service.GetDailyQuotesByCodeAndDateRange("7203", "20240101", "20240131")
 	if err != nil {
-		t.Errorf("GetDailyQuotesByCode failed: %v", err)
+		t.Errorf("GetDailyQuotesByCodeAndDateRange failed: %v", err)
 	}
 
 	// Verify
@@ -382,7 +404,6 @@ func TestQuotesService_GetDailyQuotesByCode_WithPagination(t *testing.T) {
 		t.Errorf("Expected 3 quotes total, got %d", len(quotes))
 	}
 
-	// 各データの確認
 	if quotes[0].Date != "20240101" || *quotes[0].C != 2500.0 {
 		t.Errorf("First quote data mismatch")
 	}

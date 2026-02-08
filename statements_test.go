@@ -11,26 +11,32 @@ import (
 func TestStatementsService_GetStatements(t *testing.T) {
 	tests := []struct {
 		name     string
-		code     string
-		date     string
+		params   StatementsParams
 		wantPath string
 	}{
 		{
 			name:     "with code and date",
-			code:     "7203",
-			date:     "20240101",
+			params:   StatementsParams{Code: "7203", Date: "20240101"},
 			wantPath: "/fins/summary?code=7203&date=20240101",
 		},
 		{
 			name:     "with code only",
-			code:     "7203",
-			date:     "",
+			params:   StatementsParams{Code: "7203"},
 			wantPath: "/fins/summary?code=7203",
 		},
 		{
+			name:     "with date only",
+			params:   StatementsParams{Date: "20240101"},
+			wantPath: "/fins/summary?date=20240101",
+		},
+		{
+			name:     "with pagination key",
+			params:   StatementsParams{Date: "20240101", PaginationKey: "key123"},
+			wantPath: "/fins/summary?date=20240101&pagination_key=key123",
+		},
+		{
 			name:     "with no parameters",
-			code:     "",
-			date:     "",
+			params:   StatementsParams{},
 			wantPath: "/fins/summary",
 		},
 	}
@@ -73,12 +79,12 @@ func TestStatementsService_GetStatements(t *testing.T) {
 						BPS:  floatPtr(3000.0),
 						EqAR: floatPtr(60.0),
 						// 配当情報
-						DivAnn:        floatPtr(60.0),
-						PayoutRatioAn: floatPtr(39.9),
-						FDivAnn:       floatPtr(65.0),
+						DivAnn:         floatPtr(60.0),
+						PayoutRatioAn:  floatPtr(39.9),
+						FDivAnn:        floatPtr(65.0),
 						FPayoutRatioAn: floatPtr(40.0),
-						Div2Q:         floatPtr(25.0),
-						DivFY:         floatPtr(35.0),
+						Div2Q:          floatPtr(25.0),
+						DivFY:          floatPtr(35.0),
 						// 業績予想
 						FSales: floatPtr(15000000000),
 						FOP:    floatPtr(3000000000),
@@ -91,14 +97,14 @@ func TestStatementsService_GetStatements(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Test
-			statements, err := service.GetStatements(tt.code, tt.date)
+			resp, err := service.GetStatements(tt.params)
 			if err != nil {
 				t.Errorf("GetStatements failed: %v", err)
 			}
 
 			// Verify
-			if len(statements) != 1 {
-				t.Errorf("Expected 1 statement, got %d", len(statements))
+			if len(resp.Data) != 1 {
+				t.Errorf("Expected 1 statement, got %d", len(resp.Data))
 			}
 
 			if mockClient.LastMethod != "GET" {
@@ -189,9 +195,47 @@ func TestStatementsService_GetStatements_Error(t *testing.T) {
 	mockClient.SetError("GET", "/fins/summary?code=7203", fmt.Errorf("API error"))
 
 	// Test
-	_, err := service.GetStatements("7203", "")
+	_, err := service.GetStatements(StatementsParams{Code: "7203"})
 	if err == nil {
 		t.Errorf("Expected error, got nil")
+	}
+}
+
+func TestStatementsService_GetStatementsByCodeAndDate(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewStatementsService(mockClient)
+
+	// Mock response
+	mockResponse := StatementsResponse{
+		Data: []Statement{
+			{
+				DiscDate: "2024-01-15",
+				Code:     "72030",
+				Sales:    floatPtr(10000000000),
+				OP:       floatPtr(2000000000),
+			},
+		},
+	}
+	mockClient.SetResponse("GET", "/fins/summary?code=7203&date=2024-01-15", mockResponse)
+
+	// Test
+	statements, err := service.GetStatementsByCodeAndDate("7203", "2024-01-15")
+	if err != nil {
+		t.Errorf("GetStatementsByCodeAndDate failed: %v", err)
+	}
+
+	// Verify
+	if len(statements) != 1 {
+		t.Errorf("Expected 1 statement, got %d", len(statements))
+	}
+
+	if statements[0].Code != "72030" || statements[0].DiscDate != "2024-01-15" {
+		t.Errorf("Statement data mismatch: code=%s, date=%s", statements[0].Code, statements[0].DiscDate)
+	}
+
+	if mockClient.LastPath != "/fins/summary?code=7203&date=2024-01-15" {
+		t.Errorf("Expected path /fins/summary?code=7203&date=2024-01-15, got %s", mockClient.LastPath)
 	}
 }
 
@@ -200,8 +244,8 @@ func TestStatementsService_GetStatementsByDate(t *testing.T) {
 	mockClient := client.NewMockClient()
 	service := NewStatementsService(mockClient)
 
-	// Mock response
-	mockResponse := StatementsResponse{
+	// Mock response - 最初のページ
+	mockResponse1 := StatementsResponse{
 		Data: []Statement{
 			{
 				DiscDate: "2024-01-15",
@@ -216,8 +260,24 @@ func TestStatementsService_GetStatementsByDate(t *testing.T) {
 				OP:       floatPtr(1000000000),
 			},
 		},
+		PaginationKey: "next_page_key",
 	}
-	mockClient.SetResponse("GET", "/fins/summary?date=2024-01-15", mockResponse)
+
+	// Mock response - 2ページ目
+	mockResponse2 := StatementsResponse{
+		Data: []Statement{
+			{
+				DiscDate: "2024-01-15",
+				Code:     "99830",
+				Sales:    floatPtr(3000000000),
+				OP:       floatPtr(500000000),
+			},
+		},
+		PaginationKey: "",
+	}
+
+	mockClient.SetResponse("GET", "/fins/summary?date=2024-01-15", mockResponse1)
+	mockClient.SetResponse("GET", "/fins/summary?date=2024-01-15&pagination_key=next_page_key", mockResponse2)
 
 	// Test
 	statements, err := service.GetStatementsByDate("2024-01-15")
@@ -226,12 +286,8 @@ func TestStatementsService_GetStatementsByDate(t *testing.T) {
 	}
 
 	// Verify
-	if len(statements) != 2 {
-		t.Errorf("Expected 2 statements, got %d", len(statements))
-	}
-
-	if mockClient.LastPath != "/fins/summary?date=2024-01-15" {
-		t.Errorf("Expected path /fins/summary?date=2024-01-15, got %s", mockClient.LastPath)
+	if len(statements) != 3 {
+		t.Errorf("Expected 3 statements total, got %d", len(statements))
 	}
 }
 

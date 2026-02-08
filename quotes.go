@@ -3,7 +3,6 @@ package jquants
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/utahta/jquants/client"
 	"github.com/utahta/jquants/types"
@@ -250,21 +249,15 @@ func (s *QuotesService) GetDailyQuotes(params DailyQuotesParams) (*DailyQuotesRe
 	return &resp, nil
 }
 
-// GetDailyQuotesByCode は指定銘柄の過去N日間の株価データを取得します。
-// 例: GetDailyQuotesByCode("7203", 30) でトヨタ自動車の過去30日間のデータを取得
+// GetDailyQuotesByCode は指定銘柄の全期間の株価データを取得します。
 // ページネーションを使用して全データを取得します。
-func (s *QuotesService) GetDailyQuotesByCode(code string, days int) ([]DailyQuote, error) {
-	to := time.Now()
-	from := to.AddDate(0, 0, -days)
-
+func (s *QuotesService) GetDailyQuotesByCode(code string) ([]DailyQuote, error) {
 	var allQuotes []DailyQuote
 	paginationKey := ""
 
 	for {
 		params := DailyQuotesParams{
 			Code:          code,
-			From:          from.Format("20060102"),
-			To:            to.Format("20060102"),
 			PaginationKey: paginationKey,
 		}
 
@@ -275,7 +268,48 @@ func (s *QuotesService) GetDailyQuotesByCode(code string, days int) ([]DailyQuot
 
 		allQuotes = append(allQuotes, resp.Data...)
 
-		// ページネーションキーがなければ終了
+		if resp.PaginationKey == "" {
+			break
+		}
+		paginationKey = resp.PaginationKey
+	}
+
+	return allQuotes, nil
+}
+
+// GetDailyQuotesByCodeAndDate は指定銘柄の指定日の株価データを取得します。
+func (s *QuotesService) GetDailyQuotesByCodeAndDate(code, date string) ([]DailyQuote, error) {
+	resp, err := s.GetDailyQuotes(DailyQuotesParams{
+		Code: code,
+		Date: date,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Data, nil
+}
+
+// GetDailyQuotesByCodeAndDateRange は指定銘柄の指定期間の株価データを取得します。
+// ページネーションを使用して全データを取得します。
+func (s *QuotesService) GetDailyQuotesByCodeAndDateRange(code, from, to string) ([]DailyQuote, error) {
+	var allQuotes []DailyQuote
+	paginationKey := ""
+
+	for {
+		params := DailyQuotesParams{
+			Code:          code,
+			From:          from,
+			To:            to,
+			PaginationKey: paginationKey,
+		}
+
+		resp, err := s.GetDailyQuotes(params)
+		if err != nil {
+			return nil, err
+		}
+
+		allQuotes = append(allQuotes, resp.Data...)
+
 		if resp.PaginationKey == "" {
 			break
 		}

@@ -218,6 +218,18 @@ func (s *ShortSellingService) GetShortSellingBySectorAndDateRange(sector33Code, 
 	return allData, nil
 }
 
+// GetShortSellingBySectorAndDate は指定業種の指定日の空売り比率を取得します。
+func (s *ShortSellingService) GetShortSellingBySectorAndDate(sector33Code, date string) ([]ShortSelling, error) {
+	resp, err := s.GetShortSelling(ShortSellingParams{
+		Sector33Code: sector33Code,
+		Date:         date,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Data, nil
+}
+
 // GetTotalShortSellingValue は空売り合計金額を計算します。
 func (ss *ShortSelling) GetTotalShortSellingValue() float64 {
 	return ss.ShrtWithResVa + ss.ShrtNoResVa

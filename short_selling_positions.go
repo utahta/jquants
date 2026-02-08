@@ -303,6 +303,62 @@ func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndDateRang
 	return allData, nil
 }
 
+// GetShortSellingPositionsByCodeAndDisclosedDate は指定銘柄の指定公表日の空売り残高報告を取得します。
+func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndDisclosedDate(code, disclosedDate string) ([]ShortSellingPosition, error) {
+	var allData []ShortSellingPosition
+	paginationKey := ""
+
+	for {
+		params := ShortSellingPositionsParams{
+			Code:          code,
+			DisclosedDate: disclosedDate,
+			PaginationKey: paginationKey,
+		}
+
+		resp, err := s.GetShortSellingPositions(params)
+		if err != nil {
+			return nil, err
+		}
+
+		allData = append(allData, resp.Data...)
+
+		if resp.PaginationKey == "" {
+			break
+		}
+		paginationKey = resp.PaginationKey
+	}
+
+	return allData, nil
+}
+
+// GetShortSellingPositionsByCodeAndCalculatedDate は指定銘柄の指定計算日の空売り残高報告を取得します。
+func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndCalculatedDate(code, calculatedDate string) ([]ShortSellingPosition, error) {
+	var allData []ShortSellingPosition
+	paginationKey := ""
+
+	for {
+		params := ShortSellingPositionsParams{
+			Code:           code,
+			CalculatedDate: calculatedDate,
+			PaginationKey:  paginationKey,
+		}
+
+		resp, err := s.GetShortSellingPositions(params)
+		if err != nil {
+			return nil, err
+		}
+
+		allData = append(allData, resp.Data...)
+
+		if resp.PaginationKey == "" {
+			break
+		}
+		paginationKey = resp.PaginationKey
+	}
+
+	return allData, nil
+}
+
 // GetPositionChange は前回報告からの残高変化を計算します（株数）。
 func (ssp *ShortSellingPosition) GetPositionChange() float64 {
 	// 前回報告時の残高割合から株数を逆算

@@ -86,6 +86,95 @@ func TestTradingCalendarService_GetTradingCalendar(t *testing.T) {
 	}
 }
 
+func TestTradingCalendarService_GetAllTradingCalendar(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewTradingCalendarService(mockClient)
+
+	// Mock response
+	mockResponse := TradingCalendarResponse{
+		Data: []TradingCalendar{
+			{Date: "2024-01-01", HolDiv: "0"},
+			{Date: "2024-01-02", HolDiv: "1"},
+			{Date: "2024-01-03", HolDiv: "1"},
+		},
+	}
+	mockClient.SetResponse("GET", "/markets/calendar", mockResponse)
+
+	// Execute
+	data, err := service.GetAllTradingCalendar()
+
+	// Verify
+	if err != nil {
+		t.Fatalf("GetAllTradingCalendar() error = %v", err)
+	}
+	if len(data) != 3 {
+		t.Errorf("GetAllTradingCalendar() returned %d items, want 3", len(data))
+	}
+}
+
+func TestTradingCalendarService_GetTradingCalendarByHolidayDivision(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewTradingCalendarService(mockClient)
+
+	// Mock response
+	mockResponse := TradingCalendarResponse{
+		Data: []TradingCalendar{
+			{Date: "2024-01-02", HolDiv: "1"},
+			{Date: "2024-01-03", HolDiv: "1"},
+		},
+	}
+	mockClient.SetResponse("GET", "/markets/calendar?hol_div=1", mockResponse)
+
+	// Execute
+	data, err := service.GetTradingCalendarByHolidayDivision("1")
+
+	// Verify
+	if err != nil {
+		t.Fatalf("GetTradingCalendarByHolidayDivision() error = %v", err)
+	}
+	if len(data) != 2 {
+		t.Errorf("GetTradingCalendarByHolidayDivision() returned %d items, want 2", len(data))
+	}
+	for _, day := range data {
+		if day.HolDiv != "1" {
+			t.Errorf("GetTradingCalendarByHolidayDivision() returned HolDiv %v, want 1", day.HolDiv)
+		}
+	}
+}
+
+func TestTradingCalendarService_GetTradingCalendarByHolidayDivisionAndDateRange(t *testing.T) {
+	// Setup
+	mockClient := client.NewMockClient()
+	service := NewTradingCalendarService(mockClient)
+
+	// Mock response
+	mockResponse := TradingCalendarResponse{
+		Data: []TradingCalendar{
+			{Date: "2024-01-02", HolDiv: "1"},
+			{Date: "2024-01-03", HolDiv: "1"},
+		},
+	}
+	mockClient.SetResponse("GET", "/markets/calendar?hol_div=1&from=20240101&to=20240131", mockResponse)
+
+	// Execute
+	data, err := service.GetTradingCalendarByHolidayDivisionAndDateRange("1", "20240101", "20240131")
+
+	// Verify
+	if err != nil {
+		t.Fatalf("GetTradingCalendarByHolidayDivisionAndDateRange() error = %v", err)
+	}
+	if len(data) != 2 {
+		t.Errorf("GetTradingCalendarByHolidayDivisionAndDateRange() returned %d items, want 2", len(data))
+	}
+	for _, day := range data {
+		if day.HolDiv != "1" {
+			t.Errorf("GetTradingCalendarByHolidayDivisionAndDateRange() returned HolDiv %v, want 1", day.HolDiv)
+		}
+	}
+}
+
 func TestTradingCalendarService_GetTradingCalendarByDateRange(t *testing.T) {
 	// Setup
 	mockClient := client.NewMockClient()

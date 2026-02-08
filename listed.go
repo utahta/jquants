@@ -115,24 +115,25 @@ type ListedInfoResponse struct {
 	Data []ListedInfo `json:"data"`
 }
 
-// GetListedInfo は上場企業情報を取得します。
+// ListedInfoParams は上場企業情報のリクエストパラメータです。
+type ListedInfoParams struct {
+	Code string // 銘柄コード（4桁または5桁）
+	Date string // 基準日付（YYYYMMDD または YYYY-MM-DD）
+}
+
+// GetListedInfo は指定された条件で上場企業情報を取得します。
 // パラメータ:
-// - code: 銘柄コード（空の場合は全銘柄）4桁または5桁形式をサポート
-// - date: 基準日（YYYYMMDD または YYYY-MM-DD 形式、空の場合は最新）
-//
-// 使用例:
-// - 特定銘柄: GetListedInfo("7203", "")
-// - 全銘柄（最新）: GetListedInfo("", "")
-// - 過去時点: GetListedInfo("", "20210907")
-func (s *ListedService) GetListedInfo(code string, date string) ([]ListedInfo, error) {
+// - Code: 銘柄コード（例: "7203" または "72030"）
+// - Date: 基準日付（例: "20240101" または "2024-01-01"）
+func (s *ListedService) GetListedInfo(params ListedInfoParams) (*ListedInfoResponse, error) {
 	path := "/equities/master"
 
 	query := "?"
-	if code != "" {
-		query += fmt.Sprintf("code=%s&", code)
+	if params.Code != "" {
+		query += fmt.Sprintf("code=%s&", params.Code)
 	}
-	if date != "" {
-		query += fmt.Sprintf("date=%s&", date)
+	if params.Date != "" {
+		query += fmt.Sprintf("date=%s&", params.Date)
 	}
 
 	if len(query) > 1 {
@@ -144,28 +145,49 @@ func (s *ListedService) GetListedInfo(code string, date string) ([]ListedInfo, e
 		return nil, fmt.Errorf("failed to get listed info: %w", err)
 	}
 
-	return resp.Data, nil
+	return &resp, nil
 }
 
-// GetCompanyInfo は指定銘柄の最新企業情報を取得します。
-// 例: GetCompanyInfo("7203") でトヨタ自動車の企業情報を取得
-func (s *ListedService) GetCompanyInfo(code string) (*ListedInfo, error) {
-	infos, err := s.GetListedInfo(code, "")
+// GetAllListedInfo は当日時点の全銘柄情報を取得します。
+func (s *ListedService) GetAllListedInfo() ([]ListedInfo, error) {
+	resp, err := s.GetListedInfo(ListedInfoParams{})
 	if err != nil {
 		return nil, err
 	}
+	return resp.Data, nil
+}
 
-	if len(infos) == 0 {
-		return nil, fmt.Errorf("no company info found for code: %s", code)
+// GetListedInfoByCode は当日時点の指定銘柄情報を取得します。
+func (s *ListedService) GetListedInfoByCode(code string) ([]ListedInfo, error) {
+	resp, err := s.GetListedInfo(ListedInfoParams{Code: code})
+	if err != nil {
+		return nil, err
 	}
+	return resp.Data, nil
+}
 
-	return &infos[0], nil
+// GetListedInfoByDate は指定日時点の全銘柄情報を取得します。
+func (s *ListedService) GetListedInfoByDate(date string) ([]ListedInfo, error) {
+	resp, err := s.GetListedInfo(ListedInfoParams{Date: date})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Data, nil
+}
+
+// GetListedInfoByCodeAndDate は指定日時点の指定銘柄情報を取得します。
+func (s *ListedService) GetListedInfoByCodeAndDate(code, date string) ([]ListedInfo, error) {
+	resp, err := s.GetListedInfo(ListedInfoParams{Code: code, Date: date})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Data, nil
 }
 
 // GetListedBySector17 は指定した17業種コードの銘柄一覧を取得します。
 // 例: GetListedBySector17(Sector17IT, "") でIT関連銘柄を取得
 func (s *ListedService) GetListedBySector17(sector17Code string, date string) ([]ListedInfo, error) {
-	allInfo, err := s.GetListedInfo("", date)
+	allInfo, err := s.GetListedInfoByDate(date)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +205,7 @@ func (s *ListedService) GetListedBySector17(sector17Code string, date string) ([
 // GetListedBySector33 は指定した33業種コードの銘柄一覧を取得します。
 // 例: GetListedBySector33(Sector33IT, "") で情報・通信業銘柄を取得
 func (s *ListedService) GetListedBySector33(sector33Code string, date string) ([]ListedInfo, error) {
-	allInfo, err := s.GetListedInfo("", date)
+	allInfo, err := s.GetListedInfoByDate(date)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +223,7 @@ func (s *ListedService) GetListedBySector33(sector33Code string, date string) ([
 // GetListedByMarket は指定した市場区分の銘柄一覧を取得します。
 // marketCode: MarketPrime, MarketStandard, MarketGrowth など
 func (s *ListedService) GetListedByMarket(marketCode string, date string) ([]ListedInfo, error) {
-	allInfo, err := s.GetListedInfo("", date)
+	allInfo, err := s.GetListedInfoByDate(date)
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,7 @@ import (
 func TestStatementsEndpoint(t *testing.T) {
 	t.Run("GetStatements_ByCode", func(t *testing.T) {
 		// トヨタ自動車(7203)の財務諸表を取得
-		statements, err := jq.Statements.GetStatements("7203", "")
+		statements, err := jq.Statements.GetAllStatementsByCode("7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -260,7 +260,7 @@ func TestStatementsEndpoint(t *testing.T) {
 
 	t.Run("GetStatements_Historical", func(t *testing.T) {
 		// 複数の履歴データ取得のテスト
-		statements, err := jq.Statements.GetStatements("7203", "")
+		statements, err := jq.Statements.GetAllStatementsByCode("7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")

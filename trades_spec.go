@@ -235,6 +235,36 @@ func (s *TradesSpecService) GetAllTradesSpec() ([]TradesSpec, error) {
 	return allTradesSpec, nil
 }
 
+// GetTradesSpecBySectionAndDateRange は指定セクション・期間の投資部門別情報を取得します。
+// ページネーションを使用して全データを取得します。
+func (s *TradesSpecService) GetTradesSpecBySectionAndDateRange(section, from, to string) ([]TradesSpec, error) {
+	var allTradesSpec []TradesSpec
+	paginationKey := ""
+
+	for {
+		params := TradesSpecParams{
+			Section:       section,
+			From:          from,
+			To:            to,
+			PaginationKey: paginationKey,
+		}
+
+		resp, err := s.GetTradesSpec(params)
+		if err != nil {
+			return nil, err
+		}
+
+		allTradesSpec = append(allTradesSpec, resp.Data...)
+
+		if resp.PaginationKey == "" {
+			break
+		}
+		paginationKey = resp.PaginationKey
+	}
+
+	return allTradesSpec, nil
+}
+
 // IsBuyerDominant は買い手が優勢かどうかを判定します（差引がプラス）。
 func (ts *TradesSpec) IsBuyerDominant(investorType string) bool {
 	switch investorType {

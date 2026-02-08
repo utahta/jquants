@@ -9,9 +9,9 @@ import (
 
 // TestListedEndpoint は/equities/masterエンドポイントの完全なテスト
 func TestListedEndpoint(t *testing.T) {
-	t.Run("GetInfo_All", func(t *testing.T) {
+	t.Run("GetAllListedInfo", func(t *testing.T) {
 		// 全ての上場企業情報を取得
-		companies, err := jq.Listed.GetListedInfo("", "")
+		companies, err := jq.Listed.GetAllListedInfo()
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -86,19 +86,21 @@ func TestListedEndpoint(t *testing.T) {
 		}
 	})
 
-	t.Run("GetInfoByCode_ValidCode", func(t *testing.T) {
+	t.Run("GetListedInfoByCode", func(t *testing.T) {
 		// 特定の銘柄コードで企業情報を取得（トヨタ自動車）
-		company, err := jq.Listed.GetCompanyInfo("7203")
+		infos, err := jq.Listed.GetListedInfoByCode("7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
 			}
-			t.Fatalf("Failed to get company info for code 7203: %v", err)
+			t.Fatalf("Failed to get listed info for code 7203: %v", err)
 		}
 
-		if company == nil {
-			t.Fatal("Company info is nil for code 7203")
+		if len(infos) == 0 {
+			t.Fatal("No listed info for code 7203")
 		}
+
+		company := infos[0]
 
 		// トヨタ自動車の詳細検証
 		if company.Code != "72030" && company.Code != "7203" {
@@ -129,9 +131,9 @@ func TestListedEndpoint(t *testing.T) {
 		}
 	})
 
-	t.Run("GetInfoByCode_InvalidCode", func(t *testing.T) {
+	t.Run("GetListedInfoByCode_InvalidCode", func(t *testing.T) {
 		// 存在しない銘柄コードでのテスト
-		company, err := jq.Listed.GetCompanyInfo("99999")
+		infos, err := jq.Listed.GetListedInfoByCode("99999")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -141,14 +143,14 @@ func TestListedEndpoint(t *testing.T) {
 			return
 		}
 
-		if company != nil {
-			t.Error("Expected nil company for invalid code 99999")
+		if len(infos) > 0 {
+			t.Error("Expected no data for invalid code 99999")
 		}
 	})
 
-	t.Run("GetInfo_MarketSegments", func(t *testing.T) {
+	t.Run("GetAllListedInfo_MarketSegments", func(t *testing.T) {
 		// 全企業の市場セグメント分析
-		companies, err := jq.Listed.GetListedInfo("", "")
+		companies, err := jq.Listed.GetAllListedInfo()
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -180,9 +182,9 @@ func TestListedEndpoint(t *testing.T) {
 		}
 	})
 
-	t.Run("GetInfo_SectorAnalysis", func(t *testing.T) {
+	t.Run("GetAllListedInfo_SectorAnalysis", func(t *testing.T) {
 		// 業種別分析
-		companies, err := jq.Listed.GetListedInfo("", "")
+		companies, err := jq.Listed.GetAllListedInfo()
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -219,9 +221,9 @@ func TestListedEndpoint(t *testing.T) {
 		}
 	})
 
-	t.Run("GetInfo_CodeValidation", func(t *testing.T) {
+	t.Run("GetAllListedInfo_CodeValidation", func(t *testing.T) {
 		// 銘柄コードの形式検証
-		companies, err := jq.Listed.GetListedInfo("", "")
+		companies, err := jq.Listed.GetAllListedInfo()
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
