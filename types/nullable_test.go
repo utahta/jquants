@@ -46,9 +46,10 @@ func TestNullableFloat64_UnmarshalJSON(t *testing.T) {
 
 func TestNullableInt64_UnmarshalJSON(t *testing.T) {
 	tests := []struct {
-		name  string
-		input string
-		want  *int64
+		name    string
+		input   string
+		want    *int64
+		wantErr bool
 	}{
 		{name: "integer", input: `62000000`, want: int64Ptr(62000000)},
 		{name: "decimal number", input: `123.0`, want: int64Ptr(123)},
@@ -56,13 +57,30 @@ func TestNullableInt64_UnmarshalJSON(t *testing.T) {
 		{name: "empty string", input: `""`, want: nil},
 		{name: "dash", input: `"-"`, want: nil},
 		{name: "null", input: `null`, want: nil},
+		// float64の仮数部（2^53）を超える整数も、小数・指数表記を含め正確にパースされること
+		{name: "large integer string", input: `"9007199254740993"`, want: int64Ptr(9007199254740993)},
+		{name: "large integer number", input: `9007199254740993`, want: int64Ptr(9007199254740993)},
+		{name: "large integer decimal string", input: `"9007199254740993.0"`, want: int64Ptr(9007199254740993)},
+		{name: "large integer decimal number", input: `9007199254740993.0`, want: int64Ptr(9007199254740993)},
+		{name: "large integer exponent number", input: `9.007199254740993e15`, want: int64Ptr(9007199254740993)},
+		{name: "min int64 string", input: `"-9223372036854775808"`, want: int64Ptr(-9223372036854775808)},
+		// 表現できない値はサイレントに壊れずエラーになること
+		{name: "overflow string", input: `"92233720368547758070"`, wantErr: true},
+		{name: "overflow number", input: `92233720368547758070.0`, wantErr: true},
+		{name: "below min int64 string", input: `"-9223372036854775809"`, wantErr: true},
+		{name: "non-integral string", input: `"123.5"`, wantErr: true},
+		{name: "non-integral number", input: `123.5`, wantErr: true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var n NullableInt64
-			if err := json.Unmarshal([]byte(tt.input), &n); err != nil {
-				t.Fatalf("UnmarshalJSON(%s) error = %v", tt.input, err)
+			err := json.Unmarshal([]byte(tt.input), &n)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("UnmarshalJSON(%s) error = %v, wantErr %v", tt.input, err, tt.wantErr)
+			}
+			if tt.wantErr {
+				return
 			}
 			got := n.Ptr()
 			if (got == nil) != (tt.want == nil) || (got != nil && *got != *tt.want) {

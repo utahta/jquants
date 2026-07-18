@@ -2,6 +2,8 @@ package types
 
 import (
 	"encoding/json"
+	"fmt"
+	"math/big"
 	"strconv"
 )
 
@@ -95,11 +97,17 @@ func (n *Nullable[T]) UnmarshalJSON(data []byte) error {
 
 	var v T
 	if err := json.Unmarshal(data, &v); err != nil {
-		// int64はJSON上小数表現（例: 123.0）で届くことがあるためfloat64経由で受ける
+		// int64はJSON上小数・指数表現（例: 123.0, 1.23e5）で届くことがある
 		if p, ok := any(&v).(*int64); ok {
 			var f float64
 			if err2 := json.Unmarshal(data, &f); err2 == nil {
-				*p = int64(f)
+				// 数値であることを確認済み。値の評価はfloat64の丸めを避けて
+				// 元のテキストから厳密に行う
+				i, err3 := int64FromNumericText(string(data))
+				if err3 != nil {
+					return err3
+				}
+				*p = i
 				n.value = &v
 				return nil
 			}
@@ -134,13 +142,39 @@ func valueFromString[T NullableValue](s string) (T, error) {
 		}
 		*p = f
 	case *int64:
-		f, err := strconv.ParseFloat(s, 64)
+		// 数値文法の検証はfloat64パースで行い、値の評価は丸め誤差を避けるため
+		// 元のテキストから厳密に行う
+		if _, err := strconv.ParseFloat(s, 64); err != nil {
+			return v, err
+		}
+		i, err := int64FromNumericText(s)
 		if err != nil {
 			return v, err
 		}
-		*p = int64(f)
+		*p = i
 	}
 	return v, nil
+}
+
+// int64FromNumericText は10進の数値テキスト（整数・小数・指数表記）を
+// 丸め誤差なくint64へ変換します。float64を経由すると2^53を超える整数で
+// 精度が失われるため、big.Ratで元のテキストを厳密に評価します。
+// 非整数値やint64で表現できない値はエラーになります。
+func int64FromNumericText(s string) (int64, error) {
+	if i, err := strconv.ParseInt(s, 10, 64); err == nil {
+		return i, nil
+	}
+	r, ok := new(big.Rat).SetString(s)
+	if !ok {
+		return 0, fmt.Errorf("invalid numeric value %q", s)
+	}
+	if !r.IsInt() {
+		return 0, fmt.Errorf("value %q is not an integer", s)
+	}
+	if !r.Num().IsInt64() {
+		return 0, fmt.Errorf("value %q overflows int64", s)
+	}
+	return r.Num().Int64(), nil
 }
 
 // NullableFloat64 は欠損しうるfloat64値です。
