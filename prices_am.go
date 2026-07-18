@@ -63,14 +63,14 @@ type RawPriceAM struct {
 	Code string `json:"Code"`
 
 	// 前場四本値データ
-	MO *types.Float64String `json:"MO"`
-	MH *types.Float64String `json:"MH"`
-	ML *types.Float64String `json:"ML"`
-	MC *types.Float64String `json:"MC"`
+	MO types.NullableFloat64 `json:"MO"`
+	MH types.NullableFloat64 `json:"MH"`
+	ML types.NullableFloat64 `json:"ML"`
+	MC types.NullableFloat64 `json:"MC"`
 
 	// 前場取引情報
-	MVo *types.Float64String `json:"MVo"`
-	MVa *types.Float64String `json:"MVa"`
+	MVo types.NullableFloat64 `json:"MVo"`
+	MVa types.NullableFloat64 `json:"MVa"`
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling for PricesAMResponse
@@ -98,14 +98,14 @@ func (r *PricesAMResponse) UnmarshalJSON(data []byte) error {
 			Code: rpa.Code,
 
 			// 前場四本値データ
-			MO: types.ToFloat64Ptr(rpa.MO),
-			MH: types.ToFloat64Ptr(rpa.MH),
-			ML: types.ToFloat64Ptr(rpa.ML),
-			MC: types.ToFloat64Ptr(rpa.MC),
+			MO: rpa.MO.Ptr(),
+			MH: rpa.MH.Ptr(),
+			ML: rpa.ML.Ptr(),
+			MC: rpa.MC.Ptr(),
 
 			// 前場取引情報
-			MVo: types.ToFloat64Ptr(rpa.MVo),
-			MVa: types.ToFloat64Ptr(rpa.MVa),
+			MVo: rpa.MVo.Ptr(),
+			MVa: rpa.MVa.Ptr(),
 		}
 	}
 

@@ -75,18 +75,18 @@ func TestFuturesService_GetFutures(t *testing.T) {
 						H:            2853.0,
 						L:            2825.5,
 						C:            2829.0,
-						EO:           2825.5,
-						EH:           2850.0,
-						EL:           2825.5,
-						EC:           2845.0,
+						EO:           floatPtr(2825.5),
+						EH:           floatPtr(2850.0),
+						EL:           floatPtr(2825.5),
+						EC:           floatPtr(2845.0),
 						AO:           2850.5,
 						AH:           2853.0,
 						AL:           2826.0,
 						AC:           2829.0,
-						MO:           "",
-						MH:           "",
-						ML:           "",
-						MC:           "",
+						MO:           nil,
+						MH:           nil,
+						ML:           nil,
+						MC:           nil,
 						Vo:           42910.0,
 						OI:           479812.0,
 						Va:           1217918971856.0,
@@ -307,16 +307,17 @@ func TestFutures_HelperMethods(t *testing.T) {
 			},
 			isEmergencyMarginTriggered: true,
 			isCentralContractMonth:     false,
-			hasNightSession:            true,
-			hasMorningSession:          true,
+			// セッションデータ未設定（nil）はデータなしと判定される
+			hasNightSession:   false,
+			hasMorningSession: false,
 		},
 		{
 			name: "normal settlement price",
 			futures: Futures{
 				EmMrgnTrgDiv: "002",
 				CCMFlag:      stringPtr("1"),
-				EO:           2825.5,
-				MO:           "",
+				EO:           floatPtr(2825.5),
+				MO:           nil,
 			},
 			isEmergencyMarginTriggered: false,
 			isCentralContractMonth:     true,
@@ -328,8 +329,8 @@ func TestFutures_HelperMethods(t *testing.T) {
 			futures: Futures{
 				EmMrgnTrgDiv: "002",
 				CCMFlag:      stringPtr("0"),
-				EO:           "",
-				MO:           2500.0,
+				EO:           nil,
+				MO:           floatPtr(2500.0),
 			},
 			isEmergencyMarginTriggered: false,
 			isCentralContractMonth:     false,
@@ -359,14 +360,14 @@ func TestFutures_HelperMethods(t *testing.T) {
 func TestFutures_SessionGetters(t *testing.T) {
 	// Setup
 	futures := Futures{
-		EO: 2825.5,
-		EH: 2850.0,
-		EL: 2825.5,
-		EC: 2845.0,
-		MO: "",
-		MH: "",
-		ML: "",
-		MC: "",
+		EO: floatPtr(2825.5),
+		EH: floatPtr(2850.0),
+		EL: floatPtr(2825.5),
+		EC: floatPtr(2845.0),
+		MO: nil,
+		MH: nil,
+		ML: nil,
+		MC: nil,
 	}
 
 	// Test night session getters
@@ -407,7 +408,7 @@ func TestFutures_GetDayNightGap(t *testing.T) {
 		{
 			name: "positive gap",
 			futures: Futures{
-				EC: 2845.0,
+				EC: floatPtr(2845.0),
 				AO: 2850.5,
 			},
 			want: floatPtr(5.5),
@@ -415,7 +416,7 @@ func TestFutures_GetDayNightGap(t *testing.T) {
 		{
 			name: "negative gap",
 			futures: Futures{
-				EC: 2850.0,
+				EC: floatPtr(2850.0),
 				AO: 2845.0,
 			},
 			want: floatPtr(-5.0),
@@ -423,7 +424,7 @@ func TestFutures_GetDayNightGap(t *testing.T) {
 		{
 			name: "no night session",
 			futures: Futures{
-				EC: "",
+				EC: nil,
 				AO: 2850.5,
 			},
 			want: nil,

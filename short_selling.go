@@ -54,9 +54,9 @@ type RawShortSelling struct {
 	S33  string `json:"S33"`
 
 	// 売買代金データ
-	SellExShortVa types.Float64String `json:"SellExShortVa"`
-	ShrtWithResVa types.Float64String `json:"ShrtWithResVa"`
-	ShrtNoResVa   types.Float64String `json:"ShrtNoResVa"`
+	SellExShortVa types.NullableFloat64 `json:"SellExShortVa"`
+	ShrtWithResVa types.NullableFloat64 `json:"ShrtWithResVa"`
+	ShrtNoResVa   types.NullableFloat64 `json:"ShrtNoResVa"`
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling for ShortSellingResponse
@@ -84,9 +84,9 @@ func (r *ShortSellingResponse) UnmarshalJSON(data []byte) error {
 			S33:  rs.S33,
 
 			// 売買代金データ
-			SellExShortVa: float64(rs.SellExShortVa),
-			ShrtWithResVa: float64(rs.ShrtWithResVa),
-			ShrtNoResVa:   float64(rs.ShrtNoResVa),
+			SellExShortVa: rs.SellExShortVa.Or(0),
+			ShrtWithResVa: rs.ShrtWithResVa.Or(0),
+			ShrtNoResVa:   rs.ShrtNoResVa.Or(0),
 		}
 	}
 

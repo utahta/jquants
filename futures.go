@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/utahta/jquants/client"
+	"github.com/utahta/jquants/types"
 )
 
 // FuturesService は先物四本値データを取得するサービスです。
@@ -55,11 +55,11 @@ type Futures struct {
 	L float64 `json:"L"` // 日通し安値
 	C float64 `json:"C"` // 日通し終値
 
-	// ナイト・セッション四本値（取引開始日初日は空文字）
-	EO interface{} `json:"EO"` // ナイト・セッション始値
-	EH interface{} `json:"EH"` // ナイト・セッション高値
-	EL interface{} `json:"EL"` // ナイト・セッション安値
-	EC interface{} `json:"EC"` // ナイト・セッション終値
+	// ナイト・セッション四本値（取引開始日初日は値なし）
+	EO *float64 `json:"EO"` // ナイト・セッション始値
+	EH *float64 `json:"EH"` // ナイト・セッション高値
+	EL *float64 `json:"EL"` // ナイト・セッション安値
+	EC *float64 `json:"EC"` // ナイト・セッション終値
 
 	// 日中セッション四本値
 	AO float64 `json:"AO"` // 日中始値
@@ -67,11 +67,11 @@ type Futures struct {
 	AL float64 `json:"AL"` // 日中安値
 	AC float64 `json:"AC"` // 日中終値
 
-	// 前場四本値（前後場取引対象銘柄でない場合、空文字）
-	MO interface{} `json:"MO"` // 前場始値
-	MH interface{} `json:"MH"` // 前場高値
-	ML interface{} `json:"ML"` // 前場安値
-	MC interface{} `json:"MC"` // 前場終値
+	// 前場四本値（前後場取引対象銘柄でない場合、値なし）
+	MO *float64 `json:"MO"` // 前場始値
+	MH *float64 `json:"MH"` // 前場高値
+	ML *float64 `json:"ML"` // 前場安値
+	MC *float64 `json:"MC"` // 前場終値
 
 	// 取引情報
 	Vo float64 `json:"Vo"` // 取引高
@@ -88,35 +88,35 @@ type Futures struct {
 
 // RawFutures is used for unmarshaling JSON response with mixed types
 type RawFutures struct {
-	Code         string      `json:"Code"`
-	ProdCat      string      `json:"ProdCat"`
-	Date         string      `json:"Date"`
-	CM           string      `json:"CM"`
-	EmMrgnTrgDiv string      `json:"EmMrgnTrgDiv"`
-	O            float64     `json:"O"`
-	H            float64     `json:"H"`
-	L            float64     `json:"L"`
-	C            float64     `json:"C"`
-	EO           interface{} `json:"EO"`
-	EH           interface{} `json:"EH"`
-	EL           interface{} `json:"EL"`
-	EC           interface{} `json:"EC"`
-	AO           float64     `json:"AO"`
-	AH           float64     `json:"AH"`
-	AL           float64     `json:"AL"`
-	AC           float64     `json:"AC"`
-	MO           interface{} `json:"MO"`
-	MH           interface{} `json:"MH"`
-	ML           interface{} `json:"ML"`
-	MC           interface{} `json:"MC"`
-	Vo           float64     `json:"Vo"`
-	OI           float64     `json:"OI"`
-	Va           float64     `json:"Va"`
-	VoOA         interface{} `json:"VoOA"`
-	Settle       interface{} `json:"Settle"`
-	LTD          interface{} `json:"LTD"`
-	SQD          interface{} `json:"SQD"`
-	CCMFlag      interface{} `json:"CCMFlag"`
+	Code         string                `json:"Code"`
+	ProdCat      string                `json:"ProdCat"`
+	Date         string                `json:"Date"`
+	CM           string                `json:"CM"`
+	EmMrgnTrgDiv string                `json:"EmMrgnTrgDiv"`
+	O            float64               `json:"O"`
+	H            float64               `json:"H"`
+	L            float64               `json:"L"`
+	C            float64               `json:"C"`
+	EO           types.NullableFloat64 `json:"EO"`
+	EH           types.NullableFloat64 `json:"EH"`
+	EL           types.NullableFloat64 `json:"EL"`
+	EC           types.NullableFloat64 `json:"EC"`
+	AO           float64               `json:"AO"`
+	AH           float64               `json:"AH"`
+	AL           float64               `json:"AL"`
+	AC           float64               `json:"AC"`
+	MO           types.NullableFloat64 `json:"MO"`
+	MH           types.NullableFloat64 `json:"MH"`
+	ML           types.NullableFloat64 `json:"ML"`
+	MC           types.NullableFloat64 `json:"MC"`
+	Vo           float64               `json:"Vo"`
+	OI           float64               `json:"OI"`
+	Va           float64               `json:"Va"`
+	VoOA         types.NullableFloat64 `json:"VoOA"`
+	Settle       types.NullableFloat64 `json:"Settle"`
+	LTD          types.NullableString  `json:"LTD"`
+	SQD          types.NullableString  `json:"SQD"`
+	CCMFlag      types.NullableString  `json:"CCMFlag"`
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling for FuturesResponse
@@ -148,39 +148,29 @@ func (r *FuturesResponse) UnmarshalJSON(data []byte) error {
 			H:            rf.H,
 			L:            rf.L,
 			C:            rf.C,
-			EO:           rf.EO,
-			EH:           rf.EH,
-			EL:           rf.EL,
-			EC:           rf.EC,
+			EO:           rf.EO.Ptr(),
+			EH:           rf.EH.Ptr(),
+			EL:           rf.EL.Ptr(),
+			EC:           rf.EC.Ptr(),
 			AO:           rf.AO,
 			AH:           rf.AH,
 			AL:           rf.AL,
 			AC:           rf.AC,
-			MO:           rf.MO,
-			MH:           rf.MH,
-			ML:           rf.ML,
-			MC:           rf.MC,
+			MO:           rf.MO.Ptr(),
+			MH:           rf.MH.Ptr(),
+			ML:           rf.ML.Ptr(),
+			MC:           rf.MC.Ptr(),
 			Vo:           rf.Vo,
 			OI:           rf.OI,
 			Va:           rf.Va,
 		}
 
 		// Convert optional fields
-		if v, ok := parseOptionalFloat(rf.VoOA); ok {
-			f.VoOA = &v
-		}
-		if v, ok := parseOptionalFloat(rf.Settle); ok {
-			f.Settle = &v
-		}
-		if v, ok := parseOptionalString(rf.LTD); ok {
-			f.LTD = &v
-		}
-		if v, ok := parseOptionalString(rf.SQD); ok {
-			f.SQD = &v
-		}
-		if v, ok := parseOptionalString(rf.CCMFlag); ok {
-			f.CCMFlag = &v
-		}
+		f.VoOA = rf.VoOA.Ptr()
+		f.Settle = rf.Settle.Ptr()
+		f.LTD = rf.LTD.Ptr()
+		f.SQD = rf.SQD.Ptr()
+		f.CCMFlag = rf.CCMFlag.Ptr()
 
 		r.Data[idx] = f
 	}
@@ -329,60 +319,52 @@ func (f *Futures) IsCentralContractMonth() bool {
 
 // HasNightSession はナイトセッションデータがあるかを判定します。
 func (f *Futures) HasNightSession() bool {
-	// interface{}型のフィールドが空文字列でないかチェック
-	if str, ok := f.EO.(string); ok && str == "" {
-		return false
-	}
-	return true
+	return f.EO != nil
 }
 
 // HasMorningSession は前場データがあるかを判定します。
 func (f *Futures) HasMorningSession() bool {
-	// interface{}型のフィールドが空文字列でないかチェック
-	if str, ok := f.MO.(string); ok && str == "" {
-		return false
-	}
-	return true
+	return f.MO != nil
 }
 
 // GetNightSessionOpen はナイトセッション始値を取得します。
 func (f *Futures) GetNightSessionOpen() *float64 {
-	return parseInterfaceToFloat64(f.EO)
+	return f.EO
 }
 
 // GetNightSessionHigh はナイトセッション高値を取得します。
 func (f *Futures) GetNightSessionHigh() *float64 {
-	return parseInterfaceToFloat64(f.EH)
+	return f.EH
 }
 
 // GetNightSessionLow はナイトセッション安値を取得します。
 func (f *Futures) GetNightSessionLow() *float64 {
-	return parseInterfaceToFloat64(f.EL)
+	return f.EL
 }
 
 // GetNightSessionClose はナイトセッション終値を取得します。
 func (f *Futures) GetNightSessionClose() *float64 {
-	return parseInterfaceToFloat64(f.EC)
+	return f.EC
 }
 
 // GetMorningSessionOpen は前場始値を取得します。
 func (f *Futures) GetMorningSessionOpen() *float64 {
-	return parseInterfaceToFloat64(f.MO)
+	return f.MO
 }
 
 // GetMorningSessionHigh は前場高値を取得します。
 func (f *Futures) GetMorningSessionHigh() *float64 {
-	return parseInterfaceToFloat64(f.MH)
+	return f.MH
 }
 
 // GetMorningSessionLow は前場安値を取得します。
 func (f *Futures) GetMorningSessionLow() *float64 {
-	return parseInterfaceToFloat64(f.ML)
+	return f.ML
 }
 
 // GetMorningSessionClose は前場終値を取得します。
 func (f *Futures) GetMorningSessionClose() *float64 {
-	return parseInterfaceToFloat64(f.MC)
+	return f.MC
 }
 
 // GetDayNightGap は日中始値とナイト終値のギャップを計算します。
@@ -398,48 +380,4 @@ func (f *Futures) GetDayNightGap() *float64 {
 // GetWholeDayRange は日通しの値幅を計算します。
 func (f *Futures) GetWholeDayRange() float64 {
 	return f.H - f.L
-}
-
-// Helper functions
-
-func parseInterfaceToFloat64(v interface{}) *float64 {
-	switch val := v.(type) {
-	case float64:
-		return &val
-	case int:
-		f := float64(val)
-		return &f
-	case string:
-		if val == "" {
-			return nil
-		}
-		if f, err := strconv.ParseFloat(val, 64); err == nil {
-			return &f
-		}
-	}
-	return nil
-}
-
-func parseOptionalFloat(v interface{}) (float64, bool) {
-	switch val := v.(type) {
-	case float64:
-		return val, true
-	case int:
-		return float64(val), true
-	case string:
-		if val == "" {
-			return 0, false
-		}
-		if f, err := strconv.ParseFloat(val, 64); err == nil {
-			return f, true
-		}
-	}
-	return 0, false
-}
-
-func parseOptionalString(v interface{}) (string, bool) {
-	if str, ok := v.(string); ok && str != "" {
-		return str, true
-	}
-	return "", false
 }

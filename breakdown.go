@@ -50,9 +50,9 @@ type Breakdown struct {
 	Code string `json:"Code"` // 銘柄コード
 
 	// 売りの約定代金内訳（単位：円）
-	LongSellVa     float64 `json:"LongSellVa"`     // 実売りの約定代金
-	ShrtNoMrgnVa   float64 `json:"ShrtNoMrgnVa"`   // 空売り（信用新規売りを除く）の約定代金
-	MrgnSellNewVa  float64 `json:"MrgnSellNewVa"`  // 信用新規売りの約定代金
+	LongSellVa      float64 `json:"LongSellVa"`      // 実売りの約定代金
+	ShrtNoMrgnVa    float64 `json:"ShrtNoMrgnVa"`    // 空売り（信用新規売りを除く）の約定代金
+	MrgnSellNewVa   float64 `json:"MrgnSellNewVa"`   // 信用新規売りの約定代金
 	MrgnSellCloseVa float64 `json:"MrgnSellCloseVa"` // 信用返済売りの約定代金
 
 	// 買いの約定代金内訳（単位：円）
@@ -74,22 +74,22 @@ type Breakdown struct {
 
 // RawBreakdown is used for unmarshaling JSON response with mixed types
 type RawBreakdown struct {
-	Date            string              `json:"Date"`
-	Code            string              `json:"Code"`
-	LongSellVa      types.Float64String `json:"LongSellVa"`
-	ShrtNoMrgnVa    types.Float64String `json:"ShrtNoMrgnVa"`
-	MrgnSellNewVa   types.Float64String `json:"MrgnSellNewVa"`
-	MrgnSellCloseVa types.Float64String `json:"MrgnSellCloseVa"`
-	LongBuyVa       types.Float64String `json:"LongBuyVa"`
-	MrgnBuyNewVa    types.Float64String `json:"MrgnBuyNewVa"`
-	MrgnBuyCloseVa  types.Float64String `json:"MrgnBuyCloseVa"`
-	LongSellVo      types.Float64String `json:"LongSellVo"`
-	ShrtNoMrgnVo    types.Float64String `json:"ShrtNoMrgnVo"`
-	MrgnSellNewVo   types.Float64String `json:"MrgnSellNewVo"`
-	MrgnSellCloseVo types.Float64String `json:"MrgnSellCloseVo"`
-	LongBuyVo       types.Float64String `json:"LongBuyVo"`
-	MrgnBuyNewVo    types.Float64String `json:"MrgnBuyNewVo"`
-	MrgnBuyCloseVo  types.Float64String `json:"MrgnBuyCloseVo"`
+	Date            string                `json:"Date"`
+	Code            string                `json:"Code"`
+	LongSellVa      types.NullableFloat64 `json:"LongSellVa"`
+	ShrtNoMrgnVa    types.NullableFloat64 `json:"ShrtNoMrgnVa"`
+	MrgnSellNewVa   types.NullableFloat64 `json:"MrgnSellNewVa"`
+	MrgnSellCloseVa types.NullableFloat64 `json:"MrgnSellCloseVa"`
+	LongBuyVa       types.NullableFloat64 `json:"LongBuyVa"`
+	MrgnBuyNewVa    types.NullableFloat64 `json:"MrgnBuyNewVa"`
+	MrgnBuyCloseVa  types.NullableFloat64 `json:"MrgnBuyCloseVa"`
+	LongSellVo      types.NullableFloat64 `json:"LongSellVo"`
+	ShrtNoMrgnVo    types.NullableFloat64 `json:"ShrtNoMrgnVo"`
+	MrgnSellNewVo   types.NullableFloat64 `json:"MrgnSellNewVo"`
+	MrgnSellCloseVo types.NullableFloat64 `json:"MrgnSellCloseVo"`
+	LongBuyVo       types.NullableFloat64 `json:"LongBuyVo"`
+	MrgnBuyNewVo    types.NullableFloat64 `json:"MrgnBuyNewVo"`
+	MrgnBuyCloseVo  types.NullableFloat64 `json:"MrgnBuyCloseVo"`
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling
@@ -114,20 +114,20 @@ func (r *BreakdownResponse) UnmarshalJSON(data []byte) error {
 		r.Data[i] = Breakdown{
 			Date:            rb.Date,
 			Code:            rb.Code,
-			LongSellVa:      float64(rb.LongSellVa),
-			ShrtNoMrgnVa:    float64(rb.ShrtNoMrgnVa),
-			MrgnSellNewVa:   float64(rb.MrgnSellNewVa),
-			MrgnSellCloseVa: float64(rb.MrgnSellCloseVa),
-			LongBuyVa:       float64(rb.LongBuyVa),
-			MrgnBuyNewVa:    float64(rb.MrgnBuyNewVa),
-			MrgnBuyCloseVa:  float64(rb.MrgnBuyCloseVa),
-			LongSellVo:      float64(rb.LongSellVo),
-			ShrtNoMrgnVo:    float64(rb.ShrtNoMrgnVo),
-			MrgnSellNewVo:   float64(rb.MrgnSellNewVo),
-			MrgnSellCloseVo: float64(rb.MrgnSellCloseVo),
-			LongBuyVo:       float64(rb.LongBuyVo),
-			MrgnBuyNewVo:    float64(rb.MrgnBuyNewVo),
-			MrgnBuyCloseVo:  float64(rb.MrgnBuyCloseVo),
+			LongSellVa:      rb.LongSellVa.Or(0),
+			ShrtNoMrgnVa:    rb.ShrtNoMrgnVa.Or(0),
+			MrgnSellNewVa:   rb.MrgnSellNewVa.Or(0),
+			MrgnSellCloseVa: rb.MrgnSellCloseVa.Or(0),
+			LongBuyVa:       rb.LongBuyVa.Or(0),
+			MrgnBuyNewVa:    rb.MrgnBuyNewVa.Or(0),
+			MrgnBuyCloseVa:  rb.MrgnBuyCloseVa.Or(0),
+			LongSellVo:      rb.LongSellVo.Or(0),
+			ShrtNoMrgnVo:    rb.ShrtNoMrgnVo.Or(0),
+			MrgnSellNewVo:   rb.MrgnSellNewVo.Or(0),
+			MrgnSellCloseVo: rb.MrgnSellCloseVo.Or(0),
+			LongBuyVo:       rb.LongBuyVo.Or(0),
+			MrgnBuyNewVo:    rb.MrgnBuyNewVo.Or(0),
+			MrgnBuyCloseVo:  rb.MrgnBuyCloseVo.Or(0),
 		}
 	}
 

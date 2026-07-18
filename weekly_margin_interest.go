@@ -68,14 +68,14 @@ type RawWeeklyMarginInterest struct {
 	IssType string `json:"IssType"`
 
 	// 信用取引残高（売建）
-	ShrtVol    types.Float64String `json:"ShrtVol"`
-	ShrtNegVol types.Float64String `json:"ShrtNegVol"`
-	ShrtStdVol types.Float64String `json:"ShrtStdVol"`
+	ShrtVol    types.NullableFloat64 `json:"ShrtVol"`
+	ShrtNegVol types.NullableFloat64 `json:"ShrtNegVol"`
+	ShrtStdVol types.NullableFloat64 `json:"ShrtStdVol"`
 
 	// 信用取引残高（買建）
-	LongVol    types.Float64String `json:"LongVol"`
-	LongNegVol types.Float64String `json:"LongNegVol"`
-	LongStdVol types.Float64String `json:"LongStdVol"`
+	LongVol    types.NullableFloat64 `json:"LongVol"`
+	LongNegVol types.NullableFloat64 `json:"LongNegVol"`
+	LongStdVol types.NullableFloat64 `json:"LongStdVol"`
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling for WeeklyMarginInterestResponse
@@ -104,14 +104,14 @@ func (r *WeeklyMarginInterestResponse) UnmarshalJSON(data []byte) error {
 			IssType: rm.IssType,
 
 			// 信用取引残高（売建）
-			ShrtVol:    float64(rm.ShrtVol),
-			ShrtNegVol: float64(rm.ShrtNegVol),
-			ShrtStdVol: float64(rm.ShrtStdVol),
+			ShrtVol:    rm.ShrtVol.Or(0),
+			ShrtNegVol: rm.ShrtNegVol.Or(0),
+			ShrtStdVol: rm.ShrtStdVol.Or(0),
 
 			// 信用取引残高（買建）
-			LongVol:    float64(rm.LongVol),
-			LongNegVol: float64(rm.LongNegVol),
-			LongStdVol: float64(rm.LongStdVol),
+			LongVol:    rm.LongVol.Or(0),
+			LongNegVol: rm.LongNegVol.Or(0),
+			LongStdVol: rm.LongStdVol.Or(0),
 		}
 	}
 

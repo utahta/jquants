@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/utahta/jquants/client"
 	"github.com/utahta/jquants/types"
@@ -69,46 +68,46 @@ type IndexOption struct {
 // RawIndexOption is used for unmarshaling JSON response with mixed types
 type RawIndexOption struct {
 	// 基本情報
-	Date         string              `json:"Date"`
-	Code         string              `json:"Code"`
-	CM           string              `json:"CM"`
-	Strike       types.Float64String `json:"Strike"`
-	PCDiv        string              `json:"PCDiv"`
-	LTD          string              `json:"LTD"`
-	SQD          string              `json:"SQD"`
-	EmMrgnTrgDiv string              `json:"EmMrgnTrgDiv"`
+	Date         string                `json:"Date"`
+	Code         string                `json:"Code"`
+	CM           string                `json:"CM"`
+	Strike       types.NullableFloat64 `json:"Strike"`
+	PCDiv        string                `json:"PCDiv"`
+	LTD          string                `json:"LTD"`
+	SQD          string                `json:"SQD"`
+	EmMrgnTrgDiv string                `json:"EmMrgnTrgDiv"`
 
 	// 日通し四本値
-	O types.Float64String `json:"O"`
-	H types.Float64String `json:"H"`
-	L types.Float64String `json:"L"`
-	C types.Float64String `json:"C"`
+	O types.NullableFloat64 `json:"O"`
+	H types.NullableFloat64 `json:"H"`
+	L types.NullableFloat64 `json:"L"`
+	C types.NullableFloat64 `json:"C"`
 
 	// ナイトセッション四本値（空文字の可能性があるためinterface{}型として受け取る）
-	EO interface{} `json:"EO"`
-	EH interface{} `json:"EH"`
-	EL interface{} `json:"EL"`
-	EC interface{} `json:"EC"`
+	EO types.NullableFloat64 `json:"EO"`
+	EH types.NullableFloat64 `json:"EH"`
+	EL types.NullableFloat64 `json:"EL"`
+	EC types.NullableFloat64 `json:"EC"`
 
 	// 日中セッション四本値
-	AO types.Float64String `json:"AO"`
-	AH types.Float64String `json:"AH"`
-	AL types.Float64String `json:"AL"`
-	AC types.Float64String `json:"AC"`
+	AO types.NullableFloat64 `json:"AO"`
+	AH types.NullableFloat64 `json:"AH"`
+	AL types.NullableFloat64 `json:"AL"`
+	AC types.NullableFloat64 `json:"AC"`
 
 	// 取引情報
-	Vo   types.Float64String `json:"Vo"`
-	VoOA interface{}         `json:"VoOA"`
-	OI   types.Float64String `json:"OI"`
-	Va   types.Float64String `json:"Va"`
+	Vo   types.NullableFloat64 `json:"Vo"`
+	VoOA types.NullableFloat64 `json:"VoOA"`
+	OI   types.NullableFloat64 `json:"OI"`
+	Va   types.NullableFloat64 `json:"Va"`
 
 	// 価格・リスク情報
-	Settle  interface{} `json:"Settle"`
-	Theo    interface{} `json:"Theo"`
-	BaseVol interface{} `json:"BaseVol"`
-	UnderPx interface{} `json:"UnderPx"`
-	IV      interface{} `json:"IV"`
-	IR      interface{} `json:"IR"`
+	Settle  types.NullableFloat64 `json:"Settle"`
+	Theo    types.NullableFloat64 `json:"Theo"`
+	BaseVol types.NullableFloat64 `json:"BaseVol"`
+	UnderPx types.NullableFloat64 `json:"UnderPx"`
+	IV      types.NullableFloat64 `json:"IV"`
+	IR      types.NullableFloat64 `json:"IR"`
 }
 
 // IndexOptionResponse は日経225オプションのレスポンスです。
@@ -159,67 +158,47 @@ func (r *IndexOptionResponse) UnmarshalJSON(data []byte) error {
 			Date:         ro.Date,
 			Code:         ro.Code,
 			CM:           ro.CM,
-			Strike:       float64(ro.Strike),
+			Strike:       ro.Strike.Or(0),
 			PCDiv:        ro.PCDiv,
 			LTD:          ro.LTD,
 			SQD:          ro.SQD,
 			EmMrgnTrgDiv: ro.EmMrgnTrgDiv,
 
 			// 日通し四本値
-			O: float64(ro.O),
-			H: float64(ro.H),
-			L: float64(ro.L),
-			C: float64(ro.C),
+			O: ro.O.Or(0),
+			H: ro.H.Or(0),
+			L: ro.L.Or(0),
+			C: ro.C.Or(0),
 
 			// ナイトセッション四本値（空文字の場合はnil）
-			EO: parseNullableFloat64(ro.EO),
-			EH: parseNullableFloat64(ro.EH),
-			EL: parseNullableFloat64(ro.EL),
-			EC: parseNullableFloat64(ro.EC),
+			EO: ro.EO.Ptr(),
+			EH: ro.EH.Ptr(),
+			EL: ro.EL.Ptr(),
+			EC: ro.EC.Ptr(),
 
 			// 日中セッション四本値
-			AO: float64(ro.AO),
-			AH: float64(ro.AH),
-			AL: float64(ro.AL),
-			AC: float64(ro.AC),
+			AO: ro.AO.Or(0),
+			AH: ro.AH.Or(0),
+			AL: ro.AL.Or(0),
+			AC: ro.AC.Or(0),
 
 			// 取引情報
-			Vo:   float64(ro.Vo),
-			VoOA: parseNullableFloat64(ro.VoOA),
-			OI:   float64(ro.OI),
-			Va:   float64(ro.Va),
+			Vo:   ro.Vo.Or(0),
+			VoOA: ro.VoOA.Ptr(),
+			OI:   ro.OI.Or(0),
+			Va:   ro.Va.Or(0),
 
 			// 価格・リスク情報
-			Settle:  parseNullableFloat64(ro.Settle),
-			Theo:    parseNullableFloat64(ro.Theo),
-			BaseVol: parseNullableFloat64(ro.BaseVol),
-			UnderPx: parseNullableFloat64(ro.UnderPx),
-			IV:      parseNullableFloat64(ro.IV),
-			IR:      parseNullableFloat64(ro.IR),
+			Settle:  ro.Settle.Ptr(),
+			Theo:    ro.Theo.Ptr(),
+			BaseVol: ro.BaseVol.Ptr(),
+			UnderPx: ro.UnderPx.Ptr(),
+			IV:      ro.IV.Ptr(),
+			IR:      ro.IR.Ptr(),
 		}
 	}
 
 	return nil
-}
-
-// parseNullableFloat64 converts interface{} to *float64, handling empty strings and nil
-func parseNullableFloat64(v interface{}) *float64 {
-	switch val := v.(type) {
-	case float64:
-		return &val
-	case string:
-		if val == "" {
-			return nil
-		}
-		// Try to convert string to float64 using strconv.ParseFloat
-		f, err := strconv.ParseFloat(val, 64)
-		if err != nil {
-			return nil
-		}
-		return &f
-	default:
-		return nil
-	}
 }
 
 // GetIndexOptions は指定日の日経225オプションデータを取得します。

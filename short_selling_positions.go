@@ -54,9 +54,9 @@ type ShortSellingPosition struct {
 	FundName string `json:"FundName"` // 信託財産・運用財産の名称
 
 	// 空売り残高情報
-	ShrtPosToSO    float64 `json:"ShrtPosToSO"`    // 空売り残高割合（発行済株式総数に対する比率）
-	ShrtPosShares  float64 `json:"ShrtPosShares"`  // 空売り残高数量（株数）
-	ShrtPosUnits   float64 `json:"ShrtPosUnits"`   // 空売り残高売買単位数
+	ShrtPosToSO   float64 `json:"ShrtPosToSO"`   // 空売り残高割合（発行済株式総数に対する比率）
+	ShrtPosShares float64 `json:"ShrtPosShares"` // 空売り残高数量（株数）
+	ShrtPosUnits  float64 `json:"ShrtPosUnits"`  // 空売り残高売買単位数
 
 	// 前回報告データ
 	PrevRptDate  string  `json:"PrevRptDate"`  // 直近計算年月日（YYYY-MM-DD形式）
@@ -83,13 +83,13 @@ type RawShortSellingPosition struct {
 	FundName string `json:"FundName"`
 
 	// 空売り残高情報
-	ShrtPosToSO   types.Float64String `json:"ShrtPosToSO"`
-	ShrtPosShares types.Float64String `json:"ShrtPosShares"`
-	ShrtPosUnits  types.Float64String `json:"ShrtPosUnits"`
+	ShrtPosToSO   types.NullableFloat64 `json:"ShrtPosToSO"`
+	ShrtPosShares types.NullableFloat64 `json:"ShrtPosShares"`
+	ShrtPosUnits  types.NullableFloat64 `json:"ShrtPosUnits"`
 
 	// 前回報告データ
-	PrevRptDate  string              `json:"PrevRptDate"`
-	PrevRptRatio types.Float64String `json:"PrevRptRatio"`
+	PrevRptDate  string                `json:"PrevRptDate"`
+	PrevRptRatio types.NullableFloat64 `json:"PrevRptRatio"`
 
 	// その他
 	Notes string `json:"Notes"`
@@ -130,13 +130,13 @@ func (r *ShortSellingPositionsResponse) UnmarshalJSON(data []byte) error {
 			FundName: rsp.FundName,
 
 			// 空売り残高情報
-			ShrtPosToSO:   float64(rsp.ShrtPosToSO),
-			ShrtPosShares: float64(rsp.ShrtPosShares),
-			ShrtPosUnits:  float64(rsp.ShrtPosUnits),
+			ShrtPosToSO:   rsp.ShrtPosToSO.Or(0),
+			ShrtPosShares: rsp.ShrtPosShares.Or(0),
+			ShrtPosUnits:  rsp.ShrtPosUnits.Or(0),
 
 			// 前回報告データ
 			PrevRptDate:  rsp.PrevRptDate,
-			PrevRptRatio: float64(rsp.PrevRptRatio),
+			PrevRptRatio: rsp.PrevRptRatio.Or(0),
 
 			// その他
 			Notes: rsp.Notes,
