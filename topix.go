@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -87,7 +88,7 @@ type TOPIXParams struct {
 // パラメータ:
 // - From/To: 期間指定（例: "20240101" または "2024-01-01"）
 // - PaginationKey: ページネーション用キー
-func (s *TOPIXService) GetTOPIXData(params TOPIXParams) (*TOPIXResponse, error) {
+func (s *TOPIXService) GetTOPIXData(ctx context.Context, params TOPIXParams) (*TOPIXResponse, error) {
 	path := "/indices/bars/daily/topix"
 
 	query := "?"
@@ -106,7 +107,7 @@ func (s *TOPIXService) GetTOPIXData(params TOPIXParams) (*TOPIXResponse, error) 
 	}
 
 	var resp TOPIXResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get TOPIX data: %w", err)
 	}
 
@@ -115,7 +116,7 @@ func (s *TOPIXService) GetTOPIXData(params TOPIXParams) (*TOPIXResponse, error) 
 
 // GetTOPIXByDateRange は指定した期間のTOPIX指数データを取得します。
 // ページネーションを使用して全データを取得します。
-func (s *TOPIXService) GetTOPIXByDateRange(from, to string) ([]TOPIXData, error) {
+func (s *TOPIXService) GetTOPIXByDateRange(ctx context.Context, from, to string) ([]TOPIXData, error) {
 	var allTOPIX []TOPIXData
 	paginationKey := ""
 
@@ -126,7 +127,7 @@ func (s *TOPIXService) GetTOPIXByDateRange(from, to string) ([]TOPIXData, error)
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetTOPIXData(params)
+		resp, err := s.GetTOPIXData(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -145,7 +146,7 @@ func (s *TOPIXService) GetTOPIXByDateRange(from, to string) ([]TOPIXData, error)
 
 // GetAllTOPIXData は全期間のTOPIX指数データを取得します。
 // ページネーションを使用して大量データを分割取得します。
-func (s *TOPIXService) GetAllTOPIXData() ([]TOPIXData, error) {
+func (s *TOPIXService) GetAllTOPIXData(ctx context.Context) ([]TOPIXData, error) {
 	var allTOPIX []TOPIXData
 	paginationKey := ""
 
@@ -154,7 +155,7 @@ func (s *TOPIXService) GetAllTOPIXData() ([]TOPIXData, error) {
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetTOPIXData(params)
+		resp, err := s.GetTOPIXData(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -172,8 +173,8 @@ func (s *TOPIXService) GetAllTOPIXData() ([]TOPIXData, error) {
 }
 
 // GetLatestTOPIX は最新のTOPIX指数データを取得します。
-func (s *TOPIXService) GetLatestTOPIX() (*TOPIXData, error) {
-	resp, err := s.GetTOPIXData(TOPIXParams{})
+func (s *TOPIXService) GetLatestTOPIX(ctx context.Context) (*TOPIXData, error) {
+	resp, err := s.GetTOPIXData(ctx, TOPIXParams{})
 	if err != nil {
 		return nil, err
 	}

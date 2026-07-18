@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/utahta/jquants/client"
@@ -54,7 +55,7 @@ type FSDetail struct {
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *FSDetailsService) GetFSDetails(params FSDetailsParams) (*FSDetailsResponse, error) {
+func (s *FSDetailsService) GetFSDetails(ctx context.Context, params FSDetailsParams) (*FSDetailsResponse, error) {
 	// codeまたはdateのいずれかが必須
 	if params.Code == "" && params.Date == "" {
 		return nil, fmt.Errorf("either code or date parameter is required")
@@ -78,7 +79,7 @@ func (s *FSDetailsService) GetFSDetails(params FSDetailsParams) (*FSDetailsRespo
 	}
 
 	var resp FSDetailsResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get fs details: %w", err)
 	}
 
@@ -90,7 +91,7 @@ func (s *FSDetailsService) GetFSDetails(params FSDetailsParams) (*FSDetailsRespo
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *FSDetailsService) GetFSDetailsByCode(code string) ([]FSDetail, error) {
+func (s *FSDetailsService) GetFSDetailsByCode(ctx context.Context, code string) ([]FSDetail, error) {
 	var allData []FSDetail
 	paginationKey := ""
 
@@ -100,7 +101,7 @@ func (s *FSDetailsService) GetFSDetailsByCode(code string) ([]FSDetail, error) {
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetFSDetails(params)
+		resp, err := s.GetFSDetails(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -119,7 +120,7 @@ func (s *FSDetailsService) GetFSDetailsByCode(code string) ([]FSDetail, error) {
 
 // GetFSDetailsByDate は指定日の全銘柄財務諸表詳細情報を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *FSDetailsService) GetFSDetailsByDate(date string) ([]FSDetail, error) {
+func (s *FSDetailsService) GetFSDetailsByDate(ctx context.Context, date string) ([]FSDetail, error) {
 	var allData []FSDetail
 	paginationKey := ""
 
@@ -129,7 +130,7 @@ func (s *FSDetailsService) GetFSDetailsByDate(date string) ([]FSDetail, error) {
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetFSDetails(params)
+		resp, err := s.GetFSDetails(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -147,8 +148,8 @@ func (s *FSDetailsService) GetFSDetailsByDate(date string) ([]FSDetail, error) {
 }
 
 // GetFSDetailsByCodeAndDate は指定銘柄の指定開示日の財務諸表詳細情報を取得します。
-func (s *FSDetailsService) GetFSDetailsByCodeAndDate(code, date string) ([]FSDetail, error) {
-	resp, err := s.GetFSDetails(FSDetailsParams{
+func (s *FSDetailsService) GetFSDetailsByCodeAndDate(ctx context.Context, code, date string) ([]FSDetail, error) {
+	resp, err := s.GetFSDetails(ctx, FSDetailsParams{
 		Code: code,
 		Date: date,
 	})

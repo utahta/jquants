@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 func TestFSDetailsEndpoint(t *testing.T) {
 	t.Run("GetFSDetails_ByCode", func(t *testing.T) {
 		// トヨタ自動車の財務諸表詳細を取得
-		details, err := jq.FSDetails.GetFSDetailsByCode("7203")
+		details, err := jq.FSDetails.GetFSDetailsByCode(context.Background(), "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -200,7 +201,7 @@ func TestFSDetailsEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		details, err := jq.FSDetails.GetFSDetails(params)
+		details, err := jq.FSDetails.GetFSDetails(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -231,7 +232,7 @@ func TestFSDetailsEndpoint(t *testing.T) {
 
 	t.Run("GetFSDetails_ProfitabilityAnalysis", func(t *testing.T) {
 		// トヨタ自動車の収益性分析
-		details, err := jq.FSDetails.GetFSDetailsByCode("7203")
+		details, err := jq.FSDetails.GetFSDetailsByCode(context.Background(), "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -288,7 +289,7 @@ func TestFSDetailsEndpoint(t *testing.T) {
 
 	t.Run("GetFSDetails_GrowthAnalysis", func(t *testing.T) {
 		// 成長性分析
-		details, err := jq.FSDetails.GetFSDetailsByCode("7203")
+		details, err := jq.FSDetails.GetFSDetailsByCode(context.Background(), "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -347,7 +348,7 @@ func TestFSDetailsEndpoint(t *testing.T) {
 			Code: "7203",
 		}
 
-		details, err := jq.FSDetails.GetFSDetails(params)
+		details, err := jq.FSDetails.GetFSDetails(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -376,7 +377,7 @@ func TestFSDetailsEndpoint(t *testing.T) {
 		// エラーケースのテスト
 
 		// 存在しない銘柄コード
-		details, err := jq.FSDetails.GetFSDetailsByCode("99999")
+		details, err := jq.FSDetails.GetFSDetailsByCode(context.Background(), "99999")
 		if err == nil && len(details) > 0 {
 			t.Error("Expected error or empty result for invalid code")
 		}
@@ -386,7 +387,7 @@ func TestFSDetailsEndpoint(t *testing.T) {
 			Date: "invalid-date",
 		}
 
-		resp, err := jq.FSDetails.GetFSDetails(params)
+		resp, err := jq.FSDetails.GetFSDetails(context.Background(), params)
 		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Error("Expected error or empty result for invalid date")
 		}

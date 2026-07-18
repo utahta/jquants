@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 func TestBreakdownEndpoint(t *testing.T) {
 	t.Run("GetBreakdown_ByCode", func(t *testing.T) {
 		// トヨタ自動車の売買内訳データを取得
-		breakdowns, err := jq.Breakdown.GetBreakdownByCode("7203", 30)
+		breakdowns, err := jq.Breakdown.GetBreakdownByCode(context.Background(), "7203", 30)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -123,7 +124,7 @@ func TestBreakdownEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.Breakdown.GetBreakdown(params)
+		resp, err := jq.Breakdown.GetBreakdown(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -169,7 +170,7 @@ func TestBreakdownEndpoint(t *testing.T) {
 			To:   to,
 		}
 
-		resp, err := jq.Breakdown.GetBreakdown(params)
+		resp, err := jq.Breakdown.GetBreakdown(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -200,7 +201,7 @@ func TestBreakdownEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.Breakdown.GetBreakdown(params)
+		resp, err := jq.Breakdown.GetBreakdown(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -218,7 +219,7 @@ func TestBreakdownEndpoint(t *testing.T) {
 		if resp.PaginationKey != "" {
 			// 次のページを取得
 			params.PaginationKey = resp.PaginationKey
-			resp2, err := jq.Breakdown.GetBreakdown(params)
+			resp2, err := jq.Breakdown.GetBreakdown(context.Background(), params)
 			if err != nil {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
@@ -231,7 +232,7 @@ func TestBreakdownEndpoint(t *testing.T) {
 
 	t.Run("GetBreakdown_Analysis", func(t *testing.T) {
 		// 売買内訳データの分析
-		breakdowns, err := jq.Breakdown.GetBreakdownByCode("7203", 10)
+		breakdowns, err := jq.Breakdown.GetBreakdownByCode(context.Background(), "7203", 10)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")

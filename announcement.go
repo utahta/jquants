@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/utahta/jquants/client"
@@ -48,7 +49,7 @@ type AnnouncementParams struct {
 // 3月期・9月期決算会社のみ対応しています。
 // パラメータ:
 // - params: ページネーション用のパラメータ（オプション）
-func (s *AnnouncementService) GetAnnouncement(params AnnouncementParams) (*AnnouncementResponse, error) {
+func (s *AnnouncementService) GetAnnouncement(ctx context.Context, params AnnouncementParams) (*AnnouncementResponse, error) {
 	path := "/equities/earnings-calendar"
 
 	if params.PaginationKey != "" {
@@ -56,7 +57,7 @@ func (s *AnnouncementService) GetAnnouncement(params AnnouncementParams) (*Annou
 	}
 
 	var resp AnnouncementResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get announcement: %w", err)
 	}
 
@@ -65,7 +66,7 @@ func (s *AnnouncementService) GetAnnouncement(params AnnouncementParams) (*Annou
 
 // GetAllAnnouncements は翌営業日の全決算発表予定を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *AnnouncementService) GetAllAnnouncements() ([]Announcement, error) {
+func (s *AnnouncementService) GetAllAnnouncements(ctx context.Context) ([]Announcement, error) {
 	var allAnnouncements []Announcement
 	paginationKey := ""
 
@@ -74,7 +75,7 @@ func (s *AnnouncementService) GetAllAnnouncements() ([]Announcement, error) {
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetAnnouncement(params)
+		resp, err := s.GetAnnouncement(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -93,8 +94,8 @@ func (s *AnnouncementService) GetAllAnnouncements() ([]Announcement, error) {
 
 // GetAnnouncementByCode は指定銘柄の決算発表予定を取得します。
 // 翌営業日に決算発表予定がある場合のみ取得できます。
-func (s *AnnouncementService) GetAnnouncementByCode(code string) (*Announcement, error) {
-	announcements, err := s.GetAllAnnouncements()
+func (s *AnnouncementService) GetAnnouncementByCode(ctx context.Context, code string) (*Announcement, error) {
+	announcements, err := s.GetAllAnnouncements(ctx)
 	if err != nil {
 		return nil, err
 	}

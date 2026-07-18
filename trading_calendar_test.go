@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -66,7 +67,7 @@ func TestTradingCalendarService_GetTradingCalendar(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Execute
-			resp, err := service.GetTradingCalendar(tt.params)
+			resp, err := service.GetTradingCalendar(context.Background(), tt.params)
 
 			// Verify
 			if err != nil {
@@ -102,7 +103,7 @@ func TestTradingCalendarService_GetAllTradingCalendar(t *testing.T) {
 	mockClient.SetResponse("GET", "/markets/calendar", mockResponse)
 
 	// Execute
-	data, err := service.GetAllTradingCalendar()
+	data, err := service.GetAllTradingCalendar(context.Background())
 
 	// Verify
 	if err != nil {
@@ -128,7 +129,7 @@ func TestTradingCalendarService_GetTradingCalendarByHolidayDivision(t *testing.T
 	mockClient.SetResponse("GET", "/markets/calendar?hol_div=1", mockResponse)
 
 	// Execute
-	data, err := service.GetTradingCalendarByHolidayDivision("1")
+	data, err := service.GetTradingCalendarByHolidayDivision(context.Background(), "1")
 
 	// Verify
 	if err != nil {
@@ -159,7 +160,7 @@ func TestTradingCalendarService_GetTradingCalendarByHolidayDivisionAndDateRange(
 	mockClient.SetResponse("GET", "/markets/calendar?hol_div=1&from=20240101&to=20240131", mockResponse)
 
 	// Execute
-	data, err := service.GetTradingCalendarByHolidayDivisionAndDateRange("1", "20240101", "20240131")
+	data, err := service.GetTradingCalendarByHolidayDivisionAndDateRange(context.Background(), "1", "20240101", "20240131")
 
 	// Verify
 	if err != nil {
@@ -196,7 +197,7 @@ func TestTradingCalendarService_GetTradingCalendarByDateRange(t *testing.T) {
 	mockClient.SetResponse("GET", "/markets/calendar?from=20240101&to=20240107", mockResponse)
 
 	// Execute
-	resp, err := service.GetTradingCalendarByDateRange("20240101", "20240107")
+	resp, err := service.GetTradingCalendarByDateRange(context.Background(), "20240101", "20240107")
 
 	// Verify
 	if err != nil {
@@ -234,7 +235,7 @@ func TestTradingCalendarService_GetTradingDays(t *testing.T) {
 	mockClient.SetResponse("GET", "/markets/calendar?hol_div=1&from=20240101&to=20240107", mockResponse)
 
 	// Execute
-	tradingDays, err := service.GetTradingDays("20240101", "20240107")
+	tradingDays, err := service.GetTradingDays(context.Background(), "20240101", "20240107")
 
 	// Verify
 	if err != nil {
@@ -322,7 +323,7 @@ func TestTradingCalendarService_GetTradingCalendar_Error(t *testing.T) {
 	mockClient.SetError("GET", "/markets/calendar", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetTradingCalendar(TradingCalendarParams{})
+	_, err := service.GetTradingCalendar(context.Background(), TradingCalendarParams{})
 
 	// Verify
 	if err == nil {

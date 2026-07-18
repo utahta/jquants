@@ -1,12 +1,15 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 )
 
 func TestNewClient(t *testing.T) {
@@ -68,7 +71,7 @@ func TestClient_DoRequest_CacheHitMiss(t *testing.T) {
 
 	// First request (cache miss)
 	var resp1 response
-	err := c.DoRequest(http.MethodGet, "/test", nil, &resp1)
+	err := c.DoRequest(context.Background(), http.MethodGet, "/test", nil, &resp1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -81,7 +84,7 @@ func TestClient_DoRequest_CacheHitMiss(t *testing.T) {
 
 	// Second request (cache hit)
 	var resp2 response
-	err = c.DoRequest(http.MethodGet, "/test", nil, &resp2)
+	err = c.DoRequest(context.Background(), http.MethodGet, "/test", nil, &resp2)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -94,7 +97,7 @@ func TestClient_DoRequest_CacheHitMiss(t *testing.T) {
 
 	// Different path is a separate cache entry
 	var resp3 response
-	err = c.DoRequest(http.MethodGet, "/test2", nil, &resp3)
+	err = c.DoRequest(context.Background(), http.MethodGet, "/test2", nil, &resp3)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -121,7 +124,7 @@ func TestClient_DoRequest_CacheDisabled(t *testing.T) {
 
 	// First request
 	var resp1 response
-	err := c.DoRequest(http.MethodGet, "/test", nil, &resp1)
+	err := c.DoRequest(context.Background(), http.MethodGet, "/test", nil, &resp1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -131,7 +134,7 @@ func TestClient_DoRequest_CacheDisabled(t *testing.T) {
 
 	// Second request (called again since no cache)
 	var resp2 response
-	err = c.DoRequest(http.MethodGet, "/test", nil, &resp2)
+	err = c.DoRequest(context.Background(), http.MethodGet, "/test", nil, &resp2)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -158,7 +161,7 @@ func TestClient_DoRequest_POSTNotCached(t *testing.T) {
 
 	// First POST request
 	var resp1 response
-	err := c.DoRequest(http.MethodPost, "/test", nil, &resp1)
+	err := c.DoRequest(context.Background(), http.MethodPost, "/test", nil, &resp1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -168,7 +171,7 @@ func TestClient_DoRequest_POSTNotCached(t *testing.T) {
 
 	// Second POST request (POST is not cached)
 	var resp2 response
-	err = c.DoRequest(http.MethodPost, "/test", nil, &resp2)
+	err = c.DoRequest(context.Background(), http.MethodPost, "/test", nil, &resp2)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -195,7 +198,7 @@ func TestClient_DoRequest_CacheWithQueryParams(t *testing.T) {
 
 	// Different query parameters are separate cache entries
 	var resp1 response
-	err := c.DoRequest(http.MethodGet, "/test?code=7203", nil, &resp1)
+	err := c.DoRequest(context.Background(), http.MethodGet, "/test?code=7203", nil, &resp1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -204,7 +207,7 @@ func TestClient_DoRequest_CacheWithQueryParams(t *testing.T) {
 	}
 
 	var resp2 response
-	err = c.DoRequest(http.MethodGet, "/test?code=9984", nil, &resp2)
+	err = c.DoRequest(context.Background(), http.MethodGet, "/test?code=9984", nil, &resp2)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -214,7 +217,7 @@ func TestClient_DoRequest_CacheWithQueryParams(t *testing.T) {
 
 	// Same query parameters result in cache hit
 	var resp3 response
-	err = c.DoRequest(http.MethodGet, "/test?code=7203", nil, &resp3)
+	err = c.DoRequest(context.Background(), http.MethodGet, "/test?code=7203", nil, &resp3)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -235,8 +238,8 @@ func TestClient_ClearCache(t *testing.T) {
 
 	// Populate cache
 	var resp struct{ Message string }
-	_ = c.DoRequest(http.MethodGet, "/test1", nil, &resp)
-	_ = c.DoRequest(http.MethodGet, "/test2", nil, &resp)
+	_ = c.DoRequest(context.Background(), http.MethodGet, "/test1", nil, &resp)
+	_ = c.DoRequest(context.Background(), http.MethodGet, "/test2", nil, &resp)
 
 	if c.CacheSize() != 2 {
 		t.Errorf("expected cache size 2, got %d", c.CacheSize())
@@ -286,7 +289,7 @@ func TestClient_DoRequest_ConcurrentAccess(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			var resp response
-			err := c.DoRequest(http.MethodGet, "/test", nil, &resp)
+			err := c.DoRequest(context.Background(), http.MethodGet, "/test", nil, &resp)
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
@@ -300,5 +303,75 @@ func TestClient_DoRequest_ConcurrentAccess(t *testing.T) {
 	}
 	if c.CacheSize() != 1 {
 		t.Errorf("expected cache size 1, got %d", c.CacheSize())
+	}
+}
+
+func TestClient_DoRequest_ContextCancellation(t *testing.T) {
+	var callCount int64
+	release := make(chan struct{})
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt64(&callCount, 1)
+		<-release
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "hello"})
+	}))
+	defer server.Close()
+
+	c := NewClient("test-api-key", WithCache())
+	c.baseURL = server.URL
+
+	type response struct {
+		Message string `json:"message"`
+	}
+
+	// Start a request and cancel its context while the request is in flight
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	errCh := make(chan error, 1)
+	go func() {
+		var resp response
+		errCh <- c.DoRequest(ctx, http.MethodGet, "/test", nil, &resp)
+	}()
+
+	// Wait until the request reaches the server
+	deadline := time.Now().Add(5 * time.Second)
+	for atomic.LoadInt64(&callCount) == 0 {
+		if time.Now().After(deadline) {
+			t.Fatal("request did not reach the server")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	cancel()
+
+	// The canceled caller returns immediately with the context error
+	select {
+	case err := <-errCh:
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("expected context.Canceled, got %v", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("canceled caller did not return")
+	}
+
+	// The detached flight keeps running and populates the cache
+	close(release)
+	deadline = time.Now().Add(5 * time.Second)
+	for c.CacheSize() == 0 {
+		if time.Now().After(deadline) {
+			t.Fatal("flight did not populate the cache after cancellation")
+		}
+		time.Sleep(time.Millisecond)
+	}
+
+	// A subsequent request is served from the cache without a new API call
+	var resp response
+	if err := c.DoRequest(context.Background(), http.MethodGet, "/test", nil, &resp); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Message != "hello" {
+		t.Errorf("expected message 'hello', got '%s'", resp.Message)
+	}
+	if got := atomic.LoadInt64(&callCount); got != 1 {
+		t.Errorf("expected 1 call, got %d", got)
 	}
 }

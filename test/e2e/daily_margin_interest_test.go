@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 
 	"github.com/utahta/jquants"
@@ -18,7 +19,7 @@ func TestDailyMarginInterestEndpoint(t *testing.T) {
 			Code: "13260", // 日々公表銘柄として一般的な銘柄
 		}
 
-		resp, err := jq.DailyMarginInterest.GetDailyMarginInterest(params)
+		resp, err := jq.DailyMarginInterest.GetDailyMarginInterest(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -113,7 +114,7 @@ func TestDailyMarginInterestEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.DailyMarginInterest.GetDailyMarginInterest(params)
+		resp, err := jq.DailyMarginInterest.GetDailyMarginInterest(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -167,7 +168,7 @@ func TestDailyMarginInterestEndpoint(t *testing.T) {
 
 	t.Run("GetDailyMarginInterestByCode_Convenience", func(t *testing.T) {
 		// 便利メソッドのテスト
-		interests, err := jq.DailyMarginInterest.GetDailyMarginInterestByCode("13260")
+		interests, err := jq.DailyMarginInterest.GetDailyMarginInterestByCode(context.Background(), "13260")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -194,7 +195,7 @@ func TestDailyMarginInterestEndpoint(t *testing.T) {
 		// 便利メソッドのテスト（日付指定）
 		date := getTestDate()
 
-		interests, err := jq.DailyMarginInterest.GetDailyMarginInterestByDate(date)
+		interests, err := jq.DailyMarginInterest.GetDailyMarginInterestByDate(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -237,7 +238,7 @@ func TestDailyMarginInterestEndpoint(t *testing.T) {
 		to := getTestDate()
 		from := "20250601" // 約2週間分
 
-		interests, err := jq.DailyMarginInterest.GetDailyMarginInterestByCodeAndDateRange("13260", from, to)
+		interests, err := jq.DailyMarginInterest.GetDailyMarginInterestByCodeAndDateRange(context.Background(), "13260", from, to)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -271,7 +272,7 @@ func TestDailyMarginInterestEndpoint(t *testing.T) {
 			Date: getTestDate(),
 		}
 
-		resp, err := jq.DailyMarginInterest.GetDailyMarginInterest(params)
+		resp, err := jq.DailyMarginInterest.GetDailyMarginInterest(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -305,7 +306,7 @@ func TestDailyMarginInterestEndpoint(t *testing.T) {
 			Date: getTestDate(),
 		}
 
-		resp, err := jq.DailyMarginInterest.GetDailyMarginInterest(params)
+		resp, err := jq.DailyMarginInterest.GetDailyMarginInterest(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -334,7 +335,7 @@ func TestDailyMarginInterestEndpoint(t *testing.T) {
 		// パラメータなしはエラー
 		params := jquants.DailyMarginInterestParams{}
 
-		_, err := jq.DailyMarginInterest.GetDailyMarginInterest(params)
+		_, err := jq.DailyMarginInterest.GetDailyMarginInterest(context.Background(), params)
 		if err == nil {
 			t.Error("Expected error for empty parameters")
 		}
@@ -344,7 +345,7 @@ func TestDailyMarginInterestEndpoint(t *testing.T) {
 			Code: "99999",
 		}
 
-		resp, err := jq.DailyMarginInterest.GetDailyMarginInterest(params)
+		resp, err := jq.DailyMarginInterest.GetDailyMarginInterest(context.Background(), params)
 		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Error("Expected empty result for invalid code")
 		}

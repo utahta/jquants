@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"testing"
@@ -97,7 +98,7 @@ func TestStatementsService_GetStatements(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Test
-			resp, err := service.GetStatements(tt.params)
+			resp, err := service.GetStatements(context.Background(), tt.params)
 			if err != nil {
 				t.Errorf("GetStatements failed: %v", err)
 			}
@@ -148,7 +149,7 @@ func TestStatementsService_GetLatestStatements(t *testing.T) {
 	mockClient.SetResponse("GET", "/fins/summary?code=7203", mockResponse)
 
 	// Test
-	statement, err := service.GetLatestStatements("7203")
+	statement, err := service.GetLatestStatements(context.Background(), "7203")
 	if err != nil {
 		t.Errorf("GetLatestStatements failed: %v", err)
 	}
@@ -180,7 +181,7 @@ func TestStatementsService_GetLatestStatements_NotFound(t *testing.T) {
 	mockClient.SetResponse("GET", "/fins/summary?code=9999", mockResponse)
 
 	// Test
-	_, err := service.GetLatestStatements("9999")
+	_, err := service.GetLatestStatements(context.Background(), "9999")
 	if err == nil {
 		t.Errorf("Expected error for non-existent company, got nil")
 	}
@@ -195,7 +196,7 @@ func TestStatementsService_GetStatements_Error(t *testing.T) {
 	mockClient.SetError("GET", "/fins/summary?code=7203", fmt.Errorf("API error"))
 
 	// Test
-	_, err := service.GetStatements(StatementsParams{Code: "7203"})
+	_, err := service.GetStatements(context.Background(), StatementsParams{Code: "7203"})
 	if err == nil {
 		t.Errorf("Expected error, got nil")
 	}
@@ -220,7 +221,7 @@ func TestStatementsService_GetStatementsByCodeAndDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/fins/summary?code=7203&date=2024-01-15", mockResponse)
 
 	// Test
-	statements, err := service.GetStatementsByCodeAndDate("7203", "2024-01-15")
+	statements, err := service.GetStatementsByCodeAndDate(context.Background(), "7203", "2024-01-15")
 	if err != nil {
 		t.Errorf("GetStatementsByCodeAndDate failed: %v", err)
 	}
@@ -280,7 +281,7 @@ func TestStatementsService_GetStatementsByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/fins/summary?date=2024-01-15&pagination_key=next_page_key", mockResponse2)
 
 	// Test
-	statements, err := service.GetStatementsByDate("2024-01-15")
+	statements, err := service.GetStatementsByDate(context.Background(), "2024-01-15")
 	if err != nil {
 		t.Errorf("GetStatementsByDate failed: %v", err)
 	}

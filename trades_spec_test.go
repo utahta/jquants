@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -95,7 +96,7 @@ func TestTradesSpecService_GetTradesSpec(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Execute
-			resp, err := service.GetTradesSpec(tt.params)
+			resp, err := service.GetTradesSpec(context.Background(), tt.params)
 
 			// Verify
 			if err != nil {
@@ -165,7 +166,7 @@ func TestTradesSpecService_GetTradesSpecByDateRange(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/investor-types?from=20170104&to=20170120&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	tradesSpec, err := service.GetTradesSpecByDateRange("20170104", "20170120")
+	tradesSpec, err := service.GetTradesSpecByDateRange(context.Background(), "20170104", "20170120")
 
 	// Verify
 	if err != nil {
@@ -202,7 +203,7 @@ func TestTradesSpecService_GetTradesSpecBySection(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/investor-types?section=TSEPrime", mockResponse)
 
 	// Execute
-	tradesSpec, err := service.GetTradesSpecBySection("TSEPrime")
+	tradesSpec, err := service.GetTradesSpecBySection(context.Background(), "TSEPrime")
 
 	// Verify
 	if err != nil {
@@ -250,7 +251,7 @@ func TestTradesSpecService_GetTradesSpecBySectionAndDateRange(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/investor-types?section=TSEPrime&from=20230324&to=20230403", mockResponse)
 
 	// Execute
-	tradesSpec, err := service.GetTradesSpecBySectionAndDateRange("TSEPrime", "20230324", "20230403")
+	tradesSpec, err := service.GetTradesSpecBySectionAndDateRange(context.Background(), "TSEPrime", "20230324", "20230403")
 
 	// Verify
 	if err != nil {
@@ -379,7 +380,7 @@ func TestTradesSpecService_GetTradesSpec_Error(t *testing.T) {
 	mockClient.SetError("GET", "/equities/investor-types", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetTradesSpec(TradesSpecParams{})
+	_, err := service.GetTradesSpec(context.Background(), TradesSpecParams{})
 
 	// Verify
 	if err == nil {

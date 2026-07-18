@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 
 	"github.com/utahta/jquants"
@@ -15,7 +16,7 @@ func TestFuturesEndpoint(t *testing.T) {
 		// 最近の営業日の先物四本値を取得
 		date := getTestDate()
 
-		futures, err := jq.Futures.GetFuturesByDate(date)
+		futures, err := jq.Futures.GetFuturesByDate(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -209,7 +210,7 @@ func TestFuturesEndpoint(t *testing.T) {
 		// 特定カテゴリ（日経225先物）のみを取得
 		date := getTestDate()
 
-		futures, err := jq.Futures.GetFuturesByCategory(date, "NK225F")
+		futures, err := jq.Futures.GetFuturesByCategory(context.Background(), date, "NK225F")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -235,7 +236,7 @@ func TestFuturesEndpoint(t *testing.T) {
 		// 中心限月のみを取得
 		date := getTestDate()
 
-		futures, err := jq.Futures.GetCentralContractMonthFutures(date)
+		futures, err := jq.Futures.GetCentralContractMonthFutures(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -262,7 +263,7 @@ func TestFuturesEndpoint(t *testing.T) {
 		// 限月別の分析
 		date := getTestDate()
 
-		futures, err := jq.Futures.GetFuturesByDate(date)
+		futures, err := jq.Futures.GetFuturesByDate(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -309,7 +310,7 @@ func TestFuturesEndpoint(t *testing.T) {
 		// 商品区分別の分析
 		date := getTestDate()
 
-		futures, err := jq.Futures.GetFuturesByDate(date)
+		futures, err := jq.Futures.GetFuturesByDate(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -349,7 +350,7 @@ func TestFuturesEndpoint(t *testing.T) {
 		// 価格・ボラティリティ分析
 		date := getTestDate()
 
-		futures, err := jq.Futures.GetFuturesByDate(date)
+		futures, err := jq.Futures.GetFuturesByDate(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -392,7 +393,7 @@ func TestFuturesEndpoint(t *testing.T) {
 		// セッション分析（ナイト・日中・前場）
 		date := getTestDate()
 
-		futures, err := jq.Futures.GetFuturesByDate(date)
+		futures, err := jq.Futures.GetFuturesByDate(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -445,7 +446,7 @@ func TestFuturesEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.Futures.GetFutures(params)
+		resp, err := jq.Futures.GetFutures(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -481,13 +482,13 @@ func TestFuturesEndpoint(t *testing.T) {
 		// エラーケースのテスト
 
 		// 未来の日付
-		futures, err := jq.Futures.GetFuturesByDate("2030-01-01")
+		futures, err := jq.Futures.GetFuturesByDate(context.Background(), "2030-01-01")
 		if err == nil && len(futures) > 0 {
 			t.Error("Expected error or empty result for future date")
 		}
 
 		// 無効な日付形式
-		futures, err = jq.Futures.GetFuturesByDate("invalid-date")
+		futures, err = jq.Futures.GetFuturesByDate(context.Background(), "invalid-date")
 		if err == nil && len(futures) > 0 {
 			t.Error("Expected error or empty result for invalid date format")
 		}
@@ -497,13 +498,13 @@ func TestFuturesEndpoint(t *testing.T) {
 			Date: "",
 		}
 
-		_, err = jq.Futures.GetFutures(params)
+		_, err = jq.Futures.GetFutures(context.Background(), params)
 		if err == nil {
 			t.Error("Expected error for missing required date parameter")
 		}
 
 		// 無効なカテゴリ
-		futures, err = jq.Futures.GetFuturesByCategory(getTestDate(), "INVALID_CATEGORY")
+		futures, err = jq.Futures.GetFuturesByCategory(context.Background(), getTestDate(), "INVALID_CATEGORY")
 		if err == nil && len(futures) > 0 {
 			t.Error("Expected error or empty result for invalid category")
 		}

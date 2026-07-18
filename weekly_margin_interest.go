@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -118,7 +119,7 @@ func (r *WeeklyMarginInterestResponse) UnmarshalJSON(data []byte) error {
 }
 
 // GetWeeklyMarginInterest は信用取引週末残高を取得します。
-func (s *WeeklyMarginInterestService) GetWeeklyMarginInterest(params WeeklyMarginInterestParams) (*WeeklyMarginInterestResponse, error) {
+func (s *WeeklyMarginInterestService) GetWeeklyMarginInterest(ctx context.Context, params WeeklyMarginInterestParams) (*WeeklyMarginInterestResponse, error) {
 	// codeまたはdateのいずれかが必須
 	if params.Code == "" && params.Date == "" {
 		return nil, fmt.Errorf("either code or date parameter is required")
@@ -148,7 +149,7 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterest(params WeeklyMargi
 	}
 
 	var resp WeeklyMarginInterestResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get weekly margin interest: %w", err)
 	}
 
@@ -157,7 +158,7 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterest(params WeeklyMargi
 
 // GetWeeklyMarginInterestByCode は指定銘柄の信用取引週末残高を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCode(code string) ([]WeeklyMarginInterest, error) {
+func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCode(ctx context.Context, code string) ([]WeeklyMarginInterest, error) {
 	var allData []WeeklyMarginInterest
 	paginationKey := ""
 
@@ -167,7 +168,7 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCode(code string)
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetWeeklyMarginInterest(params)
+		resp, err := s.GetWeeklyMarginInterest(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -186,7 +187,7 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCode(code string)
 
 // GetWeeklyMarginInterestByDate は指定日の全銘柄信用取引週末残高を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByDate(date string) ([]WeeklyMarginInterest, error) {
+func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByDate(ctx context.Context, date string) ([]WeeklyMarginInterest, error) {
 	var allData []WeeklyMarginInterest
 	paginationKey := ""
 
@@ -196,7 +197,7 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByDate(date string)
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetWeeklyMarginInterest(params)
+		resp, err := s.GetWeeklyMarginInterest(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -214,7 +215,7 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByDate(date string)
 }
 
 // GetWeeklyMarginInterestByCodeAndDateRange は指定銘柄・期間の信用取引週末残高を取得します。
-func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCodeAndDateRange(code, from, to string) ([]WeeklyMarginInterest, error) {
+func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCodeAndDateRange(ctx context.Context, code, from, to string) ([]WeeklyMarginInterest, error) {
 	var allData []WeeklyMarginInterest
 	paginationKey := ""
 
@@ -226,7 +227,7 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCodeAndDateRange(
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetWeeklyMarginInterest(params)
+		resp, err := s.GetWeeklyMarginInterest(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -244,8 +245,8 @@ func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCodeAndDateRange(
 }
 
 // GetWeeklyMarginInterestByCodeAndDate は指定銘柄の指定公表日の信用取引週末残高を取得します。
-func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCodeAndDate(code, date string) ([]WeeklyMarginInterest, error) {
-	resp, err := s.GetWeeklyMarginInterest(WeeklyMarginInterestParams{
+func (s *WeeklyMarginInterestService) GetWeeklyMarginInterestByCodeAndDate(ctx context.Context, code, date string) ([]WeeklyMarginInterest, error) {
+	resp, err := s.GetWeeklyMarginInterest(ctx, WeeklyMarginInterestParams{
 		Code: code,
 		Date: date,
 	})

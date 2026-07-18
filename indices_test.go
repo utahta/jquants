@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -77,7 +78,7 @@ func TestIndicesService_GetIndices(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Execute
-			resp, err := service.GetIndices(tt.params)
+			resp, err := service.GetIndices(context.Background(), tt.params)
 
 			// Verify
 			if err != nil {
@@ -123,7 +124,7 @@ func TestIndicesService_GetIndicesByCode(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily?code=0000&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	indices, err := service.GetIndicesByCode("0000")
+	indices, err := service.GetIndicesByCode(context.Background(), "0000")
 
 	// Verify
 	if err != nil {
@@ -175,7 +176,7 @@ func TestIndicesService_GetIndicesByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily?date=20240101&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	indices, err := service.GetIndicesByDate("20240101")
+	indices, err := service.GetIndicesByDate(context.Background(), "20240101")
 
 	// Verify
 	if err != nil {
@@ -200,7 +201,7 @@ func TestIndicesService_GetTOPIX(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily?code=0000", mockResponse)
 
 	// Execute
-	indices, err := service.GetTOPIX()
+	indices, err := service.GetTOPIX(context.Background())
 
 	// Verify
 	if err != nil {
@@ -228,7 +229,7 @@ func TestIndicesService_GetSectorIndex(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily?code=0058", mockResponse)
 
 	// Execute
-	indices, err := service.GetSectorIndex(IndexSectorInfoComm)
+	indices, err := service.GetSectorIndex(context.Background(), IndexSectorInfoComm)
 
 	// Verify
 	if err != nil {
@@ -256,7 +257,7 @@ func TestIndicesService_GetPrimeMarketIndex(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily?code=0500", mockResponse)
 
 	// Execute
-	indices, err := service.GetPrimeMarketIndex()
+	indices, err := service.GetPrimeMarketIndex(context.Background())
 
 	// Verify
 	if err != nil {
@@ -288,7 +289,7 @@ func TestIndicesService_GetIndicesByCodeAndDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily?code=0000&date=20240101", mockResponse)
 
 	// Execute
-	indices, err := service.GetIndicesByCodeAndDate("0000", "20240101")
+	indices, err := service.GetIndicesByCodeAndDate(context.Background(), "0000", "20240101")
 
 	// Verify
 	if err != nil {
@@ -333,7 +334,7 @@ func TestIndicesService_GetIndicesByCodeAndDateRange(t *testing.T) {
 	mockClient.SetResponse("GET", basePath+"&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	indices, err := service.GetIndicesByCodeAndDateRange("0000", "20240101", "20240131")
+	indices, err := service.GetIndicesByCodeAndDateRange(context.Background(), "0000", "20240101", "20240131")
 
 	// Verify
 	if err != nil {
@@ -359,7 +360,7 @@ func TestIndicesService_GetIndices_Error(t *testing.T) {
 	mockClient.SetError("GET", "/indices/bars/daily?code=0000", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetIndices(IndicesParams{Code: "0000"})
+	_, err := service.GetIndices(context.Background(), IndicesParams{Code: "0000"})
 
 	// Verify
 	if err == nil {

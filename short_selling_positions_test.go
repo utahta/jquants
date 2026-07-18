@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -101,7 +102,7 @@ func TestShortSellingPositionsService_GetShortSellingPositions(t *testing.T) {
 			}
 
 			// Execute
-			resp, err := service.GetShortSellingPositions(tt.params)
+			resp, err := service.GetShortSellingPositions(context.Background(), tt.params)
 
 			// Verify
 			if tt.wantErr {
@@ -134,7 +135,7 @@ func TestShortSellingPositionsService_GetShortSellingPositions_RequiresParameter
 	service := NewShortSellingPositionsService(mockClient)
 
 	// Execute with empty parameters
-	_, err := service.GetShortSellingPositions(ShortSellingPositionsParams{})
+	_, err := service.GetShortSellingPositions(context.Background(), ShortSellingPositionsParams{})
 
 	// Verify
 	if err == nil {
@@ -193,7 +194,7 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByCode(t *testing.
 	mockClient.SetResponse("GET", "/markets/short-sale-report?code=86970&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	data, err := service.GetShortSellingPositionsByCode("86970")
+	data, err := service.GetShortSellingPositionsByCode(context.Background(), "86970")
 
 	// Verify
 	if err != nil {
@@ -237,7 +238,7 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByDisclosedDate(t 
 	mockClient.SetResponse("GET", "/markets/short-sale-report?disc_date=20240801", mockResponse)
 
 	// Execute
-	data, err := service.GetShortSellingPositionsByDisclosedDate("20240801")
+	data, err := service.GetShortSellingPositionsByDisclosedDate(context.Background(), "20240801")
 
 	// Verify
 	if err != nil {
@@ -274,7 +275,7 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByCalculatedDate(t
 	mockClient.SetResponse("GET", "/markets/short-sale-report?calc_date=20240731", mockResponse)
 
 	// Execute
-	data, err := service.GetShortSellingPositionsByCalculatedDate("20240731")
+	data, err := service.GetShortSellingPositionsByCalculatedDate(context.Background(), "20240731")
 
 	// Verify
 	if err != nil {
@@ -312,7 +313,7 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByCodeAndDateRange
 	mockClient.SetResponse("GET", "/markets/short-sale-report?code=86970&disc_date_from=20240101&disc_date_to=20240331", mockResponse)
 
 	// Execute
-	data, err := service.GetShortSellingPositionsByCodeAndDateRange("86970", "20240101", "20240331")
+	data, err := service.GetShortSellingPositionsByCodeAndDateRange(context.Background(), "86970", "20240101", "20240331")
 
 	// Verify
 	if err != nil {
@@ -350,7 +351,7 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByCodeAndDisclosed
 	mockClient.SetResponse("GET", "/markets/short-sale-report?code=86970&disc_date=20240801", mockResponse)
 
 	// Execute
-	data, err := service.GetShortSellingPositionsByCodeAndDisclosedDate("86970", "20240801")
+	data, err := service.GetShortSellingPositionsByCodeAndDisclosedDate(context.Background(), "86970", "20240801")
 
 	// Verify
 	if err != nil {
@@ -389,7 +390,7 @@ func TestShortSellingPositionsService_GetShortSellingPositionsByCodeAndCalculate
 	mockClient.SetResponse("GET", "/markets/short-sale-report?code=86970&calc_date=20240731", mockResponse)
 
 	// Execute
-	data, err := service.GetShortSellingPositionsByCodeAndCalculatedDate("86970", "20240731")
+	data, err := service.GetShortSellingPositionsByCodeAndCalculatedDate(context.Background(), "86970", "20240731")
 
 	// Verify
 	if err != nil {
@@ -595,7 +596,7 @@ func TestShortSellingPositionsService_GetShortSellingPositions_Error(t *testing.
 	mockClient.SetError("GET", "/markets/short-sale-report?code=86970", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetShortSellingPositions(ShortSellingPositionsParams{Code: "86970"})
+	_, err := service.GetShortSellingPositions(context.Background(), ShortSellingPositionsParams{Code: "86970"})
 
 	// Verify
 	if err == nil {

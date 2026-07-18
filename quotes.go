@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -217,7 +218,7 @@ type DailyQuotesParams struct {
 // - Date: 基準日付（例: "20240101" または "2024-01-01"）
 // - From/To: 期間指定（例: "20240101" または "2024-01-01"）
 // - PaginationKey: ページネーション用キー
-func (s *QuotesService) GetDailyQuotes(params DailyQuotesParams) (*DailyQuotesResponse, error) {
+func (s *QuotesService) GetDailyQuotes(ctx context.Context, params DailyQuotesParams) (*DailyQuotesResponse, error) {
 	path := "/equities/bars/daily"
 
 	query := "?"
@@ -242,7 +243,7 @@ func (s *QuotesService) GetDailyQuotes(params DailyQuotesParams) (*DailyQuotesRe
 	}
 
 	var resp DailyQuotesResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get daily quotes: %w", err)
 	}
 
@@ -251,7 +252,7 @@ func (s *QuotesService) GetDailyQuotes(params DailyQuotesParams) (*DailyQuotesRe
 
 // GetDailyQuotesByCode は指定銘柄の全期間の株価データを取得します。
 // ページネーションを使用して全データを取得します。
-func (s *QuotesService) GetDailyQuotesByCode(code string) ([]DailyQuote, error) {
+func (s *QuotesService) GetDailyQuotesByCode(ctx context.Context, code string) ([]DailyQuote, error) {
 	var allQuotes []DailyQuote
 	paginationKey := ""
 
@@ -261,7 +262,7 @@ func (s *QuotesService) GetDailyQuotesByCode(code string) ([]DailyQuote, error) 
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetDailyQuotes(params)
+		resp, err := s.GetDailyQuotes(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -278,8 +279,8 @@ func (s *QuotesService) GetDailyQuotesByCode(code string) ([]DailyQuote, error) 
 }
 
 // GetDailyQuotesByCodeAndDate は指定銘柄の指定日の株価データを取得します。
-func (s *QuotesService) GetDailyQuotesByCodeAndDate(code, date string) ([]DailyQuote, error) {
-	resp, err := s.GetDailyQuotes(DailyQuotesParams{
+func (s *QuotesService) GetDailyQuotesByCodeAndDate(ctx context.Context, code, date string) ([]DailyQuote, error) {
+	resp, err := s.GetDailyQuotes(ctx, DailyQuotesParams{
 		Code: code,
 		Date: date,
 	})
@@ -291,7 +292,7 @@ func (s *QuotesService) GetDailyQuotesByCodeAndDate(code, date string) ([]DailyQ
 
 // GetDailyQuotesByCodeAndDateRange は指定銘柄の指定期間の株価データを取得します。
 // ページネーションを使用して全データを取得します。
-func (s *QuotesService) GetDailyQuotesByCodeAndDateRange(code, from, to string) ([]DailyQuote, error) {
+func (s *QuotesService) GetDailyQuotesByCodeAndDateRange(ctx context.Context, code, from, to string) ([]DailyQuote, error) {
 	var allQuotes []DailyQuote
 	paginationKey := ""
 
@@ -303,7 +304,7 @@ func (s *QuotesService) GetDailyQuotesByCodeAndDateRange(code, from, to string) 
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetDailyQuotes(params)
+		resp, err := s.GetDailyQuotes(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -321,7 +322,7 @@ func (s *QuotesService) GetDailyQuotesByCodeAndDateRange(code, from, to string) 
 
 // GetDailyQuotesByDate は指定日の全銘柄の株価データを取得します。
 // ページネーションを使用して大量データを分割取得します。
-func (s *QuotesService) GetDailyQuotesByDate(date string) ([]DailyQuote, error) {
+func (s *QuotesService) GetDailyQuotesByDate(ctx context.Context, date string) ([]DailyQuote, error) {
 	var allQuotes []DailyQuote
 	paginationKey := ""
 
@@ -331,7 +332,7 @@ func (s *QuotesService) GetDailyQuotesByDate(date string) ([]DailyQuote, error) 
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetDailyQuotes(params)
+		resp, err := s.GetDailyQuotes(ctx, params)
 		if err != nil {
 			return nil, err
 		}

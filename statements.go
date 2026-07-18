@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -487,7 +488,7 @@ type StatementsParams struct {
 // - Code: 銘柄コード（例: "7203" または "72030"）
 // - Date: 開示日付（例: "20240101" または "2024-01-01"）
 // - PaginationKey: ページネーション用キー
-func (s *StatementsService) GetStatements(params StatementsParams) (*StatementsResponse, error) {
+func (s *StatementsService) GetStatements(ctx context.Context, params StatementsParams) (*StatementsResponse, error) {
 	path := "/fins/summary"
 
 	query := "?"
@@ -506,7 +507,7 @@ func (s *StatementsService) GetStatements(params StatementsParams) (*StatementsR
 	}
 
 	var resp StatementsResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get statements: %w", err)
 	}
 
@@ -515,12 +516,12 @@ func (s *StatementsService) GetStatements(params StatementsParams) (*StatementsR
 
 // GetAllStatementsByCode は指定銘柄の全期間の財務諸表データを取得します。
 // ページネーションを使用して全データを取得します。
-func (s *StatementsService) GetAllStatementsByCode(code string) ([]Statement, error) {
+func (s *StatementsService) GetAllStatementsByCode(ctx context.Context, code string) ([]Statement, error) {
 	var allStatements []Statement
 	paginationKey := ""
 
 	for {
-		resp, err := s.GetStatements(StatementsParams{
+		resp, err := s.GetStatements(ctx, StatementsParams{
 			Code:          code,
 			PaginationKey: paginationKey,
 		})
@@ -540,8 +541,8 @@ func (s *StatementsService) GetAllStatementsByCode(code string) ([]Statement, er
 }
 
 // GetStatementsByCodeAndDate は指定銘柄の指定日の財務諸表データを取得します。
-func (s *StatementsService) GetStatementsByCodeAndDate(code, date string) ([]Statement, error) {
-	resp, err := s.GetStatements(StatementsParams{
+func (s *StatementsService) GetStatementsByCodeAndDate(ctx context.Context, code, date string) ([]Statement, error) {
+	resp, err := s.GetStatements(ctx, StatementsParams{
 		Code: code,
 		Date: date,
 	})
@@ -553,12 +554,12 @@ func (s *StatementsService) GetStatementsByCodeAndDate(code, date string) ([]Sta
 
 // GetStatementsByDate は指定日の全銘柄の財務諸表データを取得します。
 // ページネーションを使用して全データを取得します。
-func (s *StatementsService) GetStatementsByDate(date string) ([]Statement, error) {
+func (s *StatementsService) GetStatementsByDate(ctx context.Context, date string) ([]Statement, error) {
 	var allStatements []Statement
 	paginationKey := ""
 
 	for {
-		resp, err := s.GetStatements(StatementsParams{
+		resp, err := s.GetStatements(ctx, StatementsParams{
 			Date:          date,
 			PaginationKey: paginationKey,
 		})
@@ -579,8 +580,8 @@ func (s *StatementsService) GetStatementsByDate(date string) ([]Statement, error
 
 // GetLatestStatements は指定銘柄の最新財務諸表を取得します。
 // 例: GetLatestStatements("7203") でトヨタ自動車の最新決算データを取得
-func (s *StatementsService) GetLatestStatements(code string) (*Statement, error) {
-	statements, err := s.GetAllStatementsByCode(code)
+func (s *StatementsService) GetLatestStatements(ctx context.Context, code string) (*Statement, error) {
+	statements, err := s.GetAllStatementsByCode(ctx, code)
 	if err != nil {
 		return nil, err
 	}

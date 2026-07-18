@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -103,7 +104,7 @@ func TestFuturesService_GetFutures(t *testing.T) {
 			}
 
 			// Execute
-			resp, err := service.GetFutures(tt.params)
+			resp, err := service.GetFutures(context.Background(), tt.params)
 
 			// Verify
 			if tt.wantErr {
@@ -136,7 +137,7 @@ func TestFuturesService_GetFutures_RequiresDate(t *testing.T) {
 	service := NewFuturesService(mockClient)
 
 	// Execute with empty date
-	_, err := service.GetFutures(FuturesParams{})
+	_, err := service.GetFutures(context.Background(), FuturesParams{})
 
 	// Verify
 	if err == nil {
@@ -188,7 +189,7 @@ func TestFuturesService_GetFuturesByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/derivatives/bars/daily/futures?date=20240723&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	data, err := service.GetFuturesByDate("20240723")
+	data, err := service.GetFuturesByDate(context.Background(), "20240723")
 
 	// Verify
 	if err != nil {
@@ -230,7 +231,7 @@ func TestFuturesService_GetFuturesByCategory(t *testing.T) {
 	mockClient.SetResponse("GET", "/derivatives/bars/daily/futures?date=20240723&category=NK225F", mockResponse)
 
 	// Execute
-	data, err := service.GetFuturesByCategory("20240723", "NK225F")
+	data, err := service.GetFuturesByCategory(context.Background(), "20240723", "NK225F")
 
 	// Verify
 	if err != nil {
@@ -274,7 +275,7 @@ func TestFuturesService_GetCentralContractMonthFutures(t *testing.T) {
 	mockClient.SetResponse("GET", "/derivatives/bars/daily/futures?date=20240723&contract_flag=1", mockResponse)
 
 	// Execute
-	data, err := service.GetCentralContractMonthFutures("20240723")
+	data, err := service.GetCentralContractMonthFutures(context.Background(), "20240723")
 
 	// Verify
 	if err != nil {
@@ -539,7 +540,7 @@ func TestFuturesService_GetFutures_Error(t *testing.T) {
 	mockClient.SetError("GET", "/derivatives/bars/daily/futures?date=20240723", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetFutures(FuturesParams{Date: "20240723"})
+	_, err := service.GetFutures(context.Background(), FuturesParams{Date: "20240723"})
 
 	// Verify
 	if err == nil {

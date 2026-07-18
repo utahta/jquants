@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 
 	"github.com/utahta/jquants"
@@ -14,7 +15,7 @@ func TestAnnouncementEndpoint(t *testing.T) {
 	t.Run("GetAnnouncement_Default", func(t *testing.T) {
 		// デフォルト（翌営業日）の決算発表予定を取得
 		params := jquants.AnnouncementParams{}
-		resp, err := jq.Announcement.GetAnnouncement(params)
+		resp, err := jq.Announcement.GetAnnouncement(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -127,7 +128,7 @@ func TestAnnouncementEndpoint(t *testing.T) {
 
 		params := jquants.AnnouncementParams{}
 
-		resp, err := jq.Announcement.GetAnnouncement(params)
+		resp, err := jq.Announcement.GetAnnouncement(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -147,7 +148,7 @@ func TestAnnouncementEndpoint(t *testing.T) {
 		// ページネーションのテスト
 		params := jquants.AnnouncementParams{}
 
-		resp, err := jq.Announcement.GetAnnouncement(params)
+		resp, err := jq.Announcement.GetAnnouncement(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -165,7 +166,7 @@ func TestAnnouncementEndpoint(t *testing.T) {
 		if resp.PaginationKey != "" {
 			// 次のページを取得
 			params.PaginationKey = resp.PaginationKey
-			resp2, err := jq.Announcement.GetAnnouncement(params)
+			resp2, err := jq.Announcement.GetAnnouncement(context.Background(), params)
 			if err != nil {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
@@ -185,7 +186,7 @@ func TestAnnouncementEndpoint(t *testing.T) {
 	t.Run("GetAnnouncement_SectorAnalysis", func(t *testing.T) {
 		// 業種別の分析
 		params := jquants.AnnouncementParams{}
-		resp, err := jq.Announcement.GetAnnouncement(params)
+		resp, err := jq.Announcement.GetAnnouncement(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -212,7 +213,7 @@ func TestAnnouncementEndpoint(t *testing.T) {
 	t.Run("GetAnnouncement_QuarterAnalysis", func(t *testing.T) {
 		// 決算四半期別の分析
 		params := jquants.AnnouncementParams{}
-		resp, err := jq.Announcement.GetAnnouncement(params)
+		resp, err := jq.Announcement.GetAnnouncement(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")

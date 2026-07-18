@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 
 	"github.com/utahta/jquants"
@@ -19,7 +20,7 @@ func TestIndicesEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.Indices.GetIndices(params)
+		resp, err := jq.Indices.GetIndices(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -112,7 +113,7 @@ func TestIndicesEndpoint(t *testing.T) {
 			Code: "0000", // 特定の指数コード
 		}
 
-		resp, err := jq.Indices.GetIndices(params)
+		resp, err := jq.Indices.GetIndices(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -140,7 +141,7 @@ func TestIndicesEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.Indices.GetIndices(params)
+		resp, err := jq.Indices.GetIndices(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -158,7 +159,7 @@ func TestIndicesEndpoint(t *testing.T) {
 		if resp.PaginationKey != "" {
 			// 次のページを取得
 			params.PaginationKey = resp.PaginationKey
-			resp2, err := jq.Indices.GetIndices(params)
+			resp2, err := jq.Indices.GetIndices(context.Background(), params)
 			if err != nil {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
@@ -178,7 +179,7 @@ func TestIndicesEndpoint(t *testing.T) {
 
 	t.Run("GetTOPIXCore30", func(t *testing.T) {
 		// TOPIX Core30の便利メソッドテスト
-		indices, err := jq.Indices.GetTOPIXCore30()
+		indices, err := jq.Indices.GetTOPIXCore30(context.Background())
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -217,7 +218,7 @@ func TestIndicesEndpoint(t *testing.T) {
 
 	t.Run("GetTOPIX", func(t *testing.T) {
 		// TOPIXの便利メソッドテスト
-		indices, err := jq.Indices.GetTOPIX()
+		indices, err := jq.Indices.GetTOPIX(context.Background())
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -252,7 +253,7 @@ func TestIndicesEndpoint(t *testing.T) {
 			To:   "2024-01-31",
 		}
 
-		resp, err := jq.Indices.GetIndices(params)
+		resp, err := jq.Indices.GetIndices(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")

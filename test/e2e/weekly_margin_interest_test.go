@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -16,7 +17,7 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 		// トヨタ自動車の信用取引週末残高を取得
 		friday := getRecentFriday()
 
-		interests, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterestByCodeAndDateRange("7203", friday, friday)
+		interests, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterestByCodeAndDateRange(context.Background(), "7203", friday, friday)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -124,7 +125,7 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 			Date: friday,
 		}
 
-		resp, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterest(params)
+		resp, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterest(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -192,7 +193,7 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 		startDate = startDate.AddDate(0, 0, -28) // 4週間前
 		startFriday := startDate.Format("2006-01-02")
 
-		interests, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterestByCodeAndDateRange("7203", startFriday, endFriday)
+		interests, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterestByCodeAndDateRange(context.Background(), "7203", startFriday, endFriday)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -242,7 +243,7 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 			Date: friday,
 		}
 
-		resp, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterest(params)
+		resp, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterest(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -260,7 +261,7 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 		if resp.PaginationKey != "" {
 			// 次のページを取得
 			params.PaginationKey = resp.PaginationKey
-			resp2, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterest(params)
+			resp2, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterest(context.Background(), params)
 			if err != nil {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
@@ -279,7 +280,7 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 			Date: friday,
 		}
 
-		resp, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterest(params)
+		resp, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterest(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -330,7 +331,7 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 		// エラーケースのテスト
 
 		// 存在しない銘柄コード
-		interests, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterestByCodeAndDateRange("99999", "2024-01-05", "2024-01-05")
+		interests, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterestByCodeAndDateRange(context.Background(), "99999", "2024-01-05", "2024-01-05")
 		if err == nil && len(interests) > 0 {
 			t.Error("Expected error or empty result for invalid code")
 		}
@@ -346,7 +347,7 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 			Date: mondayStr,
 		}
 
-		resp, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterest(params)
+		resp, err := jq.WeeklyMarginInterest.GetWeeklyMarginInterest(context.Background(), params)
 		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Logf("Warning: Got data for non-Friday date %s", mondayStr)
 		}

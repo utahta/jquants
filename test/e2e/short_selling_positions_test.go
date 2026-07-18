@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 	"time"
 )
@@ -12,7 +13,7 @@ import (
 func TestShortSellingPositionsEndpoint(t *testing.T) {
 	t.Run("GetShortSellingPositions_ByCode", func(t *testing.T) {
 		// トヨタ自動車の空売り残高報告を取得
-		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByCode("7203")
+		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByCode(context.Background(), "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -114,7 +115,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 		// 最近の金曜日の全銘柄空売り残高報告を取得
 		disclosedDate := getRecentFriday()
 		
-		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByDisclosedDate(disclosedDate)
+		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByDisclosedDate(context.Background(), disclosedDate)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -168,7 +169,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 
 	t.Run("GetShortSellingPositions_PositionAnalysis", func(t *testing.T) {
 		// トヨタ自動車の残高変化分析
-		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByCode("7203")
+		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByCode(context.Background(), "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -226,7 +227,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 		to := time.Now().Format("2006-01-02")
 		from := time.Now().AddDate(0, -1, 0).Format("2006-01-02")
 		
-		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByCodeAndDateRange("7203", from, to)
+		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByCodeAndDateRange(context.Background(), "7203", from, to)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -272,7 +273,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 
 	t.Run("GetShortSellingPositions_ThresholdAnalysis", func(t *testing.T) {
 		// 閾値分析（報告義務の閾値分析）
-		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByCode("7203")
+		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByCode(context.Background(), "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -324,13 +325,13 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 		// エラーケースのテスト
 		
 		// 存在しない銘柄コード
-		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByCode("99999")
+		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByCode(context.Background(), "99999")
 		if err == nil && len(positions) > 0 {
 			t.Error("Expected error or empty result for invalid code")
 		}
 		
 		// 無効な日付
-		positions, err = jq.ShortSellingPositions.GetShortSellingPositionsByDisclosedDate("invalid-date")
+		positions, err = jq.ShortSellingPositions.GetShortSellingPositionsByDisclosedDate(context.Background(), "invalid-date")
 		if err == nil && len(positions) > 0 {
 			t.Error("Expected error or empty result for invalid date")
 		}

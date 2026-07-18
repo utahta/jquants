@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -67,35 +68,32 @@ func NewClientFromEnv(opts ...ClientOption) (*Client, error) {
 	return NewClient(apiKey, opts...), nil
 }
 
-func (c *Client) DoRequest(method, path string, body interface{}, result interface{}) error {
+func (c *Client) DoRequest(ctx context.Context, method, path string, body interface{}, result interface{}) error {
 	cacheKey := method + ":" + path
 
 	if method == http.MethodGet && c.cacheEnabled {
 		// Check cache first
 		c.mu.RLock()
-		if cached, ok := c.cache[cacheKey]; ok {
-			c.mu.RUnlock()
-			if result != nil {
-				if err := json.Unmarshal(cached, result); err != nil {
-					return fmt.Errorf("failed to decode cached response: %w", err)
-				}
-			}
-			return nil
-		}
+		cached, ok := c.cache[cacheKey]
 		c.mu.RUnlock()
+		if ok {
+			return decodeResponse(cached, result)
+		}
 
 		// Use singleflight to deduplicate concurrent requests for the same key
-		respBody, err, _ := c.sf.Do(cacheKey, func() (interface{}, error) {
+		ch := c.sf.DoChan(cacheKey, func() (interface{}, error) {
 			// Check cache again (another goroutine may have cached it)
 			c.mu.RLock()
-			if cached, ok := c.cache[cacheKey]; ok {
-				c.mu.RUnlock()
+			cached, ok := c.cache[cacheKey]
+			c.mu.RUnlock()
+			if ok {
 				return cached, nil
 			}
-			c.mu.RUnlock()
 
-			// Perform HTTP request
-			data, err := c.doHTTPRequest(method, path, body)
+			// Detach the shared request from the caller's cancellation so that
+			// one caller canceling does not fail the flight for other waiters.
+			// The http.Client timeout still bounds the request duration.
+			data, err := c.doHTTPRequest(context.WithoutCancel(ctx), method, path, body)
 			if err != nil {
 				return nil, err
 			}
@@ -108,35 +106,31 @@ func (c *Client) DoRequest(method, path string, body interface{}, result interfa
 			return data, nil
 		})
 
-		if err != nil {
-			return err
-		}
-
-		if result != nil {
-			if err := json.Unmarshal(respBody.([]byte), result); err != nil {
-				return fmt.Errorf("failed to decode response: %w", err)
+		// Wait for the shared flight, but let each caller honor its own context.
+		// A canceled caller returns immediately; the flight keeps running and
+		// populates the cache for other callers.
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case res := <-ch:
+			if res.Err != nil {
+				return res.Err
 			}
+			return decodeResponse(res.Val.([]byte), result)
 		}
-		return nil
 	}
 
 	// Non-cached request (cache disabled or non-GET method)
-	respBody, err := c.doHTTPRequest(method, path, body)
+	respBody, err := c.doHTTPRequest(ctx, method, path, body)
 	if err != nil {
 		return err
 	}
 
-	if result != nil {
-		if err := json.Unmarshal(respBody, result); err != nil {
-			return fmt.Errorf("failed to decode response: %w", err)
-		}
-	}
-
-	return nil
+	return decodeResponse(respBody, result)
 }
 
 // doHTTPRequest performs the actual HTTP request.
-func (c *Client) doHTTPRequest(method, path string, body interface{}) ([]byte, error) {
+func (c *Client) doHTTPRequest(ctx context.Context, method, path string, body interface{}) ([]byte, error) {
 	url := c.baseURL + path
 
 	var reqBody io.Reader
@@ -148,7 +142,7 @@ func (c *Client) doHTTPRequest(method, path string, body interface{}) ([]byte, e
 		reqBody = bytes.NewBuffer(jsonBody)
 	}
 
-	req, err := http.NewRequest(method, url, reqBody)
+	req, err := http.NewRequestWithContext(ctx, method, url, reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -174,6 +168,17 @@ func (c *Client) doHTTPRequest(method, path string, body interface{}) ([]byte, e
 	}
 
 	return respBody, nil
+}
+
+// decodeResponse unmarshals data into result. A nil result skips decoding.
+func decodeResponse(data []byte, result interface{}) error {
+	if result == nil {
+		return nil
+	}
+	if err := json.Unmarshal(data, result); err != nil {
+		return fmt.Errorf("failed to decode response: %w", err)
+	}
+	return nil
 }
 
 // ClearCache clears the cache.

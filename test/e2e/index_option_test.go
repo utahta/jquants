@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 
 	"github.com/utahta/jquants"
@@ -19,7 +20,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.IndexOption.GetIndexOptions(params)
+		resp, err := jq.IndexOption.GetIndexOptions(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -203,7 +204,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 		// コールオプションのみを取得
 		date := getTestDate()
 
-		options, err := jq.IndexOption.GetCallOptions(date)
+		options, err := jq.IndexOption.GetCallOptions(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -229,7 +230,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 		// プットオプションのみを取得
 		date := getTestDate()
 
-		options, err := jq.IndexOption.GetPutOptions(date)
+		options, err := jq.IndexOption.GetPutOptions(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -255,7 +256,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 		// オプションチェーンの分析
 		date := getTestDate()
 
-		options, err := jq.IndexOption.GetOptionChain(date)
+		options, err := jq.IndexOption.GetOptionChain(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -325,7 +326,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.IndexOption.GetIndexOptions(params)
+		resp, err := jq.IndexOption.GetIndexOptions(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -376,7 +377,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.IndexOption.GetIndexOptions(params)
+		resp, err := jq.IndexOption.GetIndexOptions(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -416,7 +417,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.IndexOption.GetIndexOptions(params)
+		resp, err := jq.IndexOption.GetIndexOptions(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -434,7 +435,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 		if resp.PaginationKey != "" {
 			// 次のページを取得
 			params.PaginationKey = resp.PaginationKey
-			resp2, err := jq.IndexOption.GetIndexOptions(params)
+			resp2, err := jq.IndexOption.GetIndexOptions(context.Background(), params)
 			if err != nil {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
@@ -453,7 +454,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			Date: "2030-01-01",
 		}
 
-		resp, err := jq.IndexOption.GetIndexOptions(params)
+		resp, err := jq.IndexOption.GetIndexOptions(context.Background(), params)
 		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Error("Expected error or empty result for future date")
 		}
@@ -463,7 +464,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			Date: "invalid-date",
 		}
 
-		resp, err = jq.IndexOption.GetIndexOptions(params)
+		resp, err = jq.IndexOption.GetIndexOptions(context.Background(), params)
 		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Error("Expected error or empty result for invalid date format")
 		}
@@ -473,7 +474,7 @@ func TestIndexOptionEndpoint(t *testing.T) {
 			Date: "",
 		}
 
-		_, err = jq.IndexOption.GetIndexOptions(params)
+		_, err = jq.IndexOption.GetIndexOptions(context.Background(), params)
 		if err == nil {
 			t.Error("Expected error for missing required date parameter")
 		}

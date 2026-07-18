@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -26,7 +27,7 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 			To:   to,
 		}
 
-		resp, err := jq.Quotes.GetDailyQuotes(params)
+		resp, err := jq.Quotes.GetDailyQuotes(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -168,7 +169,7 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.Quotes.GetDailyQuotes(params)
+		resp, err := jq.Quotes.GetDailyQuotes(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -213,7 +214,7 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.Quotes.GetDailyQuotes(params)
+		resp, err := jq.Quotes.GetDailyQuotes(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -231,7 +232,7 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 		if resp.PaginationKey != "" {
 			// 次のページを取得
 			params.PaginationKey = resp.PaginationKey
-			resp2, err := jq.Quotes.GetDailyQuotes(params)
+			resp2, err := jq.Quotes.GetDailyQuotes(context.Background(), params)
 			if err != nil {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
@@ -249,7 +250,7 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 
 	t.Run("GetDailyQuotesByCode_Convenience", func(t *testing.T) {
 		// 便利メソッドのテスト（全期間）
-		quotes, err := jq.Quotes.GetDailyQuotesByCode("7203")
+		quotes, err := jq.Quotes.GetDailyQuotesByCode(context.Background(), "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -298,7 +299,7 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 			Date: getTestDate(),
 		}
 
-		resp, err := jq.Quotes.GetDailyQuotes(params)
+		resp, err := jq.Quotes.GetDailyQuotes(context.Background(), params)
 		if err == nil && len(resp.Data) > 0 {
 			t.Error("Expected no data for invalid code")
 		}
@@ -310,7 +311,7 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 			Date: futureDate,
 		}
 
-		resp, err = jq.Quotes.GetDailyQuotes(params)
+		resp, err = jq.Quotes.GetDailyQuotes(context.Background(), params)
 		if err == nil && len(resp.Data) > 0 {
 			t.Error("Expected no data for future date")
 		}

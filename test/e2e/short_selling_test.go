@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 )
 
@@ -13,7 +14,7 @@ func TestShortSellingEndpoint(t *testing.T) {
 		// 最近の営業日の業種別空売り比率を取得
 		date := getTestDate()
 		
-		shorts, err := jq.ShortSelling.GetShortSellingByDate(date)
+		shorts, err := jq.ShortSelling.GetShortSellingByDate(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -99,7 +100,7 @@ func TestShortSellingEndpoint(t *testing.T) {
 		// 特定業種（輸送用機器：3050）の空売り比率データを取得
 		sectorCode := "3050"
 		
-		shorts, err := jq.ShortSelling.GetShortSellingBySector(sectorCode)
+		shorts, err := jq.ShortSelling.GetShortSellingBySector(context.Background(), sectorCode)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -150,7 +151,7 @@ func TestShortSellingEndpoint(t *testing.T) {
 		// 最新日の全業種の空売り比率分析
 		date := getTestDate()
 		
-		shorts, err := jq.ShortSelling.GetShortSellingByDate(date)
+		shorts, err := jq.ShortSelling.GetShortSellingByDate(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -231,7 +232,7 @@ func TestShortSellingEndpoint(t *testing.T) {
 		sectorData := make(map[string][]float64) // セクター -> 直近の空売り比率リスト
 		
 		for _, sectorCode := range majorSectors {
-			shorts, err := jq.ShortSelling.GetShortSellingBySector(sectorCode)
+			shorts, err := jq.ShortSelling.GetShortSellingBySector(context.Background(), sectorCode)
 			if err != nil {
 				if isSubscriptionLimited(err) {
 					t.Skip("Skipping due to subscription limitation")
@@ -281,14 +282,14 @@ func TestShortSellingEndpoint(t *testing.T) {
 		// エラーケースのテスト
 		
 		// 存在しない業種コード（0000は無効）
-		shorts, err := jq.ShortSelling.GetShortSellingBySector("0000")
+		shorts, err := jq.ShortSelling.GetShortSellingBySector(context.Background(), "0000")
 		if err == nil && len(shorts) > 0 {
 			t.Error("Expected error or empty result for invalid sector code")
 		}
 		
 		// 未来の日付
 		futureDate := "2030-01-01"
-		shorts, err = jq.ShortSelling.GetShortSellingByDate(futureDate)
+		shorts, err = jq.ShortSelling.GetShortSellingByDate(context.Background(), futureDate)
 		if err == nil && len(shorts) > 0 {
 			t.Error("Expected error or empty result for future date")
 		}

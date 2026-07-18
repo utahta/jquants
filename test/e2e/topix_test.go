@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -21,7 +22,7 @@ func TestTOPIXEndpoint(t *testing.T) {
 			To:   date,
 		}
 
-		resp, err := jq.TOPIX.GetTOPIXData(params)
+		resp, err := jq.TOPIX.GetTOPIXData(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -99,7 +100,7 @@ func TestTOPIXEndpoint(t *testing.T) {
 			To:   toDate,
 		}
 
-		resp, err := jq.TOPIX.GetTOPIXData(params)
+		resp, err := jq.TOPIX.GetTOPIXData(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -150,7 +151,7 @@ func TestTOPIXEndpoint(t *testing.T) {
 			To:   date,
 		}
 
-		resp, err := jq.TOPIX.GetTOPIXData(params)
+		resp, err := jq.TOPIX.GetTOPIXData(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -178,7 +179,7 @@ func TestTOPIXEndpoint(t *testing.T) {
 			To:   "2024-01-31",
 		}
 
-		resp, err := jq.TOPIX.GetTOPIXData(params)
+		resp, err := jq.TOPIX.GetTOPIXData(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -196,7 +197,7 @@ func TestTOPIXEndpoint(t *testing.T) {
 		if resp.PaginationKey != "" {
 			// 次のページを取得
 			params.PaginationKey = resp.PaginationKey
-			resp2, err := jq.TOPIX.GetTOPIXData(params)
+			resp2, err := jq.TOPIX.GetTOPIXData(context.Background(), params)
 			if err != nil {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
@@ -209,7 +210,7 @@ func TestTOPIXEndpoint(t *testing.T) {
 
 	t.Run("GetLatestTOPIX", func(t *testing.T) {
 		// 最新のTOPIXデータを取得する便利メソッド
-		topix, err := jq.TOPIX.GetLatestTOPIX()
+		topix, err := jq.TOPIX.GetLatestTOPIX(context.Background())
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -244,7 +245,7 @@ func TestTOPIXEndpoint(t *testing.T) {
 			To:   toDate,
 		}
 
-		resp, err := jq.TOPIX.GetTOPIXData(params)
+		resp, err := jq.TOPIX.GetTOPIXData(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")

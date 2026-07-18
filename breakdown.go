@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -143,7 +144,7 @@ func (r *BreakdownResponse) UnmarshalJSON(data []byte) error {
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *BreakdownService) GetBreakdown(params BreakdownParams) (*BreakdownResponse, error) {
+func (s *BreakdownService) GetBreakdown(ctx context.Context, params BreakdownParams) (*BreakdownResponse, error) {
 	path := "/markets/breakdown"
 
 	query := "?"
@@ -168,7 +169,7 @@ func (s *BreakdownService) GetBreakdown(params BreakdownParams) (*BreakdownRespo
 	}
 
 	var resp BreakdownResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get breakdown: %w", err)
 	}
 
@@ -180,7 +181,7 @@ func (s *BreakdownService) GetBreakdown(params BreakdownParams) (*BreakdownRespo
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *BreakdownService) GetBreakdownByCode(code string, days int) ([]Breakdown, error) {
+func (s *BreakdownService) GetBreakdownByCode(ctx context.Context, code string, days int) ([]Breakdown, error) {
 	to := time.Now()
 	from := to.AddDate(0, 0, -days)
 
@@ -195,7 +196,7 @@ func (s *BreakdownService) GetBreakdownByCode(code string, days int) ([]Breakdow
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetBreakdown(params)
+		resp, err := s.GetBreakdown(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -214,7 +215,7 @@ func (s *BreakdownService) GetBreakdownByCode(code string, days int) ([]Breakdow
 
 // GetBreakdownByDate は指定日の全銘柄の売買内訳データを取得します。
 // ページネーションを使用して大量データを分割取得します。
-func (s *BreakdownService) GetBreakdownByDate(date string) ([]Breakdown, error) {
+func (s *BreakdownService) GetBreakdownByDate(ctx context.Context, date string) ([]Breakdown, error) {
 	var allBreakdown []Breakdown
 	paginationKey := ""
 
@@ -224,7 +225,7 @@ func (s *BreakdownService) GetBreakdownByDate(date string) ([]Breakdown, error) 
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetBreakdown(params)
+		resp, err := s.GetBreakdown(ctx, params)
 		if err != nil {
 			return nil, err
 		}

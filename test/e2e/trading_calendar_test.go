@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"strings"
 	"testing"
 	"time"
@@ -16,7 +17,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 		from := "2024-06-01"
 		to := "2024-06-30"
 
-		calendar, err := jq.TradingCalendar.GetTradingCalendarByDateRange(from, to)
+		calendar, err := jq.TradingCalendar.GetTradingCalendarByDateRange(context.Background(), from, to)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -84,7 +85,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 		from := "2024-01-01"
 		to := "2024-01-31"
 
-		calendar, err := jq.TradingCalendar.GetTradingCalendarByDateRange(from, to)
+		calendar, err := jq.TradingCalendar.GetTradingCalendarByDateRange(context.Background(), from, to)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -139,7 +140,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 		from := "2024-05-01"
 		to := "2024-05-31"
 
-		calendar, err := jq.TradingCalendar.GetTradingCalendarByDateRange(from, to)
+		calendar, err := jq.TradingCalendar.GetTradingCalendarByDateRange(context.Background(), from, to)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -189,7 +190,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 		from := "2023-01-01"
 		to := "2023-12-31"
 
-		calendar, err := jq.TradingCalendar.GetTradingCalendarByDateRange(from, to)
+		calendar, err := jq.TradingCalendar.GetTradingCalendarByDateRange(context.Background(), from, to)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -237,7 +238,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 		// 単一日付での取得テスト
 		today := time.Now().Format("2006-01-02")
 
-		calendar, err := jq.TradingCalendar.GetTradingCalendarByDateRange(today, today)
+		calendar, err := jq.TradingCalendar.GetTradingCalendarByDateRange(context.Background(), today, today)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -273,7 +274,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 		// エラーケースのテスト
 
 		// 無効な日付範囲
-		calendar, err := jq.TradingCalendar.GetTradingCalendarByDateRange("2024-12-31", "2024-01-01")
+		calendar, err := jq.TradingCalendar.GetTradingCalendarByDateRange(context.Background(), "2024-12-31", "2024-01-01")
 		if err == nil && len(calendar) > 0 {
 			t.Error("Expected error or empty result for invalid date range")
 		}
@@ -282,7 +283,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 		futureFrom := time.Now().AddDate(10, 0, 0).Format("2006-01-02")
 		futureTo := time.Now().AddDate(10, 0, 30).Format("2006-01-02")
 
-		calendar, err = jq.TradingCalendar.GetTradingCalendarByDateRange(futureFrom, futureTo)
+		calendar, err = jq.TradingCalendar.GetTradingCalendarByDateRange(context.Background(), futureFrom, futureTo)
 		if err == nil && len(calendar) > 0 {
 			t.Logf("Warning: Got calendar data for far future dates")
 		}

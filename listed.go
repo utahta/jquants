@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/utahta/jquants/client"
@@ -125,7 +126,7 @@ type ListedInfoParams struct {
 // パラメータ:
 // - Code: 銘柄コード（例: "7203" または "72030"）
 // - Date: 基準日付（例: "20240101" または "2024-01-01"）
-func (s *ListedService) GetListedInfo(params ListedInfoParams) (*ListedInfoResponse, error) {
+func (s *ListedService) GetListedInfo(ctx context.Context, params ListedInfoParams) (*ListedInfoResponse, error) {
 	path := "/equities/master"
 
 	query := "?"
@@ -141,7 +142,7 @@ func (s *ListedService) GetListedInfo(params ListedInfoParams) (*ListedInfoRespo
 	}
 
 	var resp ListedInfoResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get listed info: %w", err)
 	}
 
@@ -149,8 +150,8 @@ func (s *ListedService) GetListedInfo(params ListedInfoParams) (*ListedInfoRespo
 }
 
 // GetAllListedInfo は当日時点の全銘柄情報を取得します。
-func (s *ListedService) GetAllListedInfo() ([]ListedInfo, error) {
-	resp, err := s.GetListedInfo(ListedInfoParams{})
+func (s *ListedService) GetAllListedInfo(ctx context.Context) ([]ListedInfo, error) {
+	resp, err := s.GetListedInfo(ctx, ListedInfoParams{})
 	if err != nil {
 		return nil, err
 	}
@@ -158,8 +159,8 @@ func (s *ListedService) GetAllListedInfo() ([]ListedInfo, error) {
 }
 
 // GetListedInfoByCode は当日時点の指定銘柄情報を取得します。
-func (s *ListedService) GetListedInfoByCode(code string) ([]ListedInfo, error) {
-	resp, err := s.GetListedInfo(ListedInfoParams{Code: code})
+func (s *ListedService) GetListedInfoByCode(ctx context.Context, code string) ([]ListedInfo, error) {
+	resp, err := s.GetListedInfo(ctx, ListedInfoParams{Code: code})
 	if err != nil {
 		return nil, err
 	}
@@ -167,8 +168,8 @@ func (s *ListedService) GetListedInfoByCode(code string) ([]ListedInfo, error) {
 }
 
 // GetListedInfoByDate は指定日時点の全銘柄情報を取得します。
-func (s *ListedService) GetListedInfoByDate(date string) ([]ListedInfo, error) {
-	resp, err := s.GetListedInfo(ListedInfoParams{Date: date})
+func (s *ListedService) GetListedInfoByDate(ctx context.Context, date string) ([]ListedInfo, error) {
+	resp, err := s.GetListedInfo(ctx, ListedInfoParams{Date: date})
 	if err != nil {
 		return nil, err
 	}
@@ -176,8 +177,8 @@ func (s *ListedService) GetListedInfoByDate(date string) ([]ListedInfo, error) {
 }
 
 // GetListedInfoByCodeAndDate は指定日時点の指定銘柄情報を取得します。
-func (s *ListedService) GetListedInfoByCodeAndDate(code, date string) ([]ListedInfo, error) {
-	resp, err := s.GetListedInfo(ListedInfoParams{Code: code, Date: date})
+func (s *ListedService) GetListedInfoByCodeAndDate(ctx context.Context, code, date string) ([]ListedInfo, error) {
+	resp, err := s.GetListedInfo(ctx, ListedInfoParams{Code: code, Date: date})
 	if err != nil {
 		return nil, err
 	}
@@ -185,9 +186,9 @@ func (s *ListedService) GetListedInfoByCodeAndDate(code, date string) ([]ListedI
 }
 
 // GetListedBySector17 は指定した17業種コードの銘柄一覧を取得します。
-// 例: GetListedBySector17(Sector17IT, "") でIT関連銘柄を取得
-func (s *ListedService) GetListedBySector17(sector17Code string, date string) ([]ListedInfo, error) {
-	allInfo, err := s.GetListedInfoByDate(date)
+// 例: GetListedBySector17(ctx, Sector17IT, "") でIT関連銘柄を取得
+func (s *ListedService) GetListedBySector17(ctx context.Context, sector17Code string, date string) ([]ListedInfo, error) {
+	allInfo, err := s.GetListedInfoByDate(ctx, date)
 	if err != nil {
 		return nil, err
 	}
@@ -203,9 +204,9 @@ func (s *ListedService) GetListedBySector17(sector17Code string, date string) ([
 }
 
 // GetListedBySector33 は指定した33業種コードの銘柄一覧を取得します。
-// 例: GetListedBySector33(Sector33IT, "") で情報・通信業銘柄を取得
-func (s *ListedService) GetListedBySector33(sector33Code string, date string) ([]ListedInfo, error) {
-	allInfo, err := s.GetListedInfoByDate(date)
+// 例: GetListedBySector33(ctx, Sector33IT, "") で情報・通信業銘柄を取得
+func (s *ListedService) GetListedBySector33(ctx context.Context, sector33Code string, date string) ([]ListedInfo, error) {
+	allInfo, err := s.GetListedInfoByDate(ctx, date)
 	if err != nil {
 		return nil, err
 	}
@@ -222,8 +223,8 @@ func (s *ListedService) GetListedBySector33(sector33Code string, date string) ([
 
 // GetListedByMarket は指定した市場区分の銘柄一覧を取得します。
 // marketCode: MarketPrime, MarketStandard, MarketGrowth など
-func (s *ListedService) GetListedByMarket(marketCode string, date string) ([]ListedInfo, error) {
-	allInfo, err := s.GetListedInfoByDate(date)
+func (s *ListedService) GetListedByMarket(ctx context.Context, marketCode string, date string) ([]ListedInfo, error) {
+	allInfo, err := s.GetListedInfoByDate(ctx, date)
 	if err != nil {
 		return nil, err
 	}
