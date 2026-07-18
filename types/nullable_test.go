@@ -16,6 +16,7 @@ func TestNullableFloat64_UnmarshalJSON(t *testing.T) {
 		{name: "number", input: `123.45`, want: float64Ptr(123.45)},
 		{name: "numeric string", input: `"678.9"`, want: float64Ptr(678.9)},
 		{name: "empty string", input: `""`, want: nil},
+		{name: "asterisk", input: `"*"`, want: nil},
 		{name: "dash", input: `"-"`, want: nil, wantUndetermined: true},
 		{name: "null", input: `null`, want: nil},
 		{name: "invalid string", input: `"abc"`, wantErr: true},

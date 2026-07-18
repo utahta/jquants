@@ -16,7 +16,7 @@ type NullableValue interface {
 //
 //   - JSON値（数値・文字列）: 値として保持
 //   - 数値の文字列（"678.9"）: 数値型ではパースして保持
-//   - null / ""（非設定）: 値なし
+//   - null / ""（非設定） / "*"（該当なし。例: ETFの上場比）: 値なし
 //   - "-"（未定）: 値なし、IsUndetermined() が true
 type Nullable[T NullableValue] struct {
 	value        *T
@@ -74,11 +74,12 @@ func (n *Nullable[T]) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
-	// 文字列は特別扱い: "" は非設定、"-" は未定、数値型では数値文字列を受ける
+	// 文字列は特別扱い: "" は非設定、"*" は該当なし、"-" は未定、
+	// 数値型では数値文字列を受ける
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		switch s {
-		case "":
+		case "", "*":
 			return nil
 		case "-":
 			n.undetermined = true
