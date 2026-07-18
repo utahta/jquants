@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -191,7 +192,7 @@ func (r *FuturesResponse) UnmarshalJSON(data []byte) error {
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *FuturesService) GetFutures(params FuturesParams) (*FuturesResponse, error) {
+func (s *FuturesService) GetFutures(ctx context.Context, params FuturesParams) (*FuturesResponse, error) {
 	// dateは必須パラメータ
 	if params.Date == "" {
 		return nil, fmt.Errorf("date parameter is required")
@@ -213,7 +214,7 @@ func (s *FuturesService) GetFutures(params FuturesParams) (*FuturesResponse, err
 	path += query
 
 	var resp FuturesResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get futures: %w", err)
 	}
 
@@ -225,7 +226,7 @@ func (s *FuturesService) GetFutures(params FuturesParams) (*FuturesResponse, err
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *FuturesService) GetFuturesByDate(date string) ([]Futures, error) {
+func (s *FuturesService) GetFuturesByDate(ctx context.Context, date string) ([]Futures, error) {
 	var allData []Futures
 	paginationKey := ""
 
@@ -235,7 +236,7 @@ func (s *FuturesService) GetFuturesByDate(date string) ([]Futures, error) {
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetFutures(params)
+		resp, err := s.GetFutures(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -256,7 +257,7 @@ func (s *FuturesService) GetFuturesByDate(date string) ([]Futures, error) {
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *FuturesService) GetFuturesByCategory(date, category string) ([]Futures, error) {
+func (s *FuturesService) GetFuturesByCategory(ctx context.Context, date, category string) ([]Futures, error) {
 	var allData []Futures
 	paginationKey := ""
 
@@ -267,7 +268,7 @@ func (s *FuturesService) GetFuturesByCategory(date, category string) ([]Futures,
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetFutures(params)
+		resp, err := s.GetFutures(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -287,7 +288,7 @@ func (s *FuturesService) GetFuturesByCategory(date, category string) ([]Futures,
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *FuturesService) GetCentralContractMonthFutures(date string) ([]Futures, error) {
+func (s *FuturesService) GetCentralContractMonthFutures(ctx context.Context, date string) ([]Futures, error) {
 	var allData []Futures
 	paginationKey := ""
 
@@ -298,7 +299,7 @@ func (s *FuturesService) GetCentralContractMonthFutures(date string) ([]Futures,
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetFutures(params)
+		resp, err := s.GetFutures(ctx, params)
 		if err != nil {
 			return nil, err
 		}

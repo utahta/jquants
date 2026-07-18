@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -68,7 +69,7 @@ func TestShortSellingService_GetShortSelling(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Execute
-			resp, err := service.GetShortSelling(tt.params)
+			resp, err := service.GetShortSelling(context.Background(), tt.params)
 
 			// Verify
 			if err != nil {
@@ -94,7 +95,7 @@ func TestShortSellingService_GetShortSelling_RequiresSectorOrDate(t *testing.T) 
 	service := NewShortSellingService(mockClient)
 
 	// Execute with empty sector and date
-	_, err := service.GetShortSelling(ShortSellingParams{})
+	_, err := service.GetShortSelling(context.Background(), ShortSellingParams{})
 
 	// Verify
 	if err == nil {
@@ -149,7 +150,7 @@ func TestShortSellingService_GetShortSellingBySector(t *testing.T) {
 	mockClient.SetResponse("GET", "/markets/short-ratio?s33=0050&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	data, err := service.GetShortSellingBySector("0050")
+	data, err := service.GetShortSellingBySector(context.Background(), "0050")
 
 	// Verify
 	if err != nil {
@@ -193,7 +194,7 @@ func TestShortSellingService_GetShortSellingByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/markets/short-ratio?date=20221025", mockResponse)
 
 	// Execute
-	data, err := service.GetShortSellingByDate("20221025")
+	data, err := service.GetShortSellingByDate(context.Background(), "20221025")
 
 	// Verify
 	if err != nil {
@@ -237,7 +238,7 @@ func TestShortSellingService_GetShortSellingBySectorAndDateRange(t *testing.T) {
 	mockClient.SetResponse("GET", "/markets/short-ratio?s33=0050&from=20220101&to=20221231", mockResponse)
 
 	// Execute
-	data, err := service.GetShortSellingBySectorAndDateRange("0050", "20220101", "20221231")
+	data, err := service.GetShortSellingBySectorAndDateRange(context.Background(), "0050", "20220101", "20221231")
 
 	// Verify
 	if err != nil {
@@ -274,7 +275,7 @@ func TestShortSellingService_GetShortSellingBySectorAndDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/markets/short-ratio?s33=0050&date=20221025", mockResponse)
 
 	// Execute
-	data, err := service.GetShortSellingBySectorAndDate("0050", "20221025")
+	data, err := service.GetShortSellingBySectorAndDate(context.Background(), "0050", "20221025")
 
 	// Verify
 	if err != nil {
@@ -419,7 +420,7 @@ func TestShortSellingService_GetShortSelling_Error(t *testing.T) {
 	mockClient.SetError("GET", "/markets/short-ratio?s33=0050", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetShortSelling(ShortSellingParams{Sector33Code: "0050"})
+	_, err := service.GetShortSelling(context.Background(), ShortSellingParams{Sector33Code: "0050"})
 
 	// Verify
 	if err == nil {

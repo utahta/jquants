@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -226,7 +227,7 @@ func (r *OptionsResponse) UnmarshalJSON(data []byte) error {
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *OptionsService) GetOptions(params OptionsParams) (*OptionsResponse, error) {
+func (s *OptionsService) GetOptions(ctx context.Context, params OptionsParams) (*OptionsResponse, error) {
 	// dateは必須パラメータ
 	if params.Date == "" {
 		return nil, fmt.Errorf("date parameter is required")
@@ -251,7 +252,7 @@ func (s *OptionsService) GetOptions(params OptionsParams) (*OptionsResponse, err
 	path += query
 
 	var resp OptionsResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get options: %w", err)
 	}
 
@@ -263,7 +264,7 @@ func (s *OptionsService) GetOptions(params OptionsParams) (*OptionsResponse, err
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *OptionsService) GetOptionsByDate(date string) ([]Option, error) {
+func (s *OptionsService) GetOptionsByDate(ctx context.Context, date string) ([]Option, error) {
 	var allData []Option
 	paginationKey := ""
 
@@ -273,7 +274,7 @@ func (s *OptionsService) GetOptionsByDate(date string) ([]Option, error) {
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetOptions(params)
+		resp, err := s.GetOptions(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -294,7 +295,7 @@ func (s *OptionsService) GetOptionsByDate(date string) ([]Option, error) {
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *OptionsService) GetOptionsByCategory(date, category string) ([]Option, error) {
+func (s *OptionsService) GetOptionsByCategory(ctx context.Context, date, category string) ([]Option, error) {
 	var allData []Option
 	paginationKey := ""
 
@@ -305,7 +306,7 @@ func (s *OptionsService) GetOptionsByCategory(date, category string) ([]Option, 
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetOptions(params)
+		resp, err := s.GetOptions(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -325,7 +326,7 @@ func (s *OptionsService) GetOptionsByCategory(date, category string) ([]Option, 
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *OptionsService) GetSecurityOptionsByCode(date, code string) ([]Option, error) {
+func (s *OptionsService) GetSecurityOptionsByCode(ctx context.Context, date, code string) ([]Option, error) {
 	var allData []Option
 	paginationKey := ""
 
@@ -337,7 +338,7 @@ func (s *OptionsService) GetSecurityOptionsByCode(date, code string) ([]Option, 
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetOptions(params)
+		resp, err := s.GetOptions(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -357,7 +358,7 @@ func (s *OptionsService) GetSecurityOptionsByCode(date, code string) ([]Option, 
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *OptionsService) GetCentralContractMonthOptions(date string) ([]Option, error) {
+func (s *OptionsService) GetCentralContractMonthOptions(ctx context.Context, date string) ([]Option, error) {
 	var allData []Option
 	paginationKey := ""
 
@@ -368,7 +369,7 @@ func (s *OptionsService) GetCentralContractMonthOptions(date string) ([]Option, 
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetOptions(params)
+		resp, err := s.GetOptions(ctx, params)
 		if err != nil {
 			return nil, err
 		}

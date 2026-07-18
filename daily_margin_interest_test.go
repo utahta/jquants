@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -98,7 +99,7 @@ func TestDailyMarginInterestService_GetDailyMarginInterest(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Execute
-			resp, err := service.GetDailyMarginInterest(tt.params)
+			resp, err := service.GetDailyMarginInterest(context.Background(), tt.params)
 
 			// Verify
 			if err != nil {
@@ -124,7 +125,7 @@ func TestDailyMarginInterestService_GetDailyMarginInterest_RequiresCodeOrDate(t 
 	service := NewDailyMarginInterestService(mockClient)
 
 	// Execute with empty code and date
-	_, err := service.GetDailyMarginInterest(DailyMarginInterestParams{})
+	_, err := service.GetDailyMarginInterest(context.Background(), DailyMarginInterestParams{})
 
 	// Verify
 	if err == nil {
@@ -188,7 +189,7 @@ func TestDailyMarginInterestService_GetDailyMarginInterestByCode(t *testing.T) {
 	mockClient.SetResponse("GET", "/markets/margin-alert?code=13260&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	data, err := service.GetDailyMarginInterestByCode("13260")
+	data, err := service.GetDailyMarginInterestByCode(context.Background(), "13260")
 
 	// Verify
 	if err != nil {
@@ -232,7 +233,7 @@ func TestDailyMarginInterestService_GetDailyMarginInterestByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/markets/margin-alert?date=20240208", mockResponse)
 
 	// Execute
-	data, err := service.GetDailyMarginInterestByDate("20240208")
+	data, err := service.GetDailyMarginInterestByDate(context.Background(), "20240208")
 
 	// Verify
 	if err != nil {
@@ -276,7 +277,7 @@ func TestDailyMarginInterestService_GetDailyMarginInterestByCodeAndDateRange(t *
 	mockClient.SetResponse("GET", "/markets/margin-alert?code=13260&from=20240201&to=20240208", mockResponse)
 
 	// Execute
-	data, err := service.GetDailyMarginInterestByCodeAndDateRange("13260", "20240201", "20240208")
+	data, err := service.GetDailyMarginInterestByCodeAndDateRange(context.Background(), "13260", "20240201", "20240208")
 
 	// Verify
 	if err != nil {
@@ -473,7 +474,7 @@ func TestDailyMarginInterestService_GetDailyMarginInterest_Error(t *testing.T) {
 	mockClient.SetError("GET", "/markets/margin-alert?code=13260", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetDailyMarginInterest(DailyMarginInterestParams{Code: "13260"})
+	_, err := service.GetDailyMarginInterest(context.Background(), DailyMarginInterestParams{Code: "13260"})
 
 	// Verify
 	if err == nil {

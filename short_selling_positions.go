@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -146,7 +147,7 @@ func (r *ShortSellingPositionsResponse) UnmarshalJSON(data []byte) error {
 }
 
 // GetShortSellingPositions は空売り残高報告を取得します。
-func (s *ShortSellingPositionsService) GetShortSellingPositions(params ShortSellingPositionsParams) (*ShortSellingPositionsResponse, error) {
+func (s *ShortSellingPositionsService) GetShortSellingPositions(ctx context.Context, params ShortSellingPositionsParams) (*ShortSellingPositionsResponse, error) {
 	// code、disc_date、calc_dateのいずれかが必須
 	if params.Code == "" && params.DisclosedDate == "" && params.CalculatedDate == "" {
 		return nil, fmt.Errorf("either code, disc_date, or calc_date parameter is required")
@@ -179,7 +180,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositions(params ShortSell
 	}
 
 	var resp ShortSellingPositionsResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get short selling positions: %w", err)
 	}
 
@@ -188,7 +189,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositions(params ShortSell
 
 // GetShortSellingPositionsByCode は指定銘柄の空売り残高報告を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *ShortSellingPositionsService) GetShortSellingPositionsByCode(code string) ([]ShortSellingPosition, error) {
+func (s *ShortSellingPositionsService) GetShortSellingPositionsByCode(ctx context.Context, code string) ([]ShortSellingPosition, error) {
 	var allData []ShortSellingPosition
 	paginationKey := ""
 
@@ -198,7 +199,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositionsByCode(code strin
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetShortSellingPositions(params)
+		resp, err := s.GetShortSellingPositions(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -217,7 +218,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositionsByCode(code strin
 
 // GetShortSellingPositionsByDisclosedDate は指定公表日の全銘柄空売り残高報告を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *ShortSellingPositionsService) GetShortSellingPositionsByDisclosedDate(disclosedDate string) ([]ShortSellingPosition, error) {
+func (s *ShortSellingPositionsService) GetShortSellingPositionsByDisclosedDate(ctx context.Context, disclosedDate string) ([]ShortSellingPosition, error) {
 	var allData []ShortSellingPosition
 	paginationKey := ""
 
@@ -227,7 +228,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositionsByDisclosedDate(d
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetShortSellingPositions(params)
+		resp, err := s.GetShortSellingPositions(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -246,7 +247,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositionsByDisclosedDate(d
 
 // GetShortSellingPositionsByCalculatedDate は指定計算日の全銘柄空売り残高報告を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *ShortSellingPositionsService) GetShortSellingPositionsByCalculatedDate(calculatedDate string) ([]ShortSellingPosition, error) {
+func (s *ShortSellingPositionsService) GetShortSellingPositionsByCalculatedDate(ctx context.Context, calculatedDate string) ([]ShortSellingPosition, error) {
 	var allData []ShortSellingPosition
 	paginationKey := ""
 
@@ -256,7 +257,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositionsByCalculatedDate(
 			PaginationKey:  paginationKey,
 		}
 
-		resp, err := s.GetShortSellingPositions(params)
+		resp, err := s.GetShortSellingPositions(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -274,7 +275,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositionsByCalculatedDate(
 }
 
 // GetShortSellingPositionsByCodeAndDateRange は指定銘柄・期間の空売り残高報告を取得します。
-func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndDateRange(code, fromDate, toDate string) ([]ShortSellingPosition, error) {
+func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndDateRange(ctx context.Context, code, fromDate, toDate string) ([]ShortSellingPosition, error) {
 	var allData []ShortSellingPosition
 	paginationKey := ""
 
@@ -286,7 +287,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndDateRang
 			PaginationKey:     paginationKey,
 		}
 
-		resp, err := s.GetShortSellingPositions(params)
+		resp, err := s.GetShortSellingPositions(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -304,7 +305,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndDateRang
 }
 
 // GetShortSellingPositionsByCodeAndDisclosedDate は指定銘柄の指定公表日の空売り残高報告を取得します。
-func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndDisclosedDate(code, disclosedDate string) ([]ShortSellingPosition, error) {
+func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndDisclosedDate(ctx context.Context, code, disclosedDate string) ([]ShortSellingPosition, error) {
 	var allData []ShortSellingPosition
 	paginationKey := ""
 
@@ -315,7 +316,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndDisclose
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetShortSellingPositions(params)
+		resp, err := s.GetShortSellingPositions(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -332,7 +333,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndDisclose
 }
 
 // GetShortSellingPositionsByCodeAndCalculatedDate は指定銘柄の指定計算日の空売り残高報告を取得します。
-func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndCalculatedDate(code, calculatedDate string) ([]ShortSellingPosition, error) {
+func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndCalculatedDate(ctx context.Context, code, calculatedDate string) ([]ShortSellingPosition, error) {
 	var allData []ShortSellingPosition
 	paginationKey := ""
 
@@ -343,7 +344,7 @@ func (s *ShortSellingPositionsService) GetShortSellingPositionsByCodeAndCalculat
 			PaginationKey:  paginationKey,
 		}
 
-		resp, err := s.GetShortSellingPositions(params)
+		resp, err := s.GetShortSellingPositions(ctx, params)
 		if err != nil {
 			return nil, err
 		}

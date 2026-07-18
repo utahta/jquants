@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -25,7 +26,11 @@ func NewMockClient() *MockClient {
 }
 
 // DoRequest implements HTTPClient interface
-func (m *MockClient) DoRequest(method, path string, body interface{}, result interface{}) error {
+func (m *MockClient) DoRequest(ctx context.Context, method, path string, body interface{}, result interface{}) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	m.RequestCount++
 	m.LastMethod = method
 	m.LastPath = path

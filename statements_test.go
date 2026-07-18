@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"testing"
@@ -97,7 +98,7 @@ func TestStatementsService_GetStatements(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Test
-			resp, err := service.GetStatements(tt.params)
+			resp, err := service.GetStatements(context.Background(), tt.params)
 			if err != nil {
 				t.Errorf("GetStatements failed: %v", err)
 			}
@@ -148,7 +149,7 @@ func TestStatementsService_GetLatestStatements(t *testing.T) {
 	mockClient.SetResponse("GET", "/fins/summary?code=7203", mockResponse)
 
 	// Test
-	statement, err := service.GetLatestStatements("7203")
+	statement, err := service.GetLatestStatements(context.Background(), "7203")
 	if err != nil {
 		t.Errorf("GetLatestStatements failed: %v", err)
 	}
@@ -180,7 +181,7 @@ func TestStatementsService_GetLatestStatements_NotFound(t *testing.T) {
 	mockClient.SetResponse("GET", "/fins/summary?code=9999", mockResponse)
 
 	// Test
-	_, err := service.GetLatestStatements("9999")
+	_, err := service.GetLatestStatements(context.Background(), "9999")
 	if err == nil {
 		t.Errorf("Expected error for non-existent company, got nil")
 	}
@@ -195,7 +196,7 @@ func TestStatementsService_GetStatements_Error(t *testing.T) {
 	mockClient.SetError("GET", "/fins/summary?code=7203", fmt.Errorf("API error"))
 
 	// Test
-	_, err := service.GetStatements(StatementsParams{Code: "7203"})
+	_, err := service.GetStatements(context.Background(), StatementsParams{Code: "7203"})
 	if err == nil {
 		t.Errorf("Expected error, got nil")
 	}
@@ -220,7 +221,7 @@ func TestStatementsService_GetStatementsByCodeAndDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/fins/summary?code=7203&date=2024-01-15", mockResponse)
 
 	// Test
-	statements, err := service.GetStatementsByCodeAndDate("7203", "2024-01-15")
+	statements, err := service.GetStatementsByCodeAndDate(context.Background(), "7203", "2024-01-15")
 	if err != nil {
 		t.Errorf("GetStatementsByCodeAndDate failed: %v", err)
 	}
@@ -280,7 +281,7 @@ func TestStatementsService_GetStatementsByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/fins/summary?date=2024-01-15&pagination_key=next_page_key", mockResponse2)
 
 	// Test
-	statements, err := service.GetStatementsByDate("2024-01-15")
+	statements, err := service.GetStatementsByDate(context.Background(), "2024-01-15")
 	if err != nil {
 		t.Errorf("GetStatementsByDate failed: %v", err)
 	}
@@ -557,15 +558,53 @@ func TestStatementsResponse_UnmarshalJSON(t *testing.T) {
 	}
 
 	sEmpty := respEmpty.Data[0]
-	// Empty string is converted to 0 for numeric types in current implementation
-	if sEmpty.Sales == nil || *sEmpty.Sales != 0 {
-		t.Errorf("Expected Sales 0 for empty string, got %v", sEmpty.Sales)
+	// 空文字（非設定）は0ではなくnilになる（0円と未設定を区別する）
+	if sEmpty.Sales != nil {
+		t.Errorf("Expected Sales nil for empty string, got %v", *sEmpty.Sales)
 	}
 	if sEmpty.MatChgSub != "" {
 		t.Errorf("Expected MatChgSub '' for empty string, got %s", sEmpty.MatChgSub)
 	}
-	// Empty string is converted to 0 for numeric types in current implementation
-	if sEmpty.ShOutFY == nil || *sEmpty.ShOutFY != 0 {
-		t.Errorf("Expected ShOutFY 0 for empty string, got %v", sEmpty.ShOutFY)
+	if sEmpty.ShOutFY != nil {
+		t.Errorf("Expected ShOutFY nil for empty string, got %v", *sEmpty.ShOutFY)
+	}
+}
+
+func TestStatementsResponse_UnmarshalJSON_MissingValueVariants(t *testing.T) {
+	// 空文字（非設定）、"-"（未定）、null はいずれもnil、数値・数値文字列は値になる
+	jsonData := `{
+		"data": [
+			{
+				"DiscDate": "2024-01-15",
+				"Code": "72030",
+				"Sales": 1000.5,
+				"OP": "200.5",
+				"OdP": "",
+				"NP": "-",
+				"TA": null
+			}
+		]
+	}`
+
+	var resp StatementsResponse
+	if err := json.Unmarshal([]byte(jsonData), &resp); err != nil {
+		t.Fatalf("UnmarshalJSON failed: %v", err)
+	}
+
+	s := resp.Data[0]
+	if s.Sales == nil || *s.Sales != 1000.5 {
+		t.Errorf("Sales = %v, want 1000.5", s.Sales)
+	}
+	if s.OP == nil || *s.OP != 200.5 {
+		t.Errorf("OP = %v, want 200.5", s.OP)
+	}
+	if s.OdP != nil {
+		t.Errorf("OdP = %v, want nil for empty string", *s.OdP)
+	}
+	if s.NP != nil {
+		t.Errorf("NP = %v, want nil for dash", *s.NP)
+	}
+	if s.TA != nil {
+		t.Errorf("TA = %v, want nil for null", *s.TA)
 	}
 }

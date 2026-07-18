@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 )
 
@@ -11,7 +12,7 @@ import (
 func TestListedEndpoint(t *testing.T) {
 	t.Run("GetAllListedInfo", func(t *testing.T) {
 		// 全ての上場企業情報を取得
-		companies, err := jq.Listed.GetAllListedInfo()
+		companies, err := jq.Listed.GetAllListedInfo(context.Background())
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -88,7 +89,7 @@ func TestListedEndpoint(t *testing.T) {
 
 	t.Run("GetListedInfoByCode", func(t *testing.T) {
 		// 特定の銘柄コードで企業情報を取得（トヨタ自動車）
-		infos, err := jq.Listed.GetListedInfoByCode("7203")
+		infos, err := jq.Listed.GetListedInfoByCode(context.Background(), "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -133,7 +134,7 @@ func TestListedEndpoint(t *testing.T) {
 
 	t.Run("GetListedInfoByCode_InvalidCode", func(t *testing.T) {
 		// 存在しない銘柄コードでのテスト
-		infos, err := jq.Listed.GetListedInfoByCode("99999")
+		infos, err := jq.Listed.GetListedInfoByCode(context.Background(), "99999")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -150,7 +151,7 @@ func TestListedEndpoint(t *testing.T) {
 
 	t.Run("GetAllListedInfo_MarketSegments", func(t *testing.T) {
 		// 全企業の市場セグメント分析
-		companies, err := jq.Listed.GetAllListedInfo()
+		companies, err := jq.Listed.GetAllListedInfo(context.Background())
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -184,7 +185,7 @@ func TestListedEndpoint(t *testing.T) {
 
 	t.Run("GetAllListedInfo_SectorAnalysis", func(t *testing.T) {
 		// 業種別分析
-		companies, err := jq.Listed.GetAllListedInfo()
+		companies, err := jq.Listed.GetAllListedInfo(context.Background())
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -223,7 +224,7 @@ func TestListedEndpoint(t *testing.T) {
 
 	t.Run("GetAllListedInfo_CodeValidation", func(t *testing.T) {
 		// 銘柄コードの形式検証
-		companies, err := jq.Listed.GetAllListedInfo()
+		companies, err := jq.Listed.GetAllListedInfo(context.Background())
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")

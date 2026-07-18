@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -77,7 +78,7 @@ func TestIndexOptionService_GetIndexOptions(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Execute
-			resp, err := service.GetIndexOptions(tt.params)
+			resp, err := service.GetIndexOptions(context.Background(), tt.params)
 
 			// Verify
 			if err != nil {
@@ -103,7 +104,7 @@ func TestIndexOptionService_GetIndexOptions_RequiresDate(t *testing.T) {
 	service := NewIndexOptionService(mockClient)
 
 	// Execute with empty date
-	_, err := service.GetIndexOptions(IndexOptionParams{})
+	_, err := service.GetIndexOptions(context.Background(), IndexOptionParams{})
 
 	// Verify
 	if err == nil {
@@ -158,7 +159,7 @@ func TestIndexOptionService_GetIndexOptionsByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/derivatives/bars/daily/options/225?date=20230322&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	options, err := service.GetIndexOptionsByDate("20230322")
+	options, err := service.GetIndexOptionsByDate(context.Background(), "20230322")
 
 	// Verify
 	if err != nil {
@@ -204,7 +205,7 @@ func TestIndexOptionService_GetCallOptions(t *testing.T) {
 	mockClient.SetResponse("GET", "/derivatives/bars/daily/options/225?date=20230322", mockResponse)
 
 	// Execute
-	callOptions, err := service.GetCallOptions("20230322")
+	callOptions, err := service.GetCallOptions(context.Background(), "20230322")
 
 	// Verify
 	if err != nil {
@@ -256,7 +257,7 @@ func TestIndexOptionService_GetPutOptions(t *testing.T) {
 	mockClient.SetResponse("GET", "/derivatives/bars/daily/options/225?date=20230322", mockResponse)
 
 	// Execute
-	putOptions, err := service.GetPutOptions("20230322")
+	putOptions, err := service.GetPutOptions(context.Background(), "20230322")
 
 	// Verify
 	if err != nil {
@@ -301,7 +302,7 @@ func TestIndexOptionService_GetOptionChain(t *testing.T) {
 	mockClient.SetResponse("GET", "/derivatives/bars/daily/options/225?date=20230322", mockResponse)
 
 	// Execute
-	options, err := service.GetOptionChain("20230322")
+	options, err := service.GetOptionChain(context.Background(), "20230322")
 
 	// Verify
 	if err != nil {
@@ -449,7 +450,7 @@ func TestIndexOptionService_GetIndexOptions_Error(t *testing.T) {
 	mockClient.SetError("GET", "/derivatives/bars/daily/options/225?date=20230322", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetIndexOptions(IndexOptionParams{Date: "20230322"})
+	_, err := service.GetIndexOptions(context.Background(), IndexOptionParams{Date: "20230322"})
 
 	// Verify
 	if err == nil {

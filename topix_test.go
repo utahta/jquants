@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -66,7 +67,7 @@ func TestTOPIXService_GetTOPIXData(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Execute
-			resp, err := service.GetTOPIXData(tt.params)
+			resp, err := service.GetTOPIXData(context.Background(), tt.params)
 
 			// Verify
 			if err != nil {
@@ -124,7 +125,7 @@ func TestTOPIXService_GetTOPIXByDateRange(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily/topix?from=20240101&to=20240103&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	topixData, err := service.GetTOPIXByDateRange("20240101", "20240103")
+	topixData, err := service.GetTOPIXByDateRange(context.Background(), "20240101", "20240103")
 
 	// Verify
 	if err != nil {
@@ -164,7 +165,7 @@ func TestTOPIXService_GetLatestTOPIX(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily/topix", mockResponse)
 
 	// Execute
-	latest, err := service.GetLatestTOPIX()
+	latest, err := service.GetLatestTOPIX(context.Background())
 
 	// Verify
 	if err != nil {
@@ -195,7 +196,7 @@ func TestTOPIXService_GetLatestTOPIX_NoData(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily/topix", mockResponse)
 
 	// Execute
-	_, err := service.GetLatestTOPIX()
+	_, err := service.GetLatestTOPIX(context.Background())
 
 	// Verify
 	if err == nil {
@@ -212,7 +213,7 @@ func TestTOPIXService_GetTOPIXData_Error(t *testing.T) {
 	mockClient.SetError("GET", "/indices/bars/daily/topix", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetTOPIXData(TOPIXParams{})
+	_, err := service.GetTOPIXData(context.Background(), TOPIXParams{})
 
 	// Verify
 	if err == nil {

@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"testing"
@@ -113,7 +114,7 @@ func TestOptionsService_GetOptions(t *testing.T) {
 			}
 
 			// Execute
-			resp, err := service.GetOptions(tt.params)
+			resp, err := service.GetOptions(context.Background(), tt.params)
 
 			// Verify
 			if tt.wantErr {
@@ -185,7 +186,7 @@ func TestOptionsService_GetOptionsByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/derivatives/bars/daily/options?date=20240723&pagination_key=next_page", mockResponse2)
 
 	// Execute
-	options, err := service.GetOptionsByDate("20240723")
+	options, err := service.GetOptionsByDate(context.Background(), "20240723")
 
 	// Verify
 	if err != nil {
@@ -225,7 +226,7 @@ func TestOptionsService_GetOptionsByCategory(t *testing.T) {
 	mockClient.SetResponse("GET", "/derivatives/bars/daily/options?date=20240723&category=NK225E", mockResponse)
 
 	// Execute
-	options, err := service.GetOptionsByCategory("20240723", "NK225E")
+	options, err := service.GetOptionsByCategory(context.Background(), "20240723", "NK225E")
 
 	// Verify
 	if err != nil {
@@ -262,7 +263,7 @@ func TestOptionsService_GetSecurityOptionsByCode(t *testing.T) {
 	mockClient.SetResponse("GET", "/derivatives/bars/daily/options?date=20240723&category=EQOP&code=7203", mockResponse)
 
 	// Execute
-	options, err := service.GetSecurityOptionsByCode("20240723", "7203")
+	options, err := service.GetSecurityOptionsByCode(context.Background(), "20240723", "7203")
 
 	// Verify
 	if err != nil {
@@ -303,7 +304,7 @@ func TestOptionsService_GetCentralContractMonthOptions(t *testing.T) {
 	mockClient.SetResponse("GET", "/derivatives/bars/daily/options?date=20240723&contract_flag=1", mockResponse)
 
 	// Execute
-	options, err := service.GetCentralContractMonthOptions("20240723")
+	options, err := service.GetCentralContractMonthOptions(context.Background(), "20240723")
 
 	// Verify
 	if err != nil {
@@ -326,7 +327,7 @@ func TestOptionsService_GetOptions_Error(t *testing.T) {
 	mockClient.SetError("GET", "/derivatives/bars/daily/options?date=20240723", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetOptions(OptionsParams{Date: "20240723"})
+	_, err := service.GetOptions(context.Background(), OptionsParams{Date: "20240723"})
 
 	// Verify
 	if err == nil {

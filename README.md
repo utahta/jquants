@@ -23,6 +23,7 @@ go get github.com/utahta/jquants
 package main
 
 import (
+    "context"
     "fmt"
     "log"
 
@@ -41,7 +42,8 @@ func main() {
     jq := jquants.NewJQuantsAPI(httpClient)
 
     // 株価データを取得
-    quotes, err := jq.Quotes.GetDailyQuotesByCode("7203") // トヨタ自動車
+    ctx := context.Background()
+    quotes, err := jq.Quotes.GetDailyQuotesByCode(ctx, "7203") // トヨタ自動車
     if err != nil {
         log.Fatal(err)
     }
@@ -91,6 +93,7 @@ size := httpClient.CacheSize()
 - キャッシュはGETリクエストのみに適用されます
 - キャッシュキーはリクエストパス（クエリパラメータ含む）で区別されます
 - 同時リクエストの重複排除（singleflight）により効率的に動作します
+- 重複排除の待機中にコンテキストをキャンセルした場合、その呼び出し元だけが即座にエラーで戻り、進行中のリクエスト自体は完了してキャッシュに保存されます
 - キャッシュはクライアントインスタンスの生存期間のみ有効です
 
 ## 利用可能なAPI
@@ -127,7 +130,7 @@ size := httpClient.CacheSize()
 
 ```go
 // 特定銘柄の直近データ
-quotes, err := jq.Quotes.GetDailyQuotesByCode("7203")
+quotes, err := jq.Quotes.GetDailyQuotesByCode(ctx, "7203")
 
 // 日付範囲指定
 params := jquants.DailyQuotesParams{
@@ -135,7 +138,7 @@ params := jquants.DailyQuotesParams{
     From: "2024-01-01",
     To:   "2024-01-31",
 }
-response, err := jq.Quotes.GetDailyQuotes(params)
+response, err := jq.Quotes.GetDailyQuotes(ctx, params)
 
 // v2 APIでは短縮フィールド名を使用
 for _, q := range response.Data {
@@ -148,14 +151,14 @@ for _, q := range response.Data {
 
 ```go
 // 全銘柄を取得
-companies, err := jq.Listed.GetInfo()
+companies, err := jq.Listed.GetAllListedInfo(ctx)
 
 // 特定銘柄の情報を取得
-company, err := jq.Listed.GetInfoByCode("7203")
-fmt.Printf("企業名: %s\n", company.Name)
+companies, err := jq.Listed.GetListedInfoByCode(ctx, "7203")
+fmt.Printf("企業名: %s\n", companies[0].Name)
 
 // 市場区分で絞り込み（定数を使用）
-primeCompanies, err := jq.Listed.GetListedByMarket(jquants.MarketPrime, "")
+primeCompanies, err := jq.Listed.GetListedByMarket(ctx, jquants.MarketPrime, "")
 for _, company := range primeCompanies {
     fmt.Printf("%s (%s) - %s\n", company.Name, company.Code, company.MktName)
 }
@@ -165,13 +168,13 @@ for _, company := range primeCompanies {
 
 ```go
 // 最新の財務情報
-statement, err := jq.Statements.GetLatestStatements("7203")
+statement, err := jq.Statements.GetLatestStatements(ctx, "7203")
 if statement.NetSales != nil {
     fmt.Printf("売上高: %.0f円\n", *statement.NetSales)
 }
 
 // 特定日の財務情報
-statements, err := jq.Statements.GetStatementsByDate("2024-01-15")
+statements, err := jq.Statements.GetStatementsByDate(ctx, "2024-01-15")
 
 // 開示書類種別での絞り込み
 for _, stmt := range statements {
@@ -189,10 +192,10 @@ for _, stmt := range statements {
 
 ```go
 // 銘柄コードで取得
-data, err := jq.DailyMarginInterest.GetDailyMarginInterestByCode("13260")
+data, err := jq.DailyMarginInterest.GetDailyMarginInterestByCode(ctx, "13260")
 
 // 公表日で取得
-data, err := jq.DailyMarginInterest.GetDailyMarginInterestByDate("20240208")
+data, err := jq.DailyMarginInterest.GetDailyMarginInterestByDate(ctx, "20240208")
 
 // 公表理由の確認
 for _, d := range data {
@@ -212,13 +215,13 @@ params := jquants.DailyQuotesParams{
 }
 
 // 最初のページ
-response, err := jq.Quotes.GetDailyQuotes(params)
+response, err := jq.Quotes.GetDailyQuotes(ctx, params)
 quotes := response.Data
 
 // 次のページがある場合
 if response.PaginationKey != "" {
     params.PaginationKey = response.PaginationKey
-    nextResponse, err := jq.Quotes.GetDailyQuotes(params)
+    nextResponse, err := jq.Quotes.GetDailyQuotes(ctx, params)
     quotes = append(quotes, nextResponse.Data...)
 }
 ```
@@ -313,7 +316,7 @@ cd cmd/gitbook2md && go build
 ## エラーハンドリング
 
 ```go
-quotes, err := jq.Quotes.GetDailyQuotesByCode("9999")
+quotes, err := jq.Quotes.GetDailyQuotesByCode(ctx, "9999")
 if err != nil {
     // APIエラーの詳細を取得
     if apiErr, ok := err.(*client.APIError); ok {

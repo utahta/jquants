@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -115,7 +116,7 @@ func (r *PricesAMResponse) UnmarshalJSON(data []byte) error {
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *PricesAMService) GetPricesAM(params PricesAMParams) (*PricesAMResponse, error) {
+func (s *PricesAMService) GetPricesAM(ctx context.Context, params PricesAMParams) (*PricesAMResponse, error) {
 	path := "/equities/bars/daily/am"
 
 	query := "?"
@@ -131,7 +132,7 @@ func (s *PricesAMService) GetPricesAM(params PricesAMParams) (*PricesAMResponse,
 	}
 
 	var resp PricesAMResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get prices AM: %w", err)
 	}
 
@@ -142,8 +143,8 @@ func (s *PricesAMService) GetPricesAM(params PricesAMParams) (*PricesAMResponse,
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *PricesAMService) GetPricesAMByCode(code string) (*PricesAMResponse, error) {
-	return s.GetPricesAM(PricesAMParams{Code: code})
+func (s *PricesAMService) GetPricesAMByCode(ctx context.Context, code string) (*PricesAMResponse, error) {
+	return s.GetPricesAM(ctx, PricesAMParams{Code: code})
 }
 
 // GetAllPricesAM は全銘柄の前場四本値データを取得します。
@@ -151,7 +152,7 @@ func (s *PricesAMService) GetPricesAMByCode(code string) (*PricesAMResponse, err
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *PricesAMService) GetAllPricesAM() ([]PriceAM, error) {
+func (s *PricesAMService) GetAllPricesAM(ctx context.Context) ([]PriceAM, error) {
 	var allData []PriceAM
 	paginationKey := ""
 
@@ -160,7 +161,7 @@ func (s *PricesAMService) GetAllPricesAM() ([]PriceAM, error) {
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetPricesAM(params)
+		resp, err := s.GetPricesAM(ctx, params)
 		if err != nil {
 			return nil, err
 		}

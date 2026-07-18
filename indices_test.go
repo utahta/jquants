@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -66,9 +67,9 @@ func TestIndicesService_GetIndices(t *testing.T) {
 					{
 						Date: "2024-01-31",
 						Code: "0000",
-						O:    2400.0,
-						H:    2420.0,
-						L:    2390.0,
+						O:    floatPtr(2400.0),
+						H:    floatPtr(2420.0),
+						L:    floatPtr(2390.0),
 						C:    2410.0,
 					},
 				},
@@ -77,7 +78,7 @@ func TestIndicesService_GetIndices(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Execute
-			resp, err := service.GetIndices(tt.params)
+			resp, err := service.GetIndices(context.Background(), tt.params)
 
 			// Verify
 			if err != nil {
@@ -105,7 +106,7 @@ func TestIndicesService_GetIndicesByCode(t *testing.T) {
 	// Mock response - 最初のページ
 	mockResponse1 := IndicesResponse{
 		Data: []Index{
-			{Date: "2024-01-01", Code: "0000", O: 2400.0, H: 2420.0, L: 2390.0, C: 2410.0},
+			{Date: "2024-01-01", Code: "0000", O: floatPtr(2400.0), H: floatPtr(2420.0), L: floatPtr(2390.0), C: 2410.0},
 			{Date: "2024-01-02", Code: "0000", C: 2420.0},
 		},
 		PaginationKey: "next_page_key",
@@ -123,7 +124,7 @@ func TestIndicesService_GetIndicesByCode(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily?code=0000&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	indices, err := service.GetIndicesByCode("0000")
+	indices, err := service.GetIndicesByCode(context.Background(), "0000")
 
 	// Verify
 	if err != nil {
@@ -175,7 +176,7 @@ func TestIndicesService_GetIndicesByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily?date=20240101&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	indices, err := service.GetIndicesByDate("20240101")
+	indices, err := service.GetIndicesByDate(context.Background(), "20240101")
 
 	// Verify
 	if err != nil {
@@ -200,7 +201,7 @@ func TestIndicesService_GetTOPIX(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily?code=0000", mockResponse)
 
 	// Execute
-	indices, err := service.GetTOPIX()
+	indices, err := service.GetTOPIX(context.Background())
 
 	// Verify
 	if err != nil {
@@ -222,13 +223,13 @@ func TestIndicesService_GetSectorIndex(t *testing.T) {
 	// Mock response - 情報・通信業
 	mockResponse := IndicesResponse{
 		Data: []Index{
-			{Date: "2024-02-01", Code: "0058", O: 3000.0, H: 3050.0, L: 2980.0, C: 3020.0},
+			{Date: "2024-02-01", Code: "0058", O: floatPtr(3000.0), H: floatPtr(3050.0), L: floatPtr(2980.0), C: 3020.0},
 		},
 	}
 	mockClient.SetResponse("GET", "/indices/bars/daily?code=0058", mockResponse)
 
 	// Execute
-	indices, err := service.GetSectorIndex(IndexSectorInfoComm)
+	indices, err := service.GetSectorIndex(context.Background(), IndexSectorInfoComm)
 
 	// Verify
 	if err != nil {
@@ -256,7 +257,7 @@ func TestIndicesService_GetPrimeMarketIndex(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily?code=0500", mockResponse)
 
 	// Execute
-	indices, err := service.GetPrimeMarketIndex()
+	indices, err := service.GetPrimeMarketIndex(context.Background())
 
 	// Verify
 	if err != nil {
@@ -278,9 +279,9 @@ func TestIndicesService_GetIndicesByCodeAndDate(t *testing.T) {
 			{
 				Date: "2024-01-01",
 				Code: "0000",
-				O:    2400.0,
-				H:    2420.0,
-				L:    2390.0,
+				O:    floatPtr(2400.0),
+				H:    floatPtr(2420.0),
+				L:    floatPtr(2390.0),
 				C:    2410.0,
 			},
 		},
@@ -288,7 +289,7 @@ func TestIndicesService_GetIndicesByCodeAndDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/indices/bars/daily?code=0000&date=20240101", mockResponse)
 
 	// Execute
-	indices, err := service.GetIndicesByCodeAndDate("0000", "20240101")
+	indices, err := service.GetIndicesByCodeAndDate(context.Background(), "0000", "20240101")
 
 	// Verify
 	if err != nil {
@@ -333,7 +334,7 @@ func TestIndicesService_GetIndicesByCodeAndDateRange(t *testing.T) {
 	mockClient.SetResponse("GET", basePath+"&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	indices, err := service.GetIndicesByCodeAndDateRange("0000", "20240101", "20240131")
+	indices, err := service.GetIndicesByCodeAndDateRange(context.Background(), "0000", "20240101", "20240131")
 
 	// Verify
 	if err != nil {
@@ -350,6 +351,36 @@ func TestIndicesService_GetIndicesByCodeAndDateRange(t *testing.T) {
 	}
 }
 
+func TestIndicesService_GetIndices_CloseOnlyIndex(t *testing.T) {
+	// 終値のみ配信の指数はO/H/Lがnullで返される（例: 東証REIT用途別指数など）
+	mockClient := client.NewMockClient()
+	service := NewIndicesService(mockClient)
+
+	mockResponse := map[string]interface{}{
+		"data": []map[string]interface{}{
+			{"Date": "2025-06-13", "Code": "0504", "O": nil, "H": nil, "L": nil, "C": 1122.85},
+		},
+		"pagination_key": "",
+	}
+	mockClient.SetResponse("GET", "/indices/bars/daily?date=20250613", mockResponse)
+
+	resp, err := service.GetIndices(context.Background(), IndicesParams{Date: "20250613"})
+	if err != nil {
+		t.Fatalf("GetIndices() error = %v", err)
+	}
+	if len(resp.Data) != 1 {
+		t.Fatalf("GetIndices() returned %d items, want 1", len(resp.Data))
+	}
+
+	index := resp.Data[0]
+	if index.O != nil || index.H != nil || index.L != nil {
+		t.Errorf("O/H/L = %v/%v/%v, want all nil", index.O, index.H, index.L)
+	}
+	if index.C != 1122.85 {
+		t.Errorf("C = %v, want 1122.85", index.C)
+	}
+}
+
 func TestIndicesService_GetIndices_Error(t *testing.T) {
 	// Setup
 	mockClient := client.NewMockClient()
@@ -359,7 +390,7 @@ func TestIndicesService_GetIndices_Error(t *testing.T) {
 	mockClient.SetError("GET", "/indices/bars/daily?code=0000", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetIndices(IndicesParams{Code: "0000"})
+	_, err := service.GetIndices(context.Background(), IndicesParams{Code: "0000"})
 
 	// Verify
 	if err == nil {

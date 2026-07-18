@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -76,7 +77,7 @@ func TestQuotesService_GetDailyQuotes(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Test
-			resp, err := service.GetDailyQuotes(tt.params)
+			resp, err := service.GetDailyQuotes(context.Background(), tt.params)
 			if err != nil {
 				t.Errorf("GetDailyQuotes failed: %v", err)
 			}
@@ -135,7 +136,7 @@ func TestQuotesService_GetDailyQuotesByCode(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/bars/daily?code=7203&pagination_key=next_page_key", mockResponse2)
 
 	// Test
-	quotes, err := service.GetDailyQuotesByCode("7203")
+	quotes, err := service.GetDailyQuotesByCode(context.Background(), "7203")
 	if err != nil {
 		t.Errorf("GetDailyQuotesByCode failed: %v", err)
 	}
@@ -159,7 +160,7 @@ func TestQuotesService_GetDailyQuotes_Error(t *testing.T) {
 	mockClient.SetError("GET", "/equities/bars/daily?code=7203", fmt.Errorf("API error"))
 
 	// Test
-	_, err := service.GetDailyQuotes(DailyQuotesParams{Code: "7203"})
+	_, err := service.GetDailyQuotes(context.Background(), DailyQuotesParams{Code: "7203"})
 	if err == nil {
 		t.Errorf("Expected error, got nil")
 	}
@@ -203,7 +204,7 @@ func TestQuotesService_GetDailyQuotesByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/bars/daily?date=20240101&pagination_key=next_page_key", mockResponse2)
 
 	// Test
-	quotes, err := service.GetDailyQuotesByDate("20240101")
+	quotes, err := service.GetDailyQuotesByDate(context.Background(), "20240101")
 	if err != nil {
 		t.Errorf("GetDailyQuotesByDate failed: %v", err)
 	}
@@ -347,7 +348,7 @@ func TestQuotesService_GetDailyQuotesByCodeAndDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/bars/daily?code=7203&date=20240101", mockResponse)
 
 	// Test
-	quotes, err := service.GetDailyQuotesByCodeAndDate("7203", "20240101")
+	quotes, err := service.GetDailyQuotesByCodeAndDate(context.Background(), "7203", "20240101")
 	if err != nil {
 		t.Errorf("GetDailyQuotesByCodeAndDate failed: %v", err)
 	}
@@ -394,7 +395,7 @@ func TestQuotesService_GetDailyQuotesByCodeAndDateRange(t *testing.T) {
 	mockClient.SetResponse("GET", basePath+"&pagination_key=next_page_key", mockResponse2)
 
 	// Test
-	quotes, err := service.GetDailyQuotesByCodeAndDateRange("7203", "20240101", "20240131")
+	quotes, err := service.GetDailyQuotesByCodeAndDateRange(context.Background(), "7203", "20240101", "20240131")
 	if err != nil {
 		t.Errorf("GetDailyQuotesByCodeAndDateRange failed: %v", err)
 	}

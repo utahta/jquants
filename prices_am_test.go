@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -67,7 +68,7 @@ func TestPricesAMService_GetPricesAM(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Execute
-			resp, err := service.GetPricesAM(tt.params)
+			resp, err := service.GetPricesAM(context.Background(), tt.params)
 
 			// Verify
 			if err != nil {
@@ -111,7 +112,7 @@ func TestPricesAMService_GetPricesAMByCode(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/bars/daily/am?code=39400", mockResponse)
 
 	// Execute
-	resp, err := service.GetPricesAMByCode("39400")
+	resp, err := service.GetPricesAMByCode(context.Background(), "39400")
 
 	// Verify
 	if err != nil {
@@ -163,7 +164,7 @@ func TestPricesAMService_GetAllPricesAM(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/bars/daily/am?pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	data, err := service.GetAllPricesAM()
+	data, err := service.GetAllPricesAM(context.Background())
 
 	// Verify
 	if err != nil {
@@ -478,7 +479,7 @@ func TestPricesAMService_GetPricesAM_Error(t *testing.T) {
 	mockClient.SetError("GET", "/equities/bars/daily/am", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetPricesAM(PricesAMParams{})
+	_, err := service.GetPricesAM(context.Background(), PricesAMParams{})
 
 	// Verify
 	if err == nil {

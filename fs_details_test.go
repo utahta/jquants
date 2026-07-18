@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -98,7 +99,7 @@ func TestFSDetailsService_GetFSDetails(t *testing.T) {
 			}
 
 			// Execute
-			resp, err := service.GetFSDetails(tt.params)
+			resp, err := service.GetFSDetails(context.Background(), tt.params)
 
 			// Verify
 			if tt.wantErr {
@@ -131,7 +132,7 @@ func TestFSDetailsService_GetFSDetails_RequiresParameter(t *testing.T) {
 	service := NewFSDetailsService(mockClient)
 
 	// Execute with empty parameters
-	_, err := service.GetFSDetails(FSDetailsParams{})
+	_, err := service.GetFSDetails(context.Background(), FSDetailsParams{})
 
 	// Verify
 	if err == nil {
@@ -189,7 +190,7 @@ func TestFSDetailsService_GetFSDetailsByCode(t *testing.T) {
 	mockClient.SetResponse("GET", "/fins/details?code=86970&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	data, err := service.GetFSDetailsByCode("86970")
+	data, err := service.GetFSDetailsByCode(context.Background(), "86970")
 
 	// Verify
 	if err != nil {
@@ -227,7 +228,7 @@ func TestFSDetailsService_GetFSDetailsByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/fins/details?date=20230130", mockResponse)
 
 	// Execute
-	data, err := service.GetFSDetailsByDate("20230130")
+	data, err := service.GetFSDetailsByDate(context.Background(), "20230130")
 
 	// Verify
 	if err != nil {
@@ -265,7 +266,7 @@ func TestFSDetailsService_GetFSDetailsByCodeAndDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/fins/details?code=86970&date=20230130", mockResponse)
 
 	// Execute
-	data, err := service.GetFSDetailsByCodeAndDate("86970", "20230130")
+	data, err := service.GetFSDetailsByCodeAndDate(context.Background(), "86970", "20230130")
 
 	// Verify
 	if err != nil {
@@ -614,7 +615,7 @@ func TestFSDetailsService_GetFSDetails_Error(t *testing.T) {
 	mockClient.SetError("GET", "/fins/details?code=86970", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetFSDetails(FSDetailsParams{Code: "86970"})
+	_, err := service.GetFSDetails(context.Background(), FSDetailsParams{Code: "86970"})
 
 	// Verify
 	if err == nil {

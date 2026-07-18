@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -222,7 +223,7 @@ func parseNullableFloat64(v interface{}) *float64 {
 }
 
 // GetIndexOptions は指定日の日経225オプションデータを取得します。
-func (s *IndexOptionService) GetIndexOptions(params IndexOptionParams) (*IndexOptionResponse, error) {
+func (s *IndexOptionService) GetIndexOptions(ctx context.Context, params IndexOptionParams) (*IndexOptionResponse, error) {
 	if params.Date == "" {
 		return nil, fmt.Errorf("date parameter is required")
 	}
@@ -237,7 +238,7 @@ func (s *IndexOptionService) GetIndexOptions(params IndexOptionParams) (*IndexOp
 	path += query
 
 	var resp IndexOptionResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get index options: %w", err)
 	}
 
@@ -246,7 +247,7 @@ func (s *IndexOptionService) GetIndexOptions(params IndexOptionParams) (*IndexOp
 
 // GetIndexOptionsByDate は指定日の全日経225オプションデータを取得します。
 // ページネーションを使用して全データを取得します。
-func (s *IndexOptionService) GetIndexOptionsByDate(date string) ([]IndexOption, error) {
+func (s *IndexOptionService) GetIndexOptionsByDate(ctx context.Context, date string) ([]IndexOption, error) {
 	var allOptions []IndexOption
 	paginationKey := ""
 
@@ -256,7 +257,7 @@ func (s *IndexOptionService) GetIndexOptionsByDate(date string) ([]IndexOption, 
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetIndexOptions(params)
+		resp, err := s.GetIndexOptions(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -274,8 +275,8 @@ func (s *IndexOptionService) GetIndexOptionsByDate(date string) ([]IndexOption, 
 }
 
 // GetCallOptions は指定日のコールオプションを取得します。
-func (s *IndexOptionService) GetCallOptions(date string) ([]IndexOption, error) {
-	options, err := s.GetIndexOptionsByDate(date)
+func (s *IndexOptionService) GetCallOptions(ctx context.Context, date string) ([]IndexOption, error) {
+	options, err := s.GetIndexOptionsByDate(ctx, date)
 	if err != nil {
 		return nil, err
 	}
@@ -291,8 +292,8 @@ func (s *IndexOptionService) GetCallOptions(date string) ([]IndexOption, error) 
 }
 
 // GetPutOptions は指定日のプットオプションを取得します。
-func (s *IndexOptionService) GetPutOptions(date string) ([]IndexOption, error) {
-	options, err := s.GetIndexOptionsByDate(date)
+func (s *IndexOptionService) GetPutOptions(ctx context.Context, date string) ([]IndexOption, error) {
+	options, err := s.GetIndexOptionsByDate(ctx, date)
 	if err != nil {
 		return nil, err
 	}
@@ -308,8 +309,8 @@ func (s *IndexOptionService) GetPutOptions(date string) ([]IndexOption, error) {
 }
 
 // GetOptionChain は指定日のオプションチェーン（全ての権利行使価格）を取得します。
-func (s *IndexOptionService) GetOptionChain(date string) ([]IndexOption, error) {
-	return s.GetIndexOptionsByDate(date)
+func (s *IndexOptionService) GetOptionChain(ctx context.Context, date string) ([]IndexOption, error) {
+	return s.GetIndexOptionsByDate(ctx, date)
 }
 
 // IsCall はコールオプションかどうかを判定します。

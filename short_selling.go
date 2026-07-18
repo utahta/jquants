@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -93,7 +94,7 @@ func (r *ShortSellingResponse) UnmarshalJSON(data []byte) error {
 }
 
 // GetShortSelling は業種別空売り比率を取得します。
-func (s *ShortSellingService) GetShortSelling(params ShortSellingParams) (*ShortSellingResponse, error) {
+func (s *ShortSellingService) GetShortSelling(ctx context.Context, params ShortSellingParams) (*ShortSellingResponse, error) {
 	// s33またはdateのいずれかが必須
 	if params.Sector33Code == "" && params.Date == "" {
 		return nil, fmt.Errorf("either s33 or date parameter is required")
@@ -123,7 +124,7 @@ func (s *ShortSellingService) GetShortSelling(params ShortSellingParams) (*Short
 	}
 
 	var resp ShortSellingResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get short selling: %w", err)
 	}
 
@@ -132,7 +133,7 @@ func (s *ShortSellingService) GetShortSelling(params ShortSellingParams) (*Short
 
 // GetShortSellingBySector は指定業種の空売り比率を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *ShortSellingService) GetShortSellingBySector(sector33Code string) ([]ShortSelling, error) {
+func (s *ShortSellingService) GetShortSellingBySector(ctx context.Context, sector33Code string) ([]ShortSelling, error) {
 	var allData []ShortSelling
 	paginationKey := ""
 
@@ -142,7 +143,7 @@ func (s *ShortSellingService) GetShortSellingBySector(sector33Code string) ([]Sh
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetShortSelling(params)
+		resp, err := s.GetShortSelling(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -161,7 +162,7 @@ func (s *ShortSellingService) GetShortSellingBySector(sector33Code string) ([]Sh
 
 // GetShortSellingByDate は指定日の全業種空売り比率を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *ShortSellingService) GetShortSellingByDate(date string) ([]ShortSelling, error) {
+func (s *ShortSellingService) GetShortSellingByDate(ctx context.Context, date string) ([]ShortSelling, error) {
 	var allData []ShortSelling
 	paginationKey := ""
 
@@ -171,7 +172,7 @@ func (s *ShortSellingService) GetShortSellingByDate(date string) ([]ShortSelling
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetShortSelling(params)
+		resp, err := s.GetShortSelling(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -189,7 +190,7 @@ func (s *ShortSellingService) GetShortSellingByDate(date string) ([]ShortSelling
 }
 
 // GetShortSellingBySectorAndDateRange は指定業種・期間の空売り比率を取得します。
-func (s *ShortSellingService) GetShortSellingBySectorAndDateRange(sector33Code, from, to string) ([]ShortSelling, error) {
+func (s *ShortSellingService) GetShortSellingBySectorAndDateRange(ctx context.Context, sector33Code, from, to string) ([]ShortSelling, error) {
 	var allData []ShortSelling
 	paginationKey := ""
 
@@ -201,7 +202,7 @@ func (s *ShortSellingService) GetShortSellingBySectorAndDateRange(sector33Code, 
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetShortSelling(params)
+		resp, err := s.GetShortSelling(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -219,8 +220,8 @@ func (s *ShortSellingService) GetShortSellingBySectorAndDateRange(sector33Code, 
 }
 
 // GetShortSellingBySectorAndDate は指定業種の指定日の空売り比率を取得します。
-func (s *ShortSellingService) GetShortSellingBySectorAndDate(sector33Code, date string) ([]ShortSelling, error) {
-	resp, err := s.GetShortSelling(ShortSellingParams{
+func (s *ShortSellingService) GetShortSellingBySectorAndDate(ctx context.Context, sector33Code, date string) ([]ShortSelling, error) {
+	resp, err := s.GetShortSelling(ctx, ShortSellingParams{
 		Sector33Code: sector33Code,
 		Date:         date,
 	})

@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -69,7 +70,7 @@ func TestListedService_GetListedInfo(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Test
-			resp, err := service.GetListedInfo(tt.params)
+			resp, err := service.GetListedInfo(context.Background(), tt.params)
 			if err != nil {
 				t.Fatalf("GetListedInfo() error = %v", err)
 			}
@@ -108,7 +109,7 @@ func TestListedService_GetAllListedInfo(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/master", mockResponse)
 
 	// Execute
-	infos, err := service.GetAllListedInfo()
+	infos, err := service.GetAllListedInfo(context.Background())
 	if err != nil {
 		t.Fatalf("GetAllListedInfo() error = %v", err)
 	}
@@ -145,7 +146,7 @@ func TestListedService_GetListedInfoByCode(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/master?code=7203", mockResponse)
 
 	// Execute
-	infos, err := service.GetListedInfoByCode("7203")
+	infos, err := service.GetListedInfoByCode(context.Background(), "7203")
 	if err != nil {
 		t.Fatalf("GetListedInfoByCode() error = %v", err)
 	}
@@ -180,7 +181,7 @@ func TestListedService_GetListedInfoByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/master?date=20240101", mockResponse)
 
 	// Execute
-	infos, err := service.GetListedInfoByDate("20240101")
+	infos, err := service.GetListedInfoByDate(context.Background(), "20240101")
 	if err != nil {
 		t.Fatalf("GetListedInfoByDate() error = %v", err)
 	}
@@ -209,7 +210,7 @@ func TestListedService_GetListedInfoByCodeAndDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/master?code=7203&date=20240101", mockResponse)
 
 	// Execute
-	infos, err := service.GetListedInfoByCodeAndDate("7203", "20240101")
+	infos, err := service.GetListedInfoByCodeAndDate(context.Background(), "7203", "20240101")
 	if err != nil {
 		t.Fatalf("GetListedInfoByCodeAndDate() error = %v", err)
 	}
@@ -235,7 +236,7 @@ func TestListedService_GetListedInfo_Error(t *testing.T) {
 	mockClient.SetError("GET", "/equities/master?code=7203", fmt.Errorf("API error"))
 
 	// Test
-	_, err := service.GetListedInfo(ListedInfoParams{Code: "7203"})
+	_, err := service.GetListedInfo(context.Background(), ListedInfoParams{Code: "7203"})
 	if err == nil {
 		t.Error("GetListedInfo() expected error but got nil")
 	}
@@ -275,7 +276,7 @@ func TestListedService_GetListedBySector17(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/master", mockResponse)
 
 	// Test - 自動車・輸送機セクターの銘柄を取得
-	infos, err := service.GetListedBySector17(Sector17Auto, "")
+	infos, err := service.GetListedBySector17(context.Background(), Sector17Auto, "")
 	if err != nil {
 		t.Errorf("GetListedBySector17 failed: %v", err)
 	}
@@ -326,7 +327,7 @@ func TestListedService_GetListedBySector33(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/master", mockResponse)
 
 	// Test - 情報・通信業の銘柄を取得
-	infos, err := service.GetListedBySector33(Sector33IT, "")
+	infos, err := service.GetListedBySector33(context.Background(), Sector33IT, "")
 	if err != nil {
 		t.Errorf("GetListedBySector33 failed: %v", err)
 	}
@@ -374,7 +375,7 @@ func TestListedService_GetListedByMarket(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/master", mockResponse)
 
 	// Test - プライム市場の銘柄を取得
-	infos, err := service.GetListedByMarket(MarketPrime, "")
+	infos, err := service.GetListedByMarket(context.Background(), MarketPrime, "")
 	if err != nil {
 		t.Errorf("GetListedByMarket failed: %v", err)
 	}

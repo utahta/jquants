@@ -25,38 +25,13 @@ make test-e2e      # E2Eテスト（JQUANTS_API_KEY が必要）
 make test-run TEST=TestQuotesService_GetDailyQuotes  # 特定のテスト
 ```
 
-## ディレクトリ構造
+## 新しいAPIサービスの追加時の注意
 
-- `client/`: HTTPクライアント（認証、キャッシュ）とモック
-- `types/`: カスタム型（JSONの不整合な型を処理）
-- `docs/v2/`: v2 APIドキュメント
-- `test/e2e/`: E2Eテスト
-
-## 新しいAPIサービスの追加方法
-
-1. 新しいサービスファイルを作成（例：`new_service.go`）
-2. サービス構造体とメソッドを実装
-3. `jquants.go`の`JQuantsAPI`構造体に新サービスを追加
-4. 対応するテストファイルを作成（例：`new_service_test.go`）
-5. `docs/v2/`ディレクトリにドキュメントを追加
-
-## テスト実装のパターン
-
-```go
-func TestService_Method(t *testing.T) {
-    mockClient := &client.MockClient{
-        DoFunc: func(req *http.Request) (*http.Response, error) {
-            // モックレスポンスを返す
-        },
-    }
-    service := &Service{client: mockClient}
-    // テスト実行
-}
-```
+- `jquants.go`の`JQuantsAPI`構造体への登録を忘れない（忘れてもコンパイルは通る）
+- `docs/v2/`ディレクトリにドキュメントを追加する
 
 ## 実装上の注意点
 
 1. **nil安全性**: APIレスポンスの欠損フィールドはポインタで表現
-2. **エラーハンドリング**: 一貫したエラーラップとコンテキスト情報の付与
-3. **型変換**: `types`パッケージのカスタム型を使用してJSONの不整合を処理
-4. **定数定義**: 市場区分コード、業種コード、開示書類種別などは定数として定義済み
+2. **型変換**: APIはJSONの型を不整合に返すことがあるため、`types`パッケージのカスタム型で処理
+3. **定数定義**: 市場区分コード、業種コード、開示書類種別などは定数として定義済み（再定義しない）

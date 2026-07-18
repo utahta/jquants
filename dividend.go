@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -175,7 +176,7 @@ func (r *DividendResponse) UnmarshalJSON(data []byte) error {
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *DividendService) GetDividend(params DividendParams) (*DividendResponse, error) {
+func (s *DividendService) GetDividend(ctx context.Context, params DividendParams) (*DividendResponse, error) {
 	// codeまたはdateのいずれかが必須
 	if params.Code == "" && params.Date == "" {
 		return nil, fmt.Errorf("either code or date parameter is required")
@@ -205,7 +206,7 @@ func (s *DividendService) GetDividend(params DividendParams) (*DividendResponse,
 	}
 
 	var resp DividendResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get dividend: %w", err)
 	}
 
@@ -217,7 +218,7 @@ func (s *DividendService) GetDividend(params DividendParams) (*DividendResponse,
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *DividendService) GetDividendByCode(code string) ([]Dividend, error) {
+func (s *DividendService) GetDividendByCode(ctx context.Context, code string) ([]Dividend, error) {
 	var allData []Dividend
 	paginationKey := ""
 
@@ -227,7 +228,7 @@ func (s *DividendService) GetDividendByCode(code string) ([]Dividend, error) {
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetDividend(params)
+		resp, err := s.GetDividend(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -249,7 +250,7 @@ func (s *DividendService) GetDividendByCode(code string) ([]Dividend, error) {
 //
 // 注意: このAPIはプレミアムプラン専用です。
 // スタンダードプラン以下では "This API is not available on your subscription" エラーが返されます。
-func (s *DividendService) GetDividendByDate(date string) ([]Dividend, error) {
+func (s *DividendService) GetDividendByDate(ctx context.Context, date string) ([]Dividend, error) {
 	var allData []Dividend
 	paginationKey := ""
 
@@ -259,7 +260,7 @@ func (s *DividendService) GetDividendByDate(date string) ([]Dividend, error) {
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetDividend(params)
+		resp, err := s.GetDividend(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -277,7 +278,7 @@ func (s *DividendService) GetDividendByDate(date string) ([]Dividend, error) {
 }
 
 // GetDividendByCodeAndDateRange は指定銘柄・期間の配当情報を取得します。
-func (s *DividendService) GetDividendByCodeAndDateRange(code, from, to string) ([]Dividend, error) {
+func (s *DividendService) GetDividendByCodeAndDateRange(ctx context.Context, code, from, to string) ([]Dividend, error) {
 	var allData []Dividend
 	paginationKey := ""
 
@@ -289,7 +290,7 @@ func (s *DividendService) GetDividendByCodeAndDateRange(code, from, to string) (
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetDividend(params)
+		resp, err := s.GetDividend(ctx, params)
 		if err != nil {
 			return nil, err
 		}

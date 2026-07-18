@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -60,7 +61,7 @@ func TestAnnouncementService_GetAnnouncement(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Test
-			resp, err := service.GetAnnouncement(tt.params)
+			resp, err := service.GetAnnouncement(context.Background(), tt.params)
 			if err != nil {
 				t.Errorf("GetAnnouncement failed: %v", err)
 			}
@@ -135,7 +136,7 @@ func TestAnnouncementService_GetAllAnnouncements(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/earnings-calendar?pagination_key=next_key", mockResponse2)
 
 	// Test
-	announcements, err := service.GetAllAnnouncements()
+	announcements, err := service.GetAllAnnouncements(context.Background())
 	if err != nil {
 		t.Errorf("GetAllAnnouncements failed: %v", err)
 	}
@@ -188,7 +189,7 @@ func TestAnnouncementService_GetAnnouncementByCode(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/earnings-calendar", mockResponse)
 
 	// Test
-	announcement, err := service.GetAnnouncementByCode("7203")
+	announcement, err := service.GetAnnouncementByCode(context.Background(), "7203")
 	if err != nil {
 		t.Errorf("GetAnnouncementByCode failed: %v", err)
 	}
@@ -230,7 +231,7 @@ func TestAnnouncementService_GetAnnouncementByCode_NotFound(t *testing.T) {
 	mockClient.SetResponse("GET", "/equities/earnings-calendar", mockResponse)
 
 	// Test
-	_, err := service.GetAnnouncementByCode("7203")
+	_, err := service.GetAnnouncementByCode(context.Background(), "7203")
 	if err == nil {
 		t.Errorf("Expected error for non-existent code, got nil")
 	}
@@ -245,7 +246,7 @@ func TestAnnouncementService_GetAnnouncement_Error(t *testing.T) {
 	mockClient.SetError("GET", "/equities/earnings-calendar", fmt.Errorf("API error"))
 
 	// Test
-	_, err := service.GetAnnouncement(AnnouncementParams{})
+	_, err := service.GetAnnouncement(context.Background(), AnnouncementParams{})
 	if err == nil {
 		t.Errorf("Expected error, got nil")
 	}

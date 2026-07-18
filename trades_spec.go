@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/utahta/jquants/client"
@@ -119,7 +120,7 @@ const (
 // - section指定あり、from/to指定なし: 指定したセクションの全期間のデータ
 // - section指定なし、from/to指定あり: すべてのセクションの指定した期間のデータ
 // - section指定なし、from/to指定なし: すべてのセクションの全期間のデータ
-func (s *TradesSpecService) GetTradesSpec(params TradesSpecParams) (*TradesSpecResponse, error) {
+func (s *TradesSpecService) GetTradesSpec(ctx context.Context, params TradesSpecParams) (*TradesSpecResponse, error) {
 	path := "/equities/investor-types"
 
 	query := "?"
@@ -141,7 +142,7 @@ func (s *TradesSpecService) GetTradesSpec(params TradesSpecParams) (*TradesSpecR
 	}
 
 	var resp TradesSpecResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get trades spec: %w", err)
 	}
 
@@ -150,7 +151,7 @@ func (s *TradesSpecService) GetTradesSpec(params TradesSpecParams) (*TradesSpecR
 
 // GetTradesSpecByDateRange は指定期間の投資部門別情報を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *TradesSpecService) GetTradesSpecByDateRange(from, to string) ([]TradesSpec, error) {
+func (s *TradesSpecService) GetTradesSpecByDateRange(ctx context.Context, from, to string) ([]TradesSpec, error) {
 	var allTradesSpec []TradesSpec
 	paginationKey := ""
 
@@ -161,7 +162,7 @@ func (s *TradesSpecService) GetTradesSpecByDateRange(from, to string) ([]TradesS
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetTradesSpec(params)
+		resp, err := s.GetTradesSpec(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -180,7 +181,7 @@ func (s *TradesSpecService) GetTradesSpecByDateRange(from, to string) ([]TradesS
 
 // GetTradesSpecBySection は指定セクションの投資部門別情報を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *TradesSpecService) GetTradesSpecBySection(section string) ([]TradesSpec, error) {
+func (s *TradesSpecService) GetTradesSpecBySection(ctx context.Context, section string) ([]TradesSpec, error) {
 	var allTradesSpec []TradesSpec
 	paginationKey := ""
 
@@ -190,7 +191,7 @@ func (s *TradesSpecService) GetTradesSpecBySection(section string) ([]TradesSpec
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetTradesSpec(params)
+		resp, err := s.GetTradesSpec(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -209,7 +210,7 @@ func (s *TradesSpecService) GetTradesSpecBySection(section string) ([]TradesSpec
 
 // GetAllTradesSpec は全セクション・全期間の投資部門別情報を取得します。
 // ページネーションを使用して大量データを分割取得します。
-func (s *TradesSpecService) GetAllTradesSpec() ([]TradesSpec, error) {
+func (s *TradesSpecService) GetAllTradesSpec(ctx context.Context) ([]TradesSpec, error) {
 	var allTradesSpec []TradesSpec
 	paginationKey := ""
 
@@ -218,7 +219,7 @@ func (s *TradesSpecService) GetAllTradesSpec() ([]TradesSpec, error) {
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetTradesSpec(params)
+		resp, err := s.GetTradesSpec(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -237,7 +238,7 @@ func (s *TradesSpecService) GetAllTradesSpec() ([]TradesSpec, error) {
 
 // GetTradesSpecBySectionAndDateRange は指定セクション・期間の投資部門別情報を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *TradesSpecService) GetTradesSpecBySectionAndDateRange(section, from, to string) ([]TradesSpec, error) {
+func (s *TradesSpecService) GetTradesSpecBySectionAndDateRange(ctx context.Context, section, from, to string) ([]TradesSpec, error) {
 	var allTradesSpec []TradesSpec
 	paginationKey := ""
 
@@ -249,7 +250,7 @@ func (s *TradesSpecService) GetTradesSpecBySectionAndDateRange(section, from, to
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetTradesSpec(params)
+		resp, err := s.GetTradesSpec(ctx, params)
 		if err != nil {
 			return nil, err
 		}

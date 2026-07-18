@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -20,7 +21,7 @@ func TestOptionsEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.Options.GetOptions(params)
+		resp, err := jq.Options.GetOptions(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -227,7 +228,7 @@ func TestOptionsEndpoint(t *testing.T) {
 	t.Run("GetSecurityOptionsByCode", func(t *testing.T) {
 		// トヨタ自動車の有価証券オプションを取得
 		date := getTestDate()
-		options, err := jq.Options.GetSecurityOptionsByCode(date, "7203")
+		options, err := jq.Options.GetSecurityOptionsByCode(context.Background(), date, "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -257,7 +258,7 @@ func TestOptionsEndpoint(t *testing.T) {
 	t.Run("GetCallOptionsByCode", func(t *testing.T) {
 		// トヨタ自動車のコールオプションのみを取得（フィルタリングで実現）
 		date := getTestDate()
-		allOptions, err := jq.Options.GetSecurityOptionsByCode(date, "7203")
+		allOptions, err := jq.Options.GetSecurityOptionsByCode(context.Background(), date, "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -298,7 +299,7 @@ func TestOptionsEndpoint(t *testing.T) {
 	t.Run("GetPutOptionsByCode", func(t *testing.T) {
 		// トヨタ自動車のプットオプションのみを取得（フィルタリングで実現）
 		date := getTestDate()
-		allOptions, err := jq.Options.GetSecurityOptionsByCode(date, "7203")
+		allOptions, err := jq.Options.GetSecurityOptionsByCode(context.Background(), date, "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -339,7 +340,7 @@ func TestOptionsEndpoint(t *testing.T) {
 	t.Run("GetOptions_OptionChainAnalysis", func(t *testing.T) {
 		// オプションチェーンの分析（有価証券オプション）
 		date := getTestDate()
-		options, err := jq.Options.GetSecurityOptionsByCode(date, "7203")
+		options, err := jq.Options.GetSecurityOptionsByCode(context.Background(), date, "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -414,7 +415,7 @@ func TestOptionsEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.Options.GetOptions(params)
+		resp, err := jq.Options.GetOptions(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -482,7 +483,7 @@ func TestOptionsEndpoint(t *testing.T) {
 			Date: date,
 		}
 
-		resp, err := jq.Options.GetOptions(params)
+		resp, err := jq.Options.GetOptions(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -500,7 +501,7 @@ func TestOptionsEndpoint(t *testing.T) {
 		if resp.PaginationKey != "" {
 			// 次のページを取得
 			params.PaginationKey = resp.PaginationKey
-			resp2, err := jq.Options.GetOptions(params)
+			resp2, err := jq.Options.GetOptions(context.Background(), params)
 			if err != nil {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
@@ -516,7 +517,7 @@ func TestOptionsEndpoint(t *testing.T) {
 
 		// 存在しない銘柄コード
 		date := getTestDate()
-		options, err := jq.Options.GetSecurityOptionsByCode(date, "99999")
+		options, err := jq.Options.GetSecurityOptionsByCode(context.Background(), date, "99999")
 		if err == nil && len(options) > 0 {
 			t.Error("Expected error or empty result for invalid code")
 		}
@@ -526,7 +527,7 @@ func TestOptionsEndpoint(t *testing.T) {
 			Date: "2030-01-01",
 		}
 
-		resp, err := jq.Options.GetOptions(params)
+		resp, err := jq.Options.GetOptions(context.Background(), params)
 		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Error("Expected error or empty result for future date")
 		}
@@ -536,7 +537,7 @@ func TestOptionsEndpoint(t *testing.T) {
 			Date: "invalid-date",
 		}
 
-		resp2, err := jq.Options.GetOptions(params)
+		resp2, err := jq.Options.GetOptions(context.Background(), params)
 		if err == nil && resp2 != nil && len(resp2.Data) > 0 {
 			t.Error("Expected error or empty result for invalid date format")
 		}

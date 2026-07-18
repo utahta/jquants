@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -14,7 +15,7 @@ import (
 func TestPricesAMEndpoint(t *testing.T) {
 	t.Run("GetPricesAM_ByCode", func(t *testing.T) {
 		// トヨタ自動車の前場四本値を取得
-		resp, err := jq.PricesAM.GetPricesAMByCode("7203")
+		resp, err := jq.PricesAM.GetPricesAMByCode(context.Background(), "7203")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -119,7 +120,7 @@ func TestPricesAMEndpoint(t *testing.T) {
 		// 全銘柄の前場四本値を取得（当日のデータのみ利用可能）
 		params := jquants.PricesAMParams{}
 
-		resp, err := jq.PricesAM.GetPricesAM(params)
+		resp, err := jq.PricesAM.GetPricesAM(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -162,7 +163,7 @@ func TestPricesAMEndpoint(t *testing.T) {
 		// 市場全体の前場四本値分析（当日のデータのみ）
 		params := jquants.PricesAMParams{}
 
-		resp, err := jq.PricesAM.GetPricesAM(params)
+		resp, err := jq.PricesAM.GetPricesAM(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -216,7 +217,7 @@ func TestPricesAMEndpoint(t *testing.T) {
 		// ページネーションのテスト（当日のデータのみ）
 		params := jquants.PricesAMParams{}
 
-		resp, err := jq.PricesAM.GetPricesAM(params)
+		resp, err := jq.PricesAM.GetPricesAM(context.Background(), params)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
@@ -234,7 +235,7 @@ func TestPricesAMEndpoint(t *testing.T) {
 		if resp.PaginationKey != "" {
 			// 次のページを取得
 			params.PaginationKey = resp.PaginationKey
-			resp2, err := jq.PricesAM.GetPricesAM(params)
+			resp2, err := jq.PricesAM.GetPricesAM(context.Background(), params)
 			if err != nil {
 				t.Fatalf("Failed to get next page: %v", err)
 			}
@@ -249,7 +250,7 @@ func TestPricesAMEndpoint(t *testing.T) {
 		// エラーケースのテスト
 
 		// 存在しない銘柄コード
-		resp, err := jq.PricesAM.GetPricesAMByCode("99999")
+		resp, err := jq.PricesAM.GetPricesAMByCode(context.Background(), "99999")
 		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Error("Expected error or empty result for invalid code")
 		}
@@ -259,7 +260,7 @@ func TestPricesAMEndpoint(t *testing.T) {
 			Code: "invalid-code",
 		}
 
-		resp, err = jq.PricesAM.GetPricesAM(params)
+		resp, err = jq.PricesAM.GetPricesAM(context.Background(), params)
 		if err == nil && resp != nil && len(resp.Data) > 0 {
 			t.Error("Expected error or empty result for invalid code")
 		}

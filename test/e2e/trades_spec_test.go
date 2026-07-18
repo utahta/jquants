@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -16,7 +17,7 @@ func TestTradesSpecEndpoint(t *testing.T) {
 		// 最近の営業日の投資部門別売買状況を取得
 		date := getTestDate()
 
-		trades, err := jq.TradesSpec.GetTradesSpecByDateRange(date, date)
+		trades, err := jq.TradesSpec.GetTradesSpecByDateRange(context.Background(), date, date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -81,7 +82,7 @@ func TestTradesSpecEndpoint(t *testing.T) {
 
 	t.Run("GetTradesSpecBySection_TSEPrime", func(t *testing.T) {
 		// プライム市場の投資部門別売買状況を取得
-		trades, err := jq.TradesSpec.GetTradesSpecBySection("TSEPrime")
+		trades, err := jq.TradesSpec.GetTradesSpecBySection(context.Background(), "TSEPrime")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -119,7 +120,7 @@ func TestTradesSpecEndpoint(t *testing.T) {
 
 	t.Run("GetTradesSpecBySection_All", func(t *testing.T) {
 		// 全市場の投資部門別売買状況を取得
-		trades, err := jq.TradesSpec.GetTradesSpecBySection("All")
+		trades, err := jq.TradesSpec.GetTradesSpecBySection(context.Background(), "All")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -148,7 +149,7 @@ func TestTradesSpecEndpoint(t *testing.T) {
 		marketData := make(map[string][]jquants.TradesSpec)
 
 		for _, market := range markets {
-			trades, err := jq.TradesSpec.GetTradesSpecBySection(market)
+			trades, err := jq.TradesSpec.GetTradesSpecBySection(context.Background(), market)
 			if err != nil {
 				if isSubscriptionLimited(err) {
 					t.Skip("Skipping due to subscription limitation")
@@ -184,7 +185,7 @@ func TestTradesSpecEndpoint(t *testing.T) {
 		fromTime = fromTime.AddDate(0, 0, -7)
 		from := fromTime.Format("20060102")
 
-		trades, err := jq.TradesSpec.GetTradesSpecByDateRange(from, to)
+		trades, err := jq.TradesSpec.GetTradesSpecByDateRange(context.Background(), from, to)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -231,7 +232,7 @@ func TestTradesSpecEndpoint(t *testing.T) {
 
 	t.Run("GetTradesSpec_TrendAnalysis", func(t *testing.T) {
 		// トレンド分析（プライム市場）
-		trades, err := jq.TradesSpec.GetTradesSpecBySection("TSEPrime")
+		trades, err := jq.TradesSpec.GetTradesSpecBySection(context.Background(), "TSEPrime")
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
@@ -278,13 +279,13 @@ func TestTradesSpecEndpoint(t *testing.T) {
 		// エラーケースのテスト
 
 		// 無効なセクション
-		trades, err := jq.TradesSpec.GetTradesSpecBySection("InvalidSection")
+		trades, err := jq.TradesSpec.GetTradesSpecBySection(context.Background(), "InvalidSection")
 		if err == nil && len(trades) > 0 {
 			t.Error("Expected error or empty result for invalid section")
 		}
 
 		// 無効な日付範囲
-		trades, err = jq.TradesSpec.GetTradesSpecByDateRange("2024-12-31", "2024-01-01")
+		trades, err = jq.TradesSpec.GetTradesSpecByDateRange(context.Background(), "2024-12-31", "2024-01-01")
 		if err == nil && len(trades) > 0 {
 			t.Error("Expected error or empty result for invalid date range")
 		}

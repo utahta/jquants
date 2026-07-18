@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/utahta/jquants/client"
@@ -50,7 +51,7 @@ const (
 // - hol_div指定あり、from/to指定あり: 指定された休日区分について指定された期間分のデータ
 // - hol_div指定なし、from/to指定あり: 指定された期間分のデータ
 // - hol_div指定なし、from/to指定なし: 全期間分のデータ
-func (s *TradingCalendarService) GetTradingCalendar(params TradingCalendarParams) (*TradingCalendarResponse, error) {
+func (s *TradingCalendarService) GetTradingCalendar(ctx context.Context, params TradingCalendarParams) (*TradingCalendarResponse, error) {
 	path := "/markets/calendar"
 
 	query := "?"
@@ -69,7 +70,7 @@ func (s *TradingCalendarService) GetTradingCalendar(params TradingCalendarParams
 	}
 
 	var resp TradingCalendarResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get trading calendar: %w", err)
 	}
 
@@ -77,8 +78,8 @@ func (s *TradingCalendarService) GetTradingCalendar(params TradingCalendarParams
 }
 
 // GetAllTradingCalendar は全期間・全区分の取引カレンダーを取得します。
-func (s *TradingCalendarService) GetAllTradingCalendar() ([]TradingCalendar, error) {
-	resp, err := s.GetTradingCalendar(TradingCalendarParams{})
+func (s *TradingCalendarService) GetAllTradingCalendar(ctx context.Context) ([]TradingCalendar, error) {
+	resp, err := s.GetTradingCalendar(ctx, TradingCalendarParams{})
 	if err != nil {
 		return nil, err
 	}
@@ -86,8 +87,8 @@ func (s *TradingCalendarService) GetAllTradingCalendar() ([]TradingCalendar, err
 }
 
 // GetTradingCalendarByHolidayDivision は指定した休日区分の全期間の取引カレンダーを取得します。
-func (s *TradingCalendarService) GetTradingCalendarByHolidayDivision(holDiv string) ([]TradingCalendar, error) {
-	resp, err := s.GetTradingCalendar(TradingCalendarParams{
+func (s *TradingCalendarService) GetTradingCalendarByHolidayDivision(ctx context.Context, holDiv string) ([]TradingCalendar, error) {
+	resp, err := s.GetTradingCalendar(ctx, TradingCalendarParams{
 		HolidayDivision: holDiv,
 	})
 	if err != nil {
@@ -97,8 +98,8 @@ func (s *TradingCalendarService) GetTradingCalendarByHolidayDivision(holDiv stri
 }
 
 // GetTradingCalendarByHolidayDivisionAndDateRange は指定した休日区分・期間の取引カレンダーを取得します。
-func (s *TradingCalendarService) GetTradingCalendarByHolidayDivisionAndDateRange(holDiv, from, to string) ([]TradingCalendar, error) {
-	resp, err := s.GetTradingCalendar(TradingCalendarParams{
+func (s *TradingCalendarService) GetTradingCalendarByHolidayDivisionAndDateRange(ctx context.Context, holDiv, from, to string) ([]TradingCalendar, error) {
+	resp, err := s.GetTradingCalendar(ctx, TradingCalendarParams{
 		HolidayDivision: holDiv,
 		From:            from,
 		To:              to,
@@ -110,8 +111,8 @@ func (s *TradingCalendarService) GetTradingCalendarByHolidayDivisionAndDateRange
 }
 
 // GetTradingCalendarByDateRange は指定した期間の取引カレンダーを取得します。
-func (s *TradingCalendarService) GetTradingCalendarByDateRange(from, to string) ([]TradingCalendar, error) {
-	resp, err := s.GetTradingCalendar(TradingCalendarParams{
+func (s *TradingCalendarService) GetTradingCalendarByDateRange(ctx context.Context, from, to string) ([]TradingCalendar, error) {
+	resp, err := s.GetTradingCalendar(ctx, TradingCalendarParams{
 		From: from,
 		To:   to,
 	})
@@ -122,8 +123,8 @@ func (s *TradingCalendarService) GetTradingCalendarByDateRange(from, to string) 
 }
 
 // GetTradingDays は指定した期間の営業日のみを取得します。
-func (s *TradingCalendarService) GetTradingDays(from, to string) ([]TradingCalendar, error) {
-	resp, err := s.GetTradingCalendar(TradingCalendarParams{
+func (s *TradingCalendarService) GetTradingDays(ctx context.Context, from, to string) ([]TradingCalendar, error) {
+	resp, err := s.GetTradingCalendar(ctx, TradingCalendarParams{
 		HolidayDivision: HolidayDivisionTradingDay,
 		From:            from,
 		To:              to,
@@ -135,8 +136,8 @@ func (s *TradingCalendarService) GetTradingDays(from, to string) ([]TradingCalen
 }
 
 // GetNonTradingDays は指定した期間の非営業日のみを取得します。
-func (s *TradingCalendarService) GetNonTradingDays(from, to string) ([]TradingCalendar, error) {
-	resp, err := s.GetTradingCalendar(TradingCalendarParams{
+func (s *TradingCalendarService) GetNonTradingDays(ctx context.Context, from, to string) ([]TradingCalendar, error) {
+	resp, err := s.GetTradingCalendar(ctx, TradingCalendarParams{
 		HolidayDivision: HolidayDivisionNonTradingDay,
 		From:            from,
 		To:              to,
@@ -148,8 +149,8 @@ func (s *TradingCalendarService) GetNonTradingDays(from, to string) ([]TradingCa
 }
 
 // GetOSEHolidayTradingDays はOSEで祝日取引を実施する日を取得します。
-func (s *TradingCalendarService) GetOSEHolidayTradingDays(from, to string) ([]TradingCalendar, error) {
-	resp, err := s.GetTradingCalendar(TradingCalendarParams{
+func (s *TradingCalendarService) GetOSEHolidayTradingDays(ctx context.Context, from, to string) ([]TradingCalendar, error) {
+	resp, err := s.GetTradingCalendar(ctx, TradingCalendarParams{
 		HolidayDivision: HolidayDivisionOSEHolidayTrading,
 		From:            from,
 		To:              to,

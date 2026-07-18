@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/utahta/jquants/client"
@@ -92,7 +93,7 @@ const (
 )
 
 // GetDailyMarginInterest は日々公表信用取引残高を取得します。
-func (s *DailyMarginInterestService) GetDailyMarginInterest(params DailyMarginInterestParams) (*DailyMarginInterestResponse, error) {
+func (s *DailyMarginInterestService) GetDailyMarginInterest(ctx context.Context, params DailyMarginInterestParams) (*DailyMarginInterestResponse, error) {
 	// codeまたはdateのいずれかが必須
 	if params.Code == "" && params.Date == "" {
 		return nil, fmt.Errorf("either code or date parameter is required")
@@ -122,7 +123,7 @@ func (s *DailyMarginInterestService) GetDailyMarginInterest(params DailyMarginIn
 	}
 
 	var resp DailyMarginInterestResponse
-	if err := s.client.DoRequest("GET", path, nil, &resp); err != nil {
+	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
 		return nil, fmt.Errorf("failed to get daily margin interest: %w", err)
 	}
 
@@ -131,7 +132,7 @@ func (s *DailyMarginInterestService) GetDailyMarginInterest(params DailyMarginIn
 
 // GetDailyMarginInterestByCode は指定銘柄の日々公表信用取引残高を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *DailyMarginInterestService) GetDailyMarginInterestByCode(code string) ([]DailyMarginInterest, error) {
+func (s *DailyMarginInterestService) GetDailyMarginInterestByCode(ctx context.Context, code string) ([]DailyMarginInterest, error) {
 	var allData []DailyMarginInterest
 	paginationKey := ""
 
@@ -141,7 +142,7 @@ func (s *DailyMarginInterestService) GetDailyMarginInterestByCode(code string) (
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetDailyMarginInterest(params)
+		resp, err := s.GetDailyMarginInterest(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -159,7 +160,7 @@ func (s *DailyMarginInterestService) GetDailyMarginInterestByCode(code string) (
 
 // GetDailyMarginInterestByDate は指定日の全銘柄の日々公表信用取引残高を取得します。
 // ページネーションを使用して全データを取得します。
-func (s *DailyMarginInterestService) GetDailyMarginInterestByDate(date string) ([]DailyMarginInterest, error) {
+func (s *DailyMarginInterestService) GetDailyMarginInterestByDate(ctx context.Context, date string) ([]DailyMarginInterest, error) {
 	var allData []DailyMarginInterest
 	paginationKey := ""
 
@@ -169,7 +170,7 @@ func (s *DailyMarginInterestService) GetDailyMarginInterestByDate(date string) (
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetDailyMarginInterest(params)
+		resp, err := s.GetDailyMarginInterest(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -186,7 +187,7 @@ func (s *DailyMarginInterestService) GetDailyMarginInterestByDate(date string) (
 }
 
 // GetDailyMarginInterestByCodeAndDateRange は指定銘柄・期間の日々公表信用取引残高を取得します。
-func (s *DailyMarginInterestService) GetDailyMarginInterestByCodeAndDateRange(code, from, to string) ([]DailyMarginInterest, error) {
+func (s *DailyMarginInterestService) GetDailyMarginInterestByCodeAndDateRange(ctx context.Context, code, from, to string) ([]DailyMarginInterest, error) {
 	var allData []DailyMarginInterest
 	paginationKey := ""
 
@@ -198,7 +199,7 @@ func (s *DailyMarginInterestService) GetDailyMarginInterestByCodeAndDateRange(co
 			PaginationKey: paginationKey,
 		}
 
-		resp, err := s.GetDailyMarginInterest(params)
+		resp, err := s.GetDailyMarginInterest(ctx, params)
 		if err != nil {
 			return nil, err
 		}

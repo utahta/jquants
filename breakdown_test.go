@@ -1,6 +1,7 @@
 package jquants
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -88,7 +89,7 @@ func TestBreakdownService_GetBreakdown(t *testing.T) {
 			mockClient.SetResponse("GET", tt.wantPath, mockResponse)
 
 			// Execute
-			resp, err := service.GetBreakdown(tt.params)
+			resp, err := service.GetBreakdown(context.Background(), tt.params)
 
 			// Verify
 			if err != nil {
@@ -136,7 +137,7 @@ func TestBreakdownService_GetBreakdownByCode(t *testing.T) {
 	mockClient.SetResponse("GET", expectedPath, mockResponse)
 
 	// Execute
-	breakdown, err := service.GetBreakdownByCode("7203", 30)
+	breakdown, err := service.GetBreakdownByCode(context.Background(), "7203", 30)
 
 	// Verify
 	if err != nil {
@@ -188,7 +189,7 @@ func TestBreakdownService_GetBreakdownByDate(t *testing.T) {
 	mockClient.SetResponse("GET", "/markets/breakdown?date=20240101&pagination_key=next_page_key", mockResponse2)
 
 	// Execute
-	breakdown, err := service.GetBreakdownByDate("20240101")
+	breakdown, err := service.GetBreakdownByDate(context.Background(), "20240101")
 
 	// Verify
 	if err != nil {
@@ -208,7 +209,7 @@ func TestBreakdownService_GetBreakdown_Error(t *testing.T) {
 	mockClient.SetError("GET", "/markets/breakdown?code=7203", fmt.Errorf("unauthorized"))
 
 	// Execute
-	_, err := service.GetBreakdown(BreakdownParams{Code: "7203"})
+	_, err := service.GetBreakdown(context.Background(), BreakdownParams{Code: "7203"})
 
 	// Verify
 	if err == nil {
