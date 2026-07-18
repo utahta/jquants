@@ -32,11 +32,11 @@ type TOPIXData struct {
 
 // RawTOPIXData is used for unmarshaling JSON response with mixed types
 type RawTOPIXData struct {
-	Date string              `json:"Date"`
-	O    types.Float64String `json:"O"`
-	H    types.Float64String `json:"H"`
-	L    types.Float64String `json:"L"`
-	C    types.Float64String `json:"C"`
+	Date string                `json:"Date"`
+	O    types.NullableFloat64 `json:"O"`
+	H    types.NullableFloat64 `json:"H"`
+	L    types.NullableFloat64 `json:"L"`
+	C    types.NullableFloat64 `json:"C"`
 }
 
 // TOPIXResponse はTOPIX指数のレスポンスです。
@@ -66,10 +66,10 @@ func (t *TOPIXResponse) UnmarshalJSON(data []byte) error {
 	for idx, rt := range raw.Data {
 		t.Data[idx] = TOPIXData{
 			Date: rt.Date,
-			O:    float64(rt.O),
-			H:    float64(rt.H),
-			L:    float64(rt.L),
-			C:    float64(rt.C),
+			O:    rt.O.Or(0),
+			H:    rt.H.Or(0),
+			L:    rt.L.Or(0),
+			C:    rt.C.Or(0),
 		}
 	}
 

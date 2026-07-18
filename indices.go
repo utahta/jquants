@@ -33,12 +33,12 @@ type Index struct {
 
 // RawIndex is used for unmarshaling JSON response with mixed types
 type RawIndex struct {
-	Date string               `json:"Date"`
-	Code string               `json:"Code"`
-	O    *types.Float64String `json:"O"`
-	H    *types.Float64String `json:"H"`
-	L    *types.Float64String `json:"L"`
-	C    types.Float64String  `json:"C"`
+	Date string                `json:"Date"`
+	Code string                `json:"Code"`
+	O    types.NullableFloat64 `json:"O"`
+	H    types.NullableFloat64 `json:"H"`
+	L    types.NullableFloat64 `json:"L"`
+	C    types.NullableFloat64 `json:"C"`
 }
 
 // IndicesResponse は指数四本値のレスポンスです。
@@ -69,10 +69,10 @@ func (i *IndicesResponse) UnmarshalJSON(data []byte) error {
 		i.Data[idx] = Index{
 			Date: ri.Date,
 			Code: ri.Code,
-			O:    types.ToFloat64Ptr(ri.O),
-			H:    types.ToFloat64Ptr(ri.H),
-			L:    types.ToFloat64Ptr(ri.L),
-			C:    float64(ri.C),
+			O:    ri.O.Ptr(),
+			H:    ri.H.Ptr(),
+			L:    ri.L.Ptr(),
+			C:    ri.C.Or(0),
 		}
 	}
 

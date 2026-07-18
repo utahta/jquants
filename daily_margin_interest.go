@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/utahta/jquants/client"
+	"github.com/utahta/jquants/types"
 )
 
 // DailyMarginInterestService は日々公表信用取引残高を取得するサービスです。
@@ -35,11 +36,11 @@ type DailyMarginInterestResponse struct {
 
 // PublishReason は公表の理由を表します。
 type PublishReason struct {
-	Restricted         string `json:"Restricted"`         // 規制措置（0: 対象外, 1: 対象）
-	DailyPublication   string `json:"DailyPublication"`   // 日々公表（0: 対象外, 1: 対象）
-	Monitoring         string `json:"Monitoring"`         // 監視（0: 対象外, 1: 対象）
-	RestrictedByJSF    string `json:"RestrictedByJSF"`    // 日証金の規制（0: 対象外, 1: 対象）
-	PrecautionByJSF    string `json:"PrecautionByJSF"`    // 日証金の注意喚起（0: 対象外, 1: 対象）
+	Restricted          string `json:"Restricted"`          // 規制措置（0: 対象外, 1: 対象）
+	DailyPublication    string `json:"DailyPublication"`    // 日々公表（0: 対象外, 1: 対象）
+	Monitoring          string `json:"Monitoring"`          // 監視（0: 対象外, 1: 対象）
+	RestrictedByJSF     string `json:"RestrictedByJSF"`     // 日証金の規制（0: 対象外, 1: 対象）
+	PrecautionByJSF     string `json:"PrecautionByJSF"`     // 日証金の注意喚起（0: 対象外, 1: 対象）
 	UnclearOrSecOnAlert string `json:"UnclearOrSecOnAlert"` // 不明瞭または証券会社の注意喚起（0: 対象外, 1: 対象）
 }
 
@@ -53,29 +54,29 @@ type DailyMarginInterest struct {
 	PubReason PublishReason `json:"PubReason"` // 公表の理由
 
 	// 売合計信用残高
-	ShrtOut      float64     `json:"ShrtOut"`      // 売合計信用残高（株）
-	ShrtOutChg   interface{} `json:"ShrtOutChg"`   // 前日比 売合計信用残高（株）。前日に公表されていない場合は「-」
-	ShrtOutRatio interface{} `json:"ShrtOutRatio"` // 上場比 売合計信用残高（%）。ETFの場合は「*」
+	ShrtOut      float64               `json:"ShrtOut"`      // 売合計信用残高（株）
+	ShrtOutChg   types.NullableFloat64 `json:"ShrtOutChg"`   // 前日比 売合計信用残高（株）。前日に公表されていない場合は「-」
+	ShrtOutRatio types.NullableFloat64 `json:"ShrtOutRatio"` // 上場比 売合計信用残高（%）。ETFの場合は「*」
 
 	// 買合計信用残高
-	LongOut      float64     `json:"LongOut"`      // 買合計信用残高（株）
-	LongOutChg   interface{} `json:"LongOutChg"`   // 前日比 買合計信用残高（株）。前日に公表されていない場合は「-」
-	LongOutRatio interface{} `json:"LongOutRatio"` // 上場比 買合計信用残高（%）。ETFの場合は「*」
+	LongOut      float64               `json:"LongOut"`      // 買合計信用残高（株）
+	LongOutChg   types.NullableFloat64 `json:"LongOutChg"`   // 前日比 買合計信用残高（株）。前日に公表されていない場合は「-」
+	LongOutRatio types.NullableFloat64 `json:"LongOutRatio"` // 上場比 買合計信用残高（%）。ETFの場合は「*」
 
 	// 取組比率
 	SLRatio float64 `json:"SLRatio"` // 取組比率（%）= 売合計信用残高 / 買合計信用残高 × 100
 
 	// 一般信用取引残高
-	ShrtNegOut    float64     `json:"ShrtNegOut"`    // 一般信用取引売残高（株）
-	ShrtNegOutChg interface{} `json:"ShrtNegOutChg"` // 前日比 一般信用取引売残高（株）
-	LongNegOut    float64     `json:"LongNegOut"`    // 一般信用取引買残高（株）
-	LongNegOutChg interface{} `json:"LongNegOutChg"` // 前日比 一般信用取引買残高（株）
+	ShrtNegOut    float64               `json:"ShrtNegOut"`    // 一般信用取引売残高（株）
+	ShrtNegOutChg types.NullableFloat64 `json:"ShrtNegOutChg"` // 前日比 一般信用取引売残高（株）
+	LongNegOut    float64               `json:"LongNegOut"`    // 一般信用取引買残高（株）
+	LongNegOutChg types.NullableFloat64 `json:"LongNegOutChg"` // 前日比 一般信用取引買残高（株）
 
 	// 制度信用取引残高
-	ShrtStdOut    float64     `json:"ShrtStdOut"`    // 制度信用取引売残高（株）
-	ShrtStdOutChg interface{} `json:"ShrtStdOutChg"` // 前日比 制度信用取引売残高（株）
-	LongStdOut    float64     `json:"LongStdOut"`    // 制度信用取引買残高（株）
-	LongStdOutChg interface{} `json:"LongStdOutChg"` // 前日比 制度信用取引買残高（株）
+	ShrtStdOut    float64               `json:"ShrtStdOut"`    // 制度信用取引売残高（株）
+	ShrtStdOutChg types.NullableFloat64 `json:"ShrtStdOutChg"` // 前日比 制度信用取引売残高（株）
+	LongStdOut    float64               `json:"LongStdOut"`    // 制度信用取引買残高（株）
+	LongStdOutChg types.NullableFloat64 `json:"LongStdOutChg"` // 前日比 制度信用取引買残高（株）
 
 	// 規制区分
 	TSEMrgnRegCls string `json:"TSEMrgnRegCls"` // 東証信用貸借規制区分
@@ -218,37 +219,25 @@ func (s *DailyMarginInterestService) GetDailyMarginInterestByCodeAndDateRange(ct
 // GetShortOutChgValue は前日比売合計信用残高を数値で取得します。
 // 前日に公表されていない場合（「-」）は0を返します。
 func (d *DailyMarginInterest) GetShortOutChgValue() float64 {
-	if v, ok := d.ShrtOutChg.(float64); ok {
-		return v
-	}
-	return 0
+	return d.ShrtOutChg.Or(0)
 }
 
 // GetLongOutChgValue は前日比買合計信用残高を数値で取得します。
 // 前日に公表されていない場合（「-」）は0を返します。
 func (d *DailyMarginInterest) GetLongOutChgValue() float64 {
-	if v, ok := d.LongOutChg.(float64); ok {
-		return v
-	}
-	return 0
+	return d.LongOutChg.Or(0)
 }
 
 // GetShortOutRatioValue は上場比売合計信用残高を数値で取得します。
 // ETFの場合（「*」）は0を返します。
 func (d *DailyMarginInterest) GetShortOutRatioValue() float64 {
-	if v, ok := d.ShrtOutRatio.(float64); ok {
-		return v
-	}
-	return 0
+	return d.ShrtOutRatio.Or(0)
 }
 
 // GetLongOutRatioValue は上場比買合計信用残高を数値で取得します。
 // ETFの場合（「*」）は0を返します。
 func (d *DailyMarginInterest) GetLongOutRatioValue() float64 {
-	if v, ok := d.LongOutRatio.(float64); ok {
-		return v
-	}
-	return 0
+	return d.LongOutRatio.Or(0)
 }
 
 // IsRestricted は規制措置対象かどうかを判定します。

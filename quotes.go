@@ -83,48 +83,48 @@ type RawDailyQuote struct {
 	Date string `json:"Date"`
 	Code string `json:"Code"`
 	// 日通しデータ
-	O         *types.Float64String `json:"O"`
-	H         *types.Float64String `json:"H"`
-	L         *types.Float64String `json:"L"`
-	C         *types.Float64String `json:"C"`
-	UL        string               `json:"UL"`
-	LL        string               `json:"LL"`
-	Vo        *types.Float64String `json:"Vo"`
-	Va        *types.Float64String `json:"Va"`
-	AdjFactor types.Float64String  `json:"AdjFactor"`
-	AdjO      *types.Float64String `json:"AdjO"`
-	AdjH      *types.Float64String `json:"AdjH"`
-	AdjL      *types.Float64String `json:"AdjL"`
-	AdjC      *types.Float64String `json:"AdjC"`
-	AdjVo     *types.Float64String `json:"AdjVo"`
+	O         types.NullableFloat64 `json:"O"`
+	H         types.NullableFloat64 `json:"H"`
+	L         types.NullableFloat64 `json:"L"`
+	C         types.NullableFloat64 `json:"C"`
+	UL        string                `json:"UL"`
+	LL        string                `json:"LL"`
+	Vo        types.NullableFloat64 `json:"Vo"`
+	Va        types.NullableFloat64 `json:"Va"`
+	AdjFactor types.NullableFloat64 `json:"AdjFactor"`
+	AdjO      types.NullableFloat64 `json:"AdjO"`
+	AdjH      types.NullableFloat64 `json:"AdjH"`
+	AdjL      types.NullableFloat64 `json:"AdjL"`
+	AdjC      types.NullableFloat64 `json:"AdjC"`
+	AdjVo     types.NullableFloat64 `json:"AdjVo"`
 	// 前場データ
-	MO     *types.Float64String `json:"MO"`
-	MH     *types.Float64String `json:"MH"`
-	ML     *types.Float64String `json:"ML"`
-	MC     *types.Float64String `json:"MC"`
-	MUL    string               `json:"MUL"`
-	MLL    string               `json:"MLL"`
-	MVo    *types.Float64String `json:"MVo"`
-	MVa    *types.Float64String `json:"MVa"`
-	MAdjO  *types.Float64String `json:"MAdjO"`
-	MAdjH  *types.Float64String `json:"MAdjH"`
-	MAdjL  *types.Float64String `json:"MAdjL"`
-	MAdjC  *types.Float64String `json:"MAdjC"`
-	MAdjVo *types.Float64String `json:"MAdjVo"`
+	MO     types.NullableFloat64 `json:"MO"`
+	MH     types.NullableFloat64 `json:"MH"`
+	ML     types.NullableFloat64 `json:"ML"`
+	MC     types.NullableFloat64 `json:"MC"`
+	MUL    string                `json:"MUL"`
+	MLL    string                `json:"MLL"`
+	MVo    types.NullableFloat64 `json:"MVo"`
+	MVa    types.NullableFloat64 `json:"MVa"`
+	MAdjO  types.NullableFloat64 `json:"MAdjO"`
+	MAdjH  types.NullableFloat64 `json:"MAdjH"`
+	MAdjL  types.NullableFloat64 `json:"MAdjL"`
+	MAdjC  types.NullableFloat64 `json:"MAdjC"`
+	MAdjVo types.NullableFloat64 `json:"MAdjVo"`
 	// 後場データ
-	AO     *types.Float64String `json:"AO"`
-	AH     *types.Float64String `json:"AH"`
-	AL     *types.Float64String `json:"AL"`
-	AC     *types.Float64String `json:"AC"`
-	AUL    string               `json:"AUL"`
-	ALL    string               `json:"ALL"`
-	AVo    *types.Float64String `json:"AVo"`
-	AVa    *types.Float64String `json:"AVa"`
-	AAdjO  *types.Float64String `json:"AAdjO"`
-	AAdjH  *types.Float64String `json:"AAdjH"`
-	AAdjL  *types.Float64String `json:"AAdjL"`
-	AAdjC  *types.Float64String `json:"AAdjC"`
-	AAdjVo *types.Float64String `json:"AAdjVo"`
+	AO     types.NullableFloat64 `json:"AO"`
+	AH     types.NullableFloat64 `json:"AH"`
+	AL     types.NullableFloat64 `json:"AL"`
+	AC     types.NullableFloat64 `json:"AC"`
+	AUL    string                `json:"AUL"`
+	ALL    string                `json:"ALL"`
+	AVo    types.NullableFloat64 `json:"AVo"`
+	AVa    types.NullableFloat64 `json:"AVa"`
+	AAdjO  types.NullableFloat64 `json:"AAdjO"`
+	AAdjH  types.NullableFloat64 `json:"AAdjH"`
+	AAdjL  types.NullableFloat64 `json:"AAdjL"`
+	AAdjC  types.NullableFloat64 `json:"AAdjC"`
+	AAdjVo types.NullableFloat64 `json:"AAdjVo"`
 }
 
 type DailyQuotesResponse struct {
@@ -155,48 +155,48 @@ func (d *DailyQuotesResponse) UnmarshalJSON(data []byte) error {
 			Date: rdq.Date,
 			Code: rdq.Code,
 			// 日通しデータ
-			O:         types.ToFloat64Ptr(rdq.O),
-			H:         types.ToFloat64Ptr(rdq.H),
-			L:         types.ToFloat64Ptr(rdq.L),
-			C:         types.ToFloat64Ptr(rdq.C),
+			O:         rdq.O.Ptr(),
+			H:         rdq.H.Ptr(),
+			L:         rdq.L.Ptr(),
+			C:         rdq.C.Ptr(),
 			UL:        rdq.UL,
 			LL:        rdq.LL,
-			Vo:        types.ToFloat64Ptr(rdq.Vo),
-			Va:        types.ToFloat64Ptr(rdq.Va),
-			AdjFactor: float64(rdq.AdjFactor),
-			AdjO:      types.ToFloat64Ptr(rdq.AdjO),
-			AdjH:      types.ToFloat64Ptr(rdq.AdjH),
-			AdjL:      types.ToFloat64Ptr(rdq.AdjL),
-			AdjC:      types.ToFloat64Ptr(rdq.AdjC),
-			AdjVo:     types.ToFloat64Ptr(rdq.AdjVo),
+			Vo:        rdq.Vo.Ptr(),
+			Va:        rdq.Va.Ptr(),
+			AdjFactor: rdq.AdjFactor.Or(0),
+			AdjO:      rdq.AdjO.Ptr(),
+			AdjH:      rdq.AdjH.Ptr(),
+			AdjL:      rdq.AdjL.Ptr(),
+			AdjC:      rdq.AdjC.Ptr(),
+			AdjVo:     rdq.AdjVo.Ptr(),
 			// 前場データ
-			MO:     types.ToFloat64Ptr(rdq.MO),
-			MH:     types.ToFloat64Ptr(rdq.MH),
-			ML:     types.ToFloat64Ptr(rdq.ML),
-			MC:     types.ToFloat64Ptr(rdq.MC),
+			MO:     rdq.MO.Ptr(),
+			MH:     rdq.MH.Ptr(),
+			ML:     rdq.ML.Ptr(),
+			MC:     rdq.MC.Ptr(),
 			MUL:    rdq.MUL,
 			MLL:    rdq.MLL,
-			MVo:    types.ToFloat64Ptr(rdq.MVo),
-			MVa:    types.ToFloat64Ptr(rdq.MVa),
-			MAdjO:  types.ToFloat64Ptr(rdq.MAdjO),
-			MAdjH:  types.ToFloat64Ptr(rdq.MAdjH),
-			MAdjL:  types.ToFloat64Ptr(rdq.MAdjL),
-			MAdjC:  types.ToFloat64Ptr(rdq.MAdjC),
-			MAdjVo: types.ToFloat64Ptr(rdq.MAdjVo),
+			MVo:    rdq.MVo.Ptr(),
+			MVa:    rdq.MVa.Ptr(),
+			MAdjO:  rdq.MAdjO.Ptr(),
+			MAdjH:  rdq.MAdjH.Ptr(),
+			MAdjL:  rdq.MAdjL.Ptr(),
+			MAdjC:  rdq.MAdjC.Ptr(),
+			MAdjVo: rdq.MAdjVo.Ptr(),
 			// 後場データ
-			AO:     types.ToFloat64Ptr(rdq.AO),
-			AH:     types.ToFloat64Ptr(rdq.AH),
-			AL:     types.ToFloat64Ptr(rdq.AL),
-			AC:     types.ToFloat64Ptr(rdq.AC),
+			AO:     rdq.AO.Ptr(),
+			AH:     rdq.AH.Ptr(),
+			AL:     rdq.AL.Ptr(),
+			AC:     rdq.AC.Ptr(),
 			AUL:    rdq.AUL,
 			ALL:    rdq.ALL,
-			AVo:    types.ToFloat64Ptr(rdq.AVo),
-			AVa:    types.ToFloat64Ptr(rdq.AVa),
-			AAdjO:  types.ToFloat64Ptr(rdq.AAdjO),
-			AAdjH:  types.ToFloat64Ptr(rdq.AAdjH),
-			AAdjL:  types.ToFloat64Ptr(rdq.AAdjL),
-			AAdjC:  types.ToFloat64Ptr(rdq.AAdjC),
-			AAdjVo: types.ToFloat64Ptr(rdq.AAdjVo),
+			AVo:    rdq.AVo.Ptr(),
+			AVa:    rdq.AVa.Ptr(),
+			AAdjO:  rdq.AAdjO.Ptr(),
+			AAdjH:  rdq.AAdjH.Ptr(),
+			AAdjL:  rdq.AAdjL.Ptr(),
+			AAdjC:  rdq.AAdjC.Ptr(),
+			AAdjVo: rdq.AAdjVo.Ptr(),
 		}
 	}
 

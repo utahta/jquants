@@ -81,18 +81,18 @@ func TestOptionsService_GetOptions(t *testing.T) {
 							H:            0.0,
 							L:            0.0,
 							C:            0.0,
-							EO:           "",
-							EH:           "",
-							EL:           "",
-							EC:           "",
+							EO:           nil,
+							EH:           nil,
+							EL:           nil,
+							EC:           nil,
 							AO:           0.0,
 							AH:           0.0,
 							AL:           0.0,
 							AC:           0.0,
-							MO:           "",
-							MH:           "",
-							ML:           "",
-							MC:           "",
+							MO:           nil,
+							MH:           nil,
+							ML:           nil,
+							MC:           nil,
 							Vo:           0.0,
 							OI:           0.0,
 							Va:           0.0,
@@ -396,17 +396,17 @@ func TestOption_HelperMethods(t *testing.T) {
 
 	t.Run("Session data helpers", func(t *testing.T) {
 		optionWithNight := Option{
-			EO: 100.0,
-			EH: 110.0,
-			EL: 90.0,
-			EC: 105.0,
+			EO: floatPtr(100.0),
+			EH: floatPtr(110.0),
+			EL: floatPtr(90.0),
+			EC: floatPtr(105.0),
 		}
 
 		optionNoNight := Option{
-			EO: "",
-			EH: "",
-			EL: "",
-			EC: "",
+			EO: nil,
+			EH: nil,
+			EL: nil,
+			EC: nil,
 		}
 
 		if !optionWithNight.HasNightSession() {
@@ -565,8 +565,8 @@ func TestOptionsResponse_UnmarshalJSON(t *testing.T) {
 	}
 
 	// Check empty string fields are handled correctly
-	if str, ok := opt.EO.(string); !ok || str != "" {
-		t.Errorf("UnmarshalJSON() EO = %v, want empty string", opt.EO)
+	if opt.EO != nil {
+		t.Errorf("UnmarshalJSON() EO = %v, want nil for empty string", *opt.EO)
 	}
 
 	// Check optional fields

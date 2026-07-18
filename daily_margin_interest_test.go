@@ -2,10 +2,12 @@ package jquants
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"testing"
 
 	"github.com/utahta/jquants/client"
+	"github.com/utahta/jquants/types"
 )
 
 func TestDailyMarginInterestService_GetDailyMarginInterest(t *testing.T) {
@@ -77,20 +79,20 @@ func TestDailyMarginInterestService_GetDailyMarginInterest(t *testing.T) {
 							UnclearOrSecOnAlert: "0",
 						},
 						ShrtOut:       11.0,
-						ShrtOutChg:    0.0,
-						ShrtOutRatio:  "*",
+						ShrtOutChg:    types.NewNullable(0.0),
+						ShrtOutRatio:  types.NullableFloat64{}, // ETFのため該当なし（*）
 						LongOut:       676.0,
-						LongOutChg:    -20.0,
-						LongOutRatio:  "*",
+						LongOutChg:    types.NewNullable(-20.0),
+						LongOutRatio:  types.NullableFloat64{}, // ETFのため該当なし（*）
 						SLRatio:       1.6,
 						ShrtNegOut:    0.0,
-						ShrtNegOutChg: 0.0,
+						ShrtNegOutChg: types.NewNullable(0.0),
 						ShrtStdOut:    11.0,
-						ShrtStdOutChg: 0.0,
+						ShrtStdOutChg: types.NewNullable(0.0),
 						LongNegOut:    192.0,
-						LongNegOutChg: -20.0,
+						LongNegOutChg: types.NewNullable(-20.0),
 						LongStdOut:    484.0,
-						LongStdOutChg: 0.0,
+						LongStdOutChg: types.NewNullable(0.0),
 						TSEMrgnRegCls: "001",
 					},
 				},
@@ -295,16 +297,16 @@ func TestDailyMarginInterestService_GetDailyMarginInterestByCodeAndDateRange(t *
 
 func TestDailyMarginInterest_GetOutChgValue(t *testing.T) {
 	tests := []struct {
-		name           string
-		data           DailyMarginInterest
-		wantShortChg   float64
-		wantLongChg    float64
+		name         string
+		data         DailyMarginInterest
+		wantShortChg float64
+		wantLongChg  float64
 	}{
 		{
 			name: "numeric values",
 			data: DailyMarginInterest{
-				ShrtOutChg: 100.0,
-				LongOutChg: -50.0,
+				ShrtOutChg: types.NewNullable(100.0),
+				LongOutChg: types.NewNullable(-50.0),
 			},
 			wantShortChg: 100.0,
 			wantLongChg:  -50.0,
@@ -312,8 +314,8 @@ func TestDailyMarginInterest_GetOutChgValue(t *testing.T) {
 		{
 			name: "string values (not published)",
 			data: DailyMarginInterest{
-				ShrtOutChg: "-",
-				LongOutChg: "-",
+				ShrtOutChg: types.NullableFloat64{}, // 前日非公表（-）
+				LongOutChg: types.NullableFloat64{}, // 前日非公表（-）
 			},
 			wantShortChg: 0.0,
 			wantLongChg:  0.0,
@@ -337,16 +339,16 @@ func TestDailyMarginInterest_GetOutChgValue(t *testing.T) {
 
 func TestDailyMarginInterest_GetOutRatioValue(t *testing.T) {
 	tests := []struct {
-		name            string
-		data            DailyMarginInterest
-		wantShortRatio  float64
-		wantLongRatio   float64
+		name           string
+		data           DailyMarginInterest
+		wantShortRatio float64
+		wantLongRatio  float64
 	}{
 		{
 			name: "numeric values",
 			data: DailyMarginInterest{
-				ShrtOutRatio: 0.5,
-				LongOutRatio: 1.2,
+				ShrtOutRatio: types.NewNullable(0.5),
+				LongOutRatio: types.NewNullable(1.2),
 			},
 			wantShortRatio: 0.5,
 			wantLongRatio:  1.2,
@@ -354,8 +356,8 @@ func TestDailyMarginInterest_GetOutRatioValue(t *testing.T) {
 		{
 			name: "string values (ETF)",
 			data: DailyMarginInterest{
-				ShrtOutRatio: "*",
-				LongOutRatio: "*",
+				ShrtOutRatio: types.NullableFloat64{}, // ETFのため該当なし（*）
+				LongOutRatio: types.NullableFloat64{}, // ETFのため該当なし（*）
 			},
 			wantShortRatio: 0.0,
 			wantLongRatio:  0.0,
@@ -379,13 +381,13 @@ func TestDailyMarginInterest_GetOutRatioValue(t *testing.T) {
 
 func TestPublishReason_HelperMethods(t *testing.T) {
 	tests := []struct {
-		name       string
-		reason     PublishReason
-		isRestricted       bool
-		isDailyPublication bool
-		isMonitoring       bool
-		isRestrictedByJSF  bool
-		isPrecautionByJSF  bool
+		name                  string
+		reason                PublishReason
+		isRestricted          bool
+		isDailyPublication    bool
+		isMonitoring          bool
+		isRestrictedByJSF     bool
+		isPrecautionByJSF     bool
 		isUnclearOrSecOnAlert bool
 	}{
 		{
@@ -398,11 +400,11 @@ func TestPublishReason_HelperMethods(t *testing.T) {
 				PrecautionByJSF:     "1",
 				UnclearOrSecOnAlert: "0",
 			},
-			isRestricted:       false,
-			isDailyPublication: false,
-			isMonitoring:       false,
-			isRestrictedByJSF:  false,
-			isPrecautionByJSF:  true,
+			isRestricted:          false,
+			isDailyPublication:    false,
+			isMonitoring:          false,
+			isRestrictedByJSF:     false,
+			isPrecautionByJSF:     true,
 			isUnclearOrSecOnAlert: false,
 		},
 		{
@@ -415,11 +417,11 @@ func TestPublishReason_HelperMethods(t *testing.T) {
 				PrecautionByJSF:     "0",
 				UnclearOrSecOnAlert: "0",
 			},
-			isRestricted:       true,
-			isDailyPublication: true,
-			isMonitoring:       false,
-			isRestrictedByJSF:  false,
-			isPrecautionByJSF:  false,
+			isRestricted:          true,
+			isDailyPublication:    true,
+			isMonitoring:          false,
+			isRestrictedByJSF:     false,
+			isPrecautionByJSF:     false,
 			isUnclearOrSecOnAlert: false,
 		},
 		{
@@ -432,11 +434,11 @@ func TestPublishReason_HelperMethods(t *testing.T) {
 				PrecautionByJSF:     "1",
 				UnclearOrSecOnAlert: "1",
 			},
-			isRestricted:       true,
-			isDailyPublication: true,
-			isMonitoring:       true,
-			isRestrictedByJSF:  true,
-			isPrecautionByJSF:  true,
+			isRestricted:          true,
+			isDailyPublication:    true,
+			isMonitoring:          true,
+			isRestrictedByJSF:     true,
+			isPrecautionByJSF:     true,
 			isUnclearOrSecOnAlert: true,
 		},
 	}
@@ -503,5 +505,49 @@ func TestTSEMarginRegulationConstants(t *testing.T) {
 				t.Errorf("TSE margin regulation constant = %v, want %v", tt.constant, tt.expected)
 			}
 		})
+	}
+}
+
+func TestDailyMarginInterestResponse_UnmarshalJSON_SpecialValues(t *testing.T) {
+	// 「-」（前日非公表）と「*」（ETFのため該当なし）がエラーなく値なしとして扱われること
+	jsonData := `{
+		"data": [
+			{
+				"PubDate": "2024-02-08",
+				"Code": "13260",
+				"ShrtOut": 1000.0,
+				"ShrtOutChg": "-",
+				"ShrtOutRatio": "*",
+				"LongOut": 2000.0,
+				"LongOutChg": 150.5,
+				"LongOutRatio": "*"
+			}
+		],
+		"pagination_key": ""
+	}`
+
+	var resp DailyMarginInterestResponse
+	if err := json.Unmarshal([]byte(jsonData), &resp); err != nil {
+		t.Fatalf("UnmarshalJSON failed: %v", err)
+	}
+	if len(resp.Data) != 1 {
+		t.Fatalf("data count = %d, want 1", len(resp.Data))
+	}
+
+	d := resp.Data[0]
+	if _, ok := d.ShrtOutChg.Get(); ok {
+		t.Error("ShrtOutChg should be absent for dash")
+	}
+	if _, ok := d.ShrtOutRatio.Get(); ok {
+		t.Error("ShrtOutRatio should be absent for asterisk")
+	}
+	if v, ok := d.LongOutChg.Get(); !ok || v != 150.5 {
+		t.Errorf("LongOutChg = %v, %v; want 150.5, true", v, ok)
+	}
+	if got := d.GetShortOutChgValue(); got != 0 {
+		t.Errorf("GetShortOutChgValue() = %v, want 0", got)
+	}
+	if got := d.GetLongOutChgValue(); got != 150.5 {
+		t.Errorf("GetLongOutChgValue() = %v, want 150.5", got)
 	}
 }

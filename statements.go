@@ -183,129 +183,129 @@ type RawStatement struct {
 	NxtFYEn    string `json:"NxtFYEn"`
 
 	// 連結財務数値
-	Sales  types.Float64StringWithDash `json:"Sales"`
-	OP     types.Float64StringWithDash `json:"OP"`
-	OdP    types.Float64StringWithDash `json:"OdP"`
-	NP     types.Float64StringWithDash `json:"NP"`
-	TA     types.Float64StringWithDash `json:"TA"`
-	Eq     types.Float64StringWithDash `json:"Eq"`
-	CashEq types.Float64StringWithDash `json:"CashEq"`
-	CFO    types.Float64StringWithDash `json:"CFO"`
-	CFI    types.Float64StringWithDash `json:"CFI"`
-	CFF    types.Float64StringWithDash `json:"CFF"`
+	Sales  types.NullableFloat64 `json:"Sales"`
+	OP     types.NullableFloat64 `json:"OP"`
+	OdP    types.NullableFloat64 `json:"OdP"`
+	NP     types.NullableFloat64 `json:"NP"`
+	TA     types.NullableFloat64 `json:"TA"`
+	Eq     types.NullableFloat64 `json:"Eq"`
+	CashEq types.NullableFloat64 `json:"CashEq"`
+	CFO    types.NullableFloat64 `json:"CFO"`
+	CFI    types.NullableFloat64 `json:"CFI"`
+	CFF    types.NullableFloat64 `json:"CFF"`
 
 	// 財務指標
-	EPS  types.Float64StringWithDash `json:"EPS"`
-	DEPS types.Float64StringWithDash `json:"DEPS"`
-	BPS  types.Float64StringWithDash `json:"BPS"`
-	EqAR types.Float64StringWithDash `json:"EqAR"`
+	EPS  types.NullableFloat64 `json:"EPS"`
+	DEPS types.NullableFloat64 `json:"DEPS"`
+	BPS  types.NullableFloat64 `json:"BPS"`
+	EqAR types.NullableFloat64 `json:"EqAR"`
 
 	// 配当実績
-	Div1Q         types.Float64StringWithDash `json:"Div1Q"`
-	Div2Q         types.Float64StringWithDash `json:"Div2Q"`
-	Div3Q         types.Float64StringWithDash `json:"Div3Q"`
-	DivFY         types.Float64StringWithDash `json:"DivFY"`
-	DivAnn        types.Float64StringWithDash `json:"DivAnn"`
-	DivUnit       types.Float64StringWithDash `json:"DivUnit"`
-	DivTotalAnn   types.Float64StringWithDash `json:"DivTotalAnn"`
-	PayoutRatioAn types.Float64StringWithDash `json:"PayoutRatioAnn"`
+	Div1Q         types.NullableFloat64 `json:"Div1Q"`
+	Div2Q         types.NullableFloat64 `json:"Div2Q"`
+	Div3Q         types.NullableFloat64 `json:"Div3Q"`
+	DivFY         types.NullableFloat64 `json:"DivFY"`
+	DivAnn        types.NullableFloat64 `json:"DivAnn"`
+	DivUnit       types.NullableFloat64 `json:"DivUnit"`
+	DivTotalAnn   types.NullableFloat64 `json:"DivTotalAnn"`
+	PayoutRatioAn types.NullableFloat64 `json:"PayoutRatioAnn"`
 
 	// 配当予想
-	FDiv1Q         types.Float64StringWithDash `json:"FDiv1Q"`
-	FDiv2Q         types.Float64StringWithDash `json:"FDiv2Q"`
-	FDiv3Q         types.Float64StringWithDash `json:"FDiv3Q"`
-	FDivFY         types.Float64StringWithDash `json:"FDivFY"`
-	FDivAnn        types.Float64StringWithDash `json:"FDivAnn"`
-	FDivUnit       types.Float64StringWithDash `json:"FDivUnit"`
-	FDivTotalAnn   types.Float64StringWithDash `json:"FDivTotalAnn"`
-	FPayoutRatioAn types.Float64StringWithDash `json:"FPayoutRatioAnn"`
+	FDiv1Q         types.NullableFloat64 `json:"FDiv1Q"`
+	FDiv2Q         types.NullableFloat64 `json:"FDiv2Q"`
+	FDiv3Q         types.NullableFloat64 `json:"FDiv3Q"`
+	FDivFY         types.NullableFloat64 `json:"FDivFY"`
+	FDivAnn        types.NullableFloat64 `json:"FDivAnn"`
+	FDivUnit       types.NullableFloat64 `json:"FDivUnit"`
+	FDivTotalAnn   types.NullableFloat64 `json:"FDivTotalAnn"`
+	FPayoutRatioAn types.NullableFloat64 `json:"FPayoutRatioAnn"`
 
 	// 翌期配当予想
-	NxFDiv1Q         types.Float64StringWithDash `json:"NxFDiv1Q"`
-	NxFDiv2Q         types.Float64StringWithDash `json:"NxFDiv2Q"`
-	NxFDiv3Q         types.Float64StringWithDash `json:"NxFDiv3Q"`
-	NxFDivFY         types.Float64StringWithDash `json:"NxFDivFY"`
-	NxFDivAnn        types.Float64StringWithDash `json:"NxFDivAnn"`
-	NxFDivUnit       types.Float64StringWithDash `json:"NxFDivUnit"`
-	NxFPayoutRatioAn types.Float64StringWithDash `json:"NxFPayoutRatioAnn"`
+	NxFDiv1Q         types.NullableFloat64 `json:"NxFDiv1Q"`
+	NxFDiv2Q         types.NullableFloat64 `json:"NxFDiv2Q"`
+	NxFDiv3Q         types.NullableFloat64 `json:"NxFDiv3Q"`
+	NxFDivFY         types.NullableFloat64 `json:"NxFDivFY"`
+	NxFDivAnn        types.NullableFloat64 `json:"NxFDivAnn"`
+	NxFDivUnit       types.NullableFloat64 `json:"NxFDivUnit"`
+	NxFPayoutRatioAn types.NullableFloat64 `json:"NxFPayoutRatioAnn"`
 
 	// 第2四半期業績予想
-	FSales2Q types.Float64StringWithDash `json:"FSales2Q"`
-	FOP2Q    types.Float64StringWithDash `json:"FOP2Q"`
-	FOdP2Q   types.Float64StringWithDash `json:"FOdP2Q"`
-	FNP2Q    types.Float64StringWithDash `json:"FNP2Q"`
-	FEPS2Q   types.Float64StringWithDash `json:"FEPS2Q"`
+	FSales2Q types.NullableFloat64 `json:"FSales2Q"`
+	FOP2Q    types.NullableFloat64 `json:"FOP2Q"`
+	FOdP2Q   types.NullableFloat64 `json:"FOdP2Q"`
+	FNP2Q    types.NullableFloat64 `json:"FNP2Q"`
+	FEPS2Q   types.NullableFloat64 `json:"FEPS2Q"`
 
 	// 翌期第2四半期業績予想
-	NxFSales2Q types.Float64StringWithDash `json:"NxFSales2Q"`
-	NxFOP2Q    types.Float64StringWithDash `json:"NxFOP2Q"`
-	NxFOdP2Q   types.Float64StringWithDash `json:"NxFOdP2Q"`
-	NxFNp2Q    types.Float64StringWithDash `json:"NxFNp2Q"`
-	NxFEPS2Q   types.Float64StringWithDash `json:"NxFEPS2Q"`
+	NxFSales2Q types.NullableFloat64 `json:"NxFSales2Q"`
+	NxFOP2Q    types.NullableFloat64 `json:"NxFOP2Q"`
+	NxFOdP2Q   types.NullableFloat64 `json:"NxFOdP2Q"`
+	NxFNp2Q    types.NullableFloat64 `json:"NxFNp2Q"`
+	NxFEPS2Q   types.NullableFloat64 `json:"NxFEPS2Q"`
 
 	// 期末業績予想
-	FSales types.Float64StringWithDash `json:"FSales"`
-	FOP    types.Float64StringWithDash `json:"FOP"`
-	FOdP   types.Float64StringWithDash `json:"FOdP"`
-	FNP    types.Float64StringWithDash `json:"FNP"`
-	FEPS   types.Float64StringWithDash `json:"FEPS"`
+	FSales types.NullableFloat64 `json:"FSales"`
+	FOP    types.NullableFloat64 `json:"FOP"`
+	FOdP   types.NullableFloat64 `json:"FOdP"`
+	FNP    types.NullableFloat64 `json:"FNP"`
+	FEPS   types.NullableFloat64 `json:"FEPS"`
 
 	// 翌期末業績予想
-	NxFSales types.Float64StringWithDash `json:"NxFSales"`
-	NxFOP    types.Float64StringWithDash `json:"NxFOP"`
-	NxFOdP   types.Float64StringWithDash `json:"NxFOdP"`
-	NxFNp    types.Float64StringWithDash `json:"NxFNp"`
-	NxFEPS   types.Float64StringWithDash `json:"NxFEPS"`
+	NxFSales types.NullableFloat64 `json:"NxFSales"`
+	NxFOP    types.NullableFloat64 `json:"NxFOP"`
+	NxFOdP   types.NullableFloat64 `json:"NxFOdP"`
+	NxFNp    types.NullableFloat64 `json:"NxFNp"`
+	NxFEPS   types.NullableFloat64 `json:"NxFEPS"`
 
 	// その他
-	MatChgSub  string               `json:"MatChgSub"`
-	SigChgInC  string               `json:"SigChgInC"`
-	ChgByASRev string               `json:"ChgByASRev"`
-	ChgNoASRev string               `json:"ChgNoASRev"`
-	ChgAcEst   string               `json:"ChgAcEst"`
-	RetroRst   string               `json:"RetroRst"`
-	ShOutFY    types.Float64StringWithDash `json:"ShOutFY"`
-	TrShFY     types.Float64StringWithDash `json:"TrShFY"`
-	AvgSh      types.Float64StringWithDash `json:"AvgSh"`
+	MatChgSub  string              `json:"MatChgSub"`
+	SigChgInC  string              `json:"SigChgInC"`
+	ChgByASRev string              `json:"ChgByASRev"`
+	ChgNoASRev string              `json:"ChgNoASRev"`
+	ChgAcEst   string              `json:"ChgAcEst"`
+	RetroRst   string              `json:"RetroRst"`
+	ShOutFY    types.NullableInt64 `json:"ShOutFY"`
+	TrShFY     types.NullableInt64 `json:"TrShFY"`
+	AvgSh      types.NullableInt64 `json:"AvgSh"`
 
 	// 非連結財務数値
-	NCSales types.Float64StringWithDash `json:"NCSales"`
-	NCOP    types.Float64StringWithDash `json:"NCOP"`
-	NCOdP   types.Float64StringWithDash `json:"NCOdP"`
-	NCNP    types.Float64StringWithDash `json:"NCNP"`
-	NCEPS   types.Float64StringWithDash `json:"NCEPS"`
-	NCTA    types.Float64StringWithDash `json:"NCTA"`
-	NCEq    types.Float64StringWithDash `json:"NCEq"`
-	NCEqAR  types.Float64StringWithDash `json:"NCEqAR"`
-	NCBPS   types.Float64StringWithDash `json:"NCBPS"`
+	NCSales types.NullableFloat64 `json:"NCSales"`
+	NCOP    types.NullableFloat64 `json:"NCOP"`
+	NCOdP   types.NullableFloat64 `json:"NCOdP"`
+	NCNP    types.NullableFloat64 `json:"NCNP"`
+	NCEPS   types.NullableFloat64 `json:"NCEPS"`
+	NCTA    types.NullableFloat64 `json:"NCTA"`
+	NCEq    types.NullableFloat64 `json:"NCEq"`
+	NCEqAR  types.NullableFloat64 `json:"NCEqAR"`
+	NCBPS   types.NullableFloat64 `json:"NCBPS"`
 
 	// 非連結第2四半期予想
-	FNCSales2Q types.Float64StringWithDash `json:"FNCSales2Q"`
-	FNCOP2Q    types.Float64StringWithDash `json:"FNCOP2Q"`
-	FNCOdP2Q   types.Float64StringWithDash `json:"FNCOdP2Q"`
-	FNCNP2Q    types.Float64StringWithDash `json:"FNCNP2Q"`
-	FNCEPS2Q   types.Float64StringWithDash `json:"FNCEPS2Q"`
+	FNCSales2Q types.NullableFloat64 `json:"FNCSales2Q"`
+	FNCOP2Q    types.NullableFloat64 `json:"FNCOP2Q"`
+	FNCOdP2Q   types.NullableFloat64 `json:"FNCOdP2Q"`
+	FNCNP2Q    types.NullableFloat64 `json:"FNCNP2Q"`
+	FNCEPS2Q   types.NullableFloat64 `json:"FNCEPS2Q"`
 
 	// 翌期非連結第2四半期予想
-	NxFNCSales2Q types.Float64StringWithDash `json:"NxFNCSales2Q"`
-	NxFNCOP2Q    types.Float64StringWithDash `json:"NxFNCOP2Q"`
-	NxFNCOdP2Q   types.Float64StringWithDash `json:"NxFNCOdP2Q"`
-	NxFNCNP2Q    types.Float64StringWithDash `json:"NxFNCNP2Q"`
-	NxFNCEPS2Q   types.Float64StringWithDash `json:"NxFNCEPS2Q"`
+	NxFNCSales2Q types.NullableFloat64 `json:"NxFNCSales2Q"`
+	NxFNCOP2Q    types.NullableFloat64 `json:"NxFNCOP2Q"`
+	NxFNCOdP2Q   types.NullableFloat64 `json:"NxFNCOdP2Q"`
+	NxFNCNP2Q    types.NullableFloat64 `json:"NxFNCNP2Q"`
+	NxFNCEPS2Q   types.NullableFloat64 `json:"NxFNCEPS2Q"`
 
 	// 非連結期末予想
-	FNCSales types.Float64StringWithDash `json:"FNCSales"`
-	FNCOP    types.Float64StringWithDash `json:"FNCOP"`
-	FNCOdP   types.Float64StringWithDash `json:"FNCOdP"`
-	FNCNP    types.Float64StringWithDash `json:"FNCNP"`
-	FNCEPS   types.Float64StringWithDash `json:"FNCEPS"`
+	FNCSales types.NullableFloat64 `json:"FNCSales"`
+	FNCOP    types.NullableFloat64 `json:"FNCOP"`
+	FNCOdP   types.NullableFloat64 `json:"FNCOdP"`
+	FNCNP    types.NullableFloat64 `json:"FNCNP"`
+	FNCEPS   types.NullableFloat64 `json:"FNCEPS"`
 
 	// 翌期非連結期末予想
-	NxFNCSales types.Float64StringWithDash `json:"NxFNCSales"`
-	NxFNCOP    types.Float64StringWithDash `json:"NxFNCOP"`
-	NxFNCOdP   types.Float64StringWithDash `json:"NxFNCOdP"`
-	NxFNCNP    types.Float64StringWithDash `json:"NxFNCNP"`
-	NxFNCEPS   types.Float64StringWithDash `json:"NxFNCEPS"`
+	NxFNCSales types.NullableFloat64 `json:"NxFNCSales"`
+	NxFNCOP    types.NullableFloat64 `json:"NxFNCOP"`
+	NxFNCOdP   types.NullableFloat64 `json:"NxFNCOdP"`
+	NxFNCNP    types.NullableFloat64 `json:"NxFNCNP"`
+	NxFNCEPS   types.NullableFloat64 `json:"NxFNCEPS"`
 }
 
 type StatementsResponse struct {
@@ -347,79 +347,79 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 			NxtFYEn:    rs.NxtFYEn,
 
 			// 連結財務数値
-			Sales:  rs.Sales.ToFloat64Ptr(),
-			OP:     rs.OP.ToFloat64Ptr(),
-			OdP:    rs.OdP.ToFloat64Ptr(),
-			NP:     rs.NP.ToFloat64Ptr(),
-			TA:     rs.TA.ToFloat64Ptr(),
-			Eq:     rs.Eq.ToFloat64Ptr(),
-			CashEq: rs.CashEq.ToFloat64Ptr(),
-			CFO:    rs.CFO.ToFloat64Ptr(),
-			CFI:    rs.CFI.ToFloat64Ptr(),
-			CFF:    rs.CFF.ToFloat64Ptr(),
+			Sales:  rs.Sales.Ptr(),
+			OP:     rs.OP.Ptr(),
+			OdP:    rs.OdP.Ptr(),
+			NP:     rs.NP.Ptr(),
+			TA:     rs.TA.Ptr(),
+			Eq:     rs.Eq.Ptr(),
+			CashEq: rs.CashEq.Ptr(),
+			CFO:    rs.CFO.Ptr(),
+			CFI:    rs.CFI.Ptr(),
+			CFF:    rs.CFF.Ptr(),
 
 			// 財務指標
-			EPS:  rs.EPS.ToFloat64Ptr(),
-			DEPS: rs.DEPS.ToFloat64Ptr(),
-			BPS:  rs.BPS.ToFloat64Ptr(),
-			EqAR: rs.EqAR.ToFloat64Ptr(),
+			EPS:  rs.EPS.Ptr(),
+			DEPS: rs.DEPS.Ptr(),
+			BPS:  rs.BPS.Ptr(),
+			EqAR: rs.EqAR.Ptr(),
 
 			// 配当実績
-			Div1Q:         rs.Div1Q.ToFloat64Ptr(),
-			Div2Q:         rs.Div2Q.ToFloat64Ptr(),
-			Div3Q:         rs.Div3Q.ToFloat64Ptr(),
-			DivFY:         rs.DivFY.ToFloat64Ptr(),
-			DivAnn:        rs.DivAnn.ToFloat64Ptr(),
-			DivUnit:       rs.DivUnit.ToFloat64Ptr(),
-			DivTotalAnn:   rs.DivTotalAnn.ToFloat64Ptr(),
-			PayoutRatioAn: rs.PayoutRatioAn.ToFloat64Ptr(),
+			Div1Q:         rs.Div1Q.Ptr(),
+			Div2Q:         rs.Div2Q.Ptr(),
+			Div3Q:         rs.Div3Q.Ptr(),
+			DivFY:         rs.DivFY.Ptr(),
+			DivAnn:        rs.DivAnn.Ptr(),
+			DivUnit:       rs.DivUnit.Ptr(),
+			DivTotalAnn:   rs.DivTotalAnn.Ptr(),
+			PayoutRatioAn: rs.PayoutRatioAn.Ptr(),
 
 			// 配当予想
-			FDiv1Q:         rs.FDiv1Q.ToFloat64Ptr(),
-			FDiv2Q:         rs.FDiv2Q.ToFloat64Ptr(),
-			FDiv3Q:         rs.FDiv3Q.ToFloat64Ptr(),
-			FDivFY:         rs.FDivFY.ToFloat64Ptr(),
-			FDivAnn:        rs.FDivAnn.ToFloat64Ptr(),
-			FDivUnit:       rs.FDivUnit.ToFloat64Ptr(),
-			FDivTotalAnn:   rs.FDivTotalAnn.ToFloat64Ptr(),
-			FPayoutRatioAn: rs.FPayoutRatioAn.ToFloat64Ptr(),
+			FDiv1Q:         rs.FDiv1Q.Ptr(),
+			FDiv2Q:         rs.FDiv2Q.Ptr(),
+			FDiv3Q:         rs.FDiv3Q.Ptr(),
+			FDivFY:         rs.FDivFY.Ptr(),
+			FDivAnn:        rs.FDivAnn.Ptr(),
+			FDivUnit:       rs.FDivUnit.Ptr(),
+			FDivTotalAnn:   rs.FDivTotalAnn.Ptr(),
+			FPayoutRatioAn: rs.FPayoutRatioAn.Ptr(),
 
 			// 翌期配当予想
-			NxFDiv1Q:         rs.NxFDiv1Q.ToFloat64Ptr(),
-			NxFDiv2Q:         rs.NxFDiv2Q.ToFloat64Ptr(),
-			NxFDiv3Q:         rs.NxFDiv3Q.ToFloat64Ptr(),
-			NxFDivFY:         rs.NxFDivFY.ToFloat64Ptr(),
-			NxFDivAnn:        rs.NxFDivAnn.ToFloat64Ptr(),
-			NxFDivUnit:       rs.NxFDivUnit.ToFloat64Ptr(),
-			NxFPayoutRatioAn: rs.NxFPayoutRatioAn.ToFloat64Ptr(),
+			NxFDiv1Q:         rs.NxFDiv1Q.Ptr(),
+			NxFDiv2Q:         rs.NxFDiv2Q.Ptr(),
+			NxFDiv3Q:         rs.NxFDiv3Q.Ptr(),
+			NxFDivFY:         rs.NxFDivFY.Ptr(),
+			NxFDivAnn:        rs.NxFDivAnn.Ptr(),
+			NxFDivUnit:       rs.NxFDivUnit.Ptr(),
+			NxFPayoutRatioAn: rs.NxFPayoutRatioAn.Ptr(),
 
 			// 第2四半期業績予想
-			FSales2Q: rs.FSales2Q.ToFloat64Ptr(),
-			FOP2Q:    rs.FOP2Q.ToFloat64Ptr(),
-			FOdP2Q:   rs.FOdP2Q.ToFloat64Ptr(),
-			FNP2Q:    rs.FNP2Q.ToFloat64Ptr(),
-			FEPS2Q:   rs.FEPS2Q.ToFloat64Ptr(),
+			FSales2Q: rs.FSales2Q.Ptr(),
+			FOP2Q:    rs.FOP2Q.Ptr(),
+			FOdP2Q:   rs.FOdP2Q.Ptr(),
+			FNP2Q:    rs.FNP2Q.Ptr(),
+			FEPS2Q:   rs.FEPS2Q.Ptr(),
 
 			// 翌期第2四半期業績予想
-			NxFSales2Q: rs.NxFSales2Q.ToFloat64Ptr(),
-			NxFOP2Q:    rs.NxFOP2Q.ToFloat64Ptr(),
-			NxFOdP2Q:   rs.NxFOdP2Q.ToFloat64Ptr(),
-			NxFNp2Q:    rs.NxFNp2Q.ToFloat64Ptr(),
-			NxFEPS2Q:   rs.NxFEPS2Q.ToFloat64Ptr(),
+			NxFSales2Q: rs.NxFSales2Q.Ptr(),
+			NxFOP2Q:    rs.NxFOP2Q.Ptr(),
+			NxFOdP2Q:   rs.NxFOdP2Q.Ptr(),
+			NxFNp2Q:    rs.NxFNp2Q.Ptr(),
+			NxFEPS2Q:   rs.NxFEPS2Q.Ptr(),
 
 			// 期末業績予想
-			FSales: rs.FSales.ToFloat64Ptr(),
-			FOP:    rs.FOP.ToFloat64Ptr(),
-			FOdP:   rs.FOdP.ToFloat64Ptr(),
-			FNP:    rs.FNP.ToFloat64Ptr(),
-			FEPS:   rs.FEPS.ToFloat64Ptr(),
+			FSales: rs.FSales.Ptr(),
+			FOP:    rs.FOP.Ptr(),
+			FOdP:   rs.FOdP.Ptr(),
+			FNP:    rs.FNP.Ptr(),
+			FEPS:   rs.FEPS.Ptr(),
 
 			// 翌期末業績予想
-			NxFSales: rs.NxFSales.ToFloat64Ptr(),
-			NxFOP:    rs.NxFOP.ToFloat64Ptr(),
-			NxFOdP:   rs.NxFOdP.ToFloat64Ptr(),
-			NxFNp:    rs.NxFNp.ToFloat64Ptr(),
-			NxFEPS:   rs.NxFEPS.ToFloat64Ptr(),
+			NxFSales: rs.NxFSales.Ptr(),
+			NxFOP:    rs.NxFOP.Ptr(),
+			NxFOdP:   rs.NxFOdP.Ptr(),
+			NxFNp:    rs.NxFNp.Ptr(),
+			NxFEPS:   rs.NxFEPS.Ptr(),
 
 			// その他
 			MatChgSub:  rs.MatChgSub,
@@ -428,48 +428,48 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 			ChgNoASRev: rs.ChgNoASRev,
 			ChgAcEst:   rs.ChgAcEst,
 			RetroRst:   rs.RetroRst,
-			ShOutFY:    rs.ShOutFY.ToInt64Ptr(),
-			TrShFY:     rs.TrShFY.ToInt64Ptr(),
-			AvgSh:      rs.AvgSh.ToInt64Ptr(),
+			ShOutFY:    rs.ShOutFY.Ptr(),
+			TrShFY:     rs.TrShFY.Ptr(),
+			AvgSh:      rs.AvgSh.Ptr(),
 
 			// 非連結財務数値
-			NCSales: rs.NCSales.ToFloat64Ptr(),
-			NCOP:    rs.NCOP.ToFloat64Ptr(),
-			NCOdP:   rs.NCOdP.ToFloat64Ptr(),
-			NCNP:    rs.NCNP.ToFloat64Ptr(),
-			NCEPS:   rs.NCEPS.ToFloat64Ptr(),
-			NCTA:    rs.NCTA.ToFloat64Ptr(),
-			NCEq:    rs.NCEq.ToFloat64Ptr(),
-			NCEqAR:  rs.NCEqAR.ToFloat64Ptr(),
-			NCBPS:   rs.NCBPS.ToFloat64Ptr(),
+			NCSales: rs.NCSales.Ptr(),
+			NCOP:    rs.NCOP.Ptr(),
+			NCOdP:   rs.NCOdP.Ptr(),
+			NCNP:    rs.NCNP.Ptr(),
+			NCEPS:   rs.NCEPS.Ptr(),
+			NCTA:    rs.NCTA.Ptr(),
+			NCEq:    rs.NCEq.Ptr(),
+			NCEqAR:  rs.NCEqAR.Ptr(),
+			NCBPS:   rs.NCBPS.Ptr(),
 
 			// 非連結第2四半期予想
-			FNCSales2Q: rs.FNCSales2Q.ToFloat64Ptr(),
-			FNCOP2Q:    rs.FNCOP2Q.ToFloat64Ptr(),
-			FNCOdP2Q:   rs.FNCOdP2Q.ToFloat64Ptr(),
-			FNCNP2Q:    rs.FNCNP2Q.ToFloat64Ptr(),
-			FNCEPS2Q:   rs.FNCEPS2Q.ToFloat64Ptr(),
+			FNCSales2Q: rs.FNCSales2Q.Ptr(),
+			FNCOP2Q:    rs.FNCOP2Q.Ptr(),
+			FNCOdP2Q:   rs.FNCOdP2Q.Ptr(),
+			FNCNP2Q:    rs.FNCNP2Q.Ptr(),
+			FNCEPS2Q:   rs.FNCEPS2Q.Ptr(),
 
 			// 翌期非連結第2四半期予想
-			NxFNCSales2Q: rs.NxFNCSales2Q.ToFloat64Ptr(),
-			NxFNCOP2Q:    rs.NxFNCOP2Q.ToFloat64Ptr(),
-			NxFNCOdP2Q:   rs.NxFNCOdP2Q.ToFloat64Ptr(),
-			NxFNCNP2Q:    rs.NxFNCNP2Q.ToFloat64Ptr(),
-			NxFNCEPS2Q:   rs.NxFNCEPS2Q.ToFloat64Ptr(),
+			NxFNCSales2Q: rs.NxFNCSales2Q.Ptr(),
+			NxFNCOP2Q:    rs.NxFNCOP2Q.Ptr(),
+			NxFNCOdP2Q:   rs.NxFNCOdP2Q.Ptr(),
+			NxFNCNP2Q:    rs.NxFNCNP2Q.Ptr(),
+			NxFNCEPS2Q:   rs.NxFNCEPS2Q.Ptr(),
 
 			// 非連結期末予想
-			FNCSales: rs.FNCSales.ToFloat64Ptr(),
-			FNCOP:    rs.FNCOP.ToFloat64Ptr(),
-			FNCOdP:   rs.FNCOdP.ToFloat64Ptr(),
-			FNCNP:    rs.FNCNP.ToFloat64Ptr(),
-			FNCEPS:   rs.FNCEPS.ToFloat64Ptr(),
+			FNCSales: rs.FNCSales.Ptr(),
+			FNCOP:    rs.FNCOP.Ptr(),
+			FNCOdP:   rs.FNCOdP.Ptr(),
+			FNCNP:    rs.FNCNP.Ptr(),
+			FNCEPS:   rs.FNCEPS.Ptr(),
 
 			// 翌期非連結期末予想
-			NxFNCSales: rs.NxFNCSales.ToFloat64Ptr(),
-			NxFNCOP:    rs.NxFNCOP.ToFloat64Ptr(),
-			NxFNCOdP:   rs.NxFNCOdP.ToFloat64Ptr(),
-			NxFNCNP:    rs.NxFNCNP.ToFloat64Ptr(),
-			NxFNCEPS:   rs.NxFNCEPS.ToFloat64Ptr(),
+			NxFNCSales: rs.NxFNCSales.Ptr(),
+			NxFNCOP:    rs.NxFNCOP.Ptr(),
+			NxFNCOdP:   rs.NxFNCOdP.Ptr(),
+			NxFNCNP:    rs.NxFNCNP.Ptr(),
+			NxFNCEPS:   rs.NxFNCEPS.Ptr(),
 		}
 	}
 

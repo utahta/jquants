@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/utahta/jquants/client"
+	"github.com/utahta/jquants/types"
 )
 
 // OptionsService はオプション四本値データを取得するサービスです。
@@ -59,11 +59,11 @@ type Option struct {
 	L float64 `json:"L"` // 日通し安値
 	C float64 `json:"C"` // 日通し終値
 
-	// ナイト・セッション四本値（取引開始日初日は空文字）
-	EO interface{} `json:"EO"` // ナイト・セッション始値
-	EH interface{} `json:"EH"` // ナイト・セッション高値
-	EL interface{} `json:"EL"` // ナイト・セッション安値
-	EC interface{} `json:"EC"` // ナイト・セッション終値
+	// ナイト・セッション四本値（取引開始日初日は値なし）
+	EO *float64 `json:"EO"` // ナイト・セッション始値
+	EH *float64 `json:"EH"` // ナイト・セッション高値
+	EL *float64 `json:"EL"` // ナイト・セッション安値
+	EC *float64 `json:"EC"` // ナイト・セッション終値
 
 	// 日中セッション四本値
 	AO float64 `json:"AO"` // 日中始値
@@ -72,10 +72,10 @@ type Option struct {
 	AC float64 `json:"AC"` // 日中終値
 
 	// 前場四本値（前後場取引対象銘柄でない場合、空文字）
-	MO interface{} `json:"MO"` // 前場始値
-	MH interface{} `json:"MH"` // 前場高値
-	ML interface{} `json:"ML"` // 前場安値
-	MC interface{} `json:"MC"` // 前場終値
+	MO *float64 `json:"MO"` // 前場始値
+	MH *float64 `json:"MH"` // 前場高値
+	ML *float64 `json:"ML"` // 前場安値
+	MC *float64 `json:"MC"` // 前場終値
 
 	// 取引情報
 	Vo float64 `json:"Vo"` // 取引高
@@ -97,43 +97,43 @@ type Option struct {
 
 // RawOption is used for unmarshaling JSON response with mixed types
 type RawOption struct {
-	Code         string      `json:"Code"`
-	ProdCat      string      `json:"ProdCat"`
-	UndSSO       string      `json:"UndSSO"`
-	Date         string      `json:"Date"`
-	CM           string      `json:"CM"`
-	Strike       float64     `json:"Strike"`
-	PCDiv        string      `json:"PCDiv"`
-	EmMrgnTrgDiv string      `json:"EmMrgnTrgDiv"`
-	O            float64     `json:"O"`
-	H            float64     `json:"H"`
-	L            float64     `json:"L"`
-	C            float64     `json:"C"`
-	EO           interface{} `json:"EO"`
-	EH           interface{} `json:"EH"`
-	EL           interface{} `json:"EL"`
-	EC           interface{} `json:"EC"`
-	AO           float64     `json:"AO"`
-	AH           float64     `json:"AH"`
-	AL           float64     `json:"AL"`
-	AC           float64     `json:"AC"`
-	MO           interface{} `json:"MO"`
-	MH           interface{} `json:"MH"`
-	ML           interface{} `json:"ML"`
-	MC           interface{} `json:"MC"`
-	Vo           float64     `json:"Vo"`
-	OI           float64     `json:"OI"`
-	Va           float64     `json:"Va"`
-	VoOA         interface{} `json:"VoOA"`
-	Settle       interface{} `json:"Settle"`
-	Theo         interface{} `json:"Theo"`
-	BaseVol      interface{} `json:"BaseVol"`
-	UnderPx      interface{} `json:"UnderPx"`
-	IV           interface{} `json:"IV"`
-	IR           interface{} `json:"IR"`
-	LTD          interface{} `json:"LTD"`
-	SQD          interface{} `json:"SQD"`
-	CCMFlag      interface{} `json:"CCMFlag"`
+	Code         string                `json:"Code"`
+	ProdCat      string                `json:"ProdCat"`
+	UndSSO       string                `json:"UndSSO"`
+	Date         string                `json:"Date"`
+	CM           string                `json:"CM"`
+	Strike       float64               `json:"Strike"`
+	PCDiv        string                `json:"PCDiv"`
+	EmMrgnTrgDiv string                `json:"EmMrgnTrgDiv"`
+	O            float64               `json:"O"`
+	H            float64               `json:"H"`
+	L            float64               `json:"L"`
+	C            float64               `json:"C"`
+	EO           types.NullableFloat64 `json:"EO"`
+	EH           types.NullableFloat64 `json:"EH"`
+	EL           types.NullableFloat64 `json:"EL"`
+	EC           types.NullableFloat64 `json:"EC"`
+	AO           float64               `json:"AO"`
+	AH           float64               `json:"AH"`
+	AL           float64               `json:"AL"`
+	AC           float64               `json:"AC"`
+	MO           types.NullableFloat64 `json:"MO"`
+	MH           types.NullableFloat64 `json:"MH"`
+	ML           types.NullableFloat64 `json:"ML"`
+	MC           types.NullableFloat64 `json:"MC"`
+	Vo           float64               `json:"Vo"`
+	OI           float64               `json:"OI"`
+	Va           float64               `json:"Va"`
+	VoOA         types.NullableFloat64 `json:"VoOA"`
+	Settle       types.NullableFloat64 `json:"Settle"`
+	Theo         types.NullableFloat64 `json:"Theo"`
+	BaseVol      types.NullableFloat64 `json:"BaseVol"`
+	UnderPx      types.NullableFloat64 `json:"UnderPx"`
+	IV           types.NullableFloat64 `json:"IV"`
+	IR           types.NullableFloat64 `json:"IR"`
+	LTD          types.NullableString  `json:"LTD"`
+	SQD          types.NullableString  `json:"SQD"`
+	CCMFlag      types.NullableString  `json:"CCMFlag"`
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling for OptionsResponse
@@ -168,54 +168,34 @@ func (r *OptionsResponse) UnmarshalJSON(data []byte) error {
 			H:            ro.H,
 			L:            ro.L,
 			C:            ro.C,
-			EO:           ro.EO,
-			EH:           ro.EH,
-			EL:           ro.EL,
-			EC:           ro.EC,
+			EO:           ro.EO.Ptr(),
+			EH:           ro.EH.Ptr(),
+			EL:           ro.EL.Ptr(),
+			EC:           ro.EC.Ptr(),
 			AO:           ro.AO,
 			AH:           ro.AH,
 			AL:           ro.AL,
 			AC:           ro.AC,
-			MO:           ro.MO,
-			MH:           ro.MH,
-			ML:           ro.ML,
-			MC:           ro.MC,
+			MO:           ro.MO.Ptr(),
+			MH:           ro.MH.Ptr(),
+			ML:           ro.ML.Ptr(),
+			MC:           ro.MC.Ptr(),
 			Vo:           ro.Vo,
 			OI:           ro.OI,
 			Va:           ro.Va,
 		}
 
 		// Convert optional fields
-		if v, ok := parseOptionalFloatOpt(ro.VoOA); ok {
-			o.VoOA = &v
-		}
-		if v, ok := parseOptionalFloatOpt(ro.Settle); ok {
-			o.Settle = &v
-		}
-		if v, ok := parseOptionalFloatOpt(ro.Theo); ok {
-			o.Theo = &v
-		}
-		if v, ok := parseOptionalFloatOpt(ro.BaseVol); ok {
-			o.BaseVol = &v
-		}
-		if v, ok := parseOptionalFloatOpt(ro.UnderPx); ok {
-			o.UnderPx = &v
-		}
-		if v, ok := parseOptionalFloatOpt(ro.IV); ok {
-			o.IV = &v
-		}
-		if v, ok := parseOptionalFloatOpt(ro.IR); ok {
-			o.IR = &v
-		}
-		if v, ok := parseOptionalStringOpt(ro.LTD); ok {
-			o.LTD = &v
-		}
-		if v, ok := parseOptionalStringOpt(ro.SQD); ok {
-			o.SQD = &v
-		}
-		if v, ok := parseOptionalStringOpt(ro.CCMFlag); ok {
-			o.CCMFlag = &v
-		}
+		o.VoOA = ro.VoOA.Ptr()
+		o.Settle = ro.Settle.Ptr()
+		o.Theo = ro.Theo.Ptr()
+		o.BaseVol = ro.BaseVol.Ptr()
+		o.UnderPx = ro.UnderPx.Ptr()
+		o.IV = ro.IV.Ptr()
+		o.IR = ro.IR.Ptr()
+		o.LTD = ro.LTD.Ptr()
+		o.SQD = ro.SQD.Ptr()
+		o.CCMFlag = ro.CCMFlag.Ptr()
 
 		r.Data[idx] = o
 	}
@@ -414,64 +394,53 @@ func (o *Option) IsSecurityOption() bool {
 
 // HasNightSession はナイトセッションデータがあるかを判定します。
 func (o *Option) HasNightSession() bool {
-	// interface{}型のフィールドが空文字列でないかチェック
-	if str, ok := o.EO.(string); ok && str == "" {
-		return false
-	}
-	// 0の場合も取引なしと判定
-	if val, ok := o.EO.(float64); ok && val == 0 {
-		return false
-	}
-	return true
+	// 値なしに加えて、0の場合も取引なしと判定
+	return o.EO != nil && *o.EO != 0
 }
 
 // HasMorningSession は前場データがあるかを判定します。
 func (o *Option) HasMorningSession() bool {
-	// interface{}型のフィールドが空文字列でないかチェック
-	if str, ok := o.MO.(string); ok && str == "" {
-		return false
-	}
-	return true
+	return o.MO != nil
 }
 
 // GetNightSessionOpen はナイトセッション始値を取得します。
 func (o *Option) GetNightSessionOpen() *float64 {
-	return parseInterfaceToFloat64Opt(o.EO)
+	return o.EO
 }
 
 // GetNightSessionHigh はナイトセッション高値を取得します。
 func (o *Option) GetNightSessionHigh() *float64 {
-	return parseInterfaceToFloat64Opt(o.EH)
+	return o.EH
 }
 
 // GetNightSessionLow はナイトセッション安値を取得します。
 func (o *Option) GetNightSessionLow() *float64 {
-	return parseInterfaceToFloat64Opt(o.EL)
+	return o.EL
 }
 
 // GetNightSessionClose はナイトセッション終値を取得します。
 func (o *Option) GetNightSessionClose() *float64 {
-	return parseInterfaceToFloat64Opt(o.EC)
+	return o.EC
 }
 
 // GetMorningSessionOpen は前場始値を取得します。
 func (o *Option) GetMorningSessionOpen() *float64 {
-	return parseInterfaceToFloat64Opt(o.MO)
+	return o.MO
 }
 
 // GetMorningSessionHigh は前場高値を取得します。
 func (o *Option) GetMorningSessionHigh() *float64 {
-	return parseInterfaceToFloat64Opt(o.MH)
+	return o.MH
 }
 
 // GetMorningSessionLow は前場安値を取得します。
 func (o *Option) GetMorningSessionLow() *float64 {
-	return parseInterfaceToFloat64Opt(o.ML)
+	return o.ML
 }
 
 // GetMorningSessionClose は前場終値を取得します。
 func (o *Option) GetMorningSessionClose() *float64 {
-	return parseInterfaceToFloat64Opt(o.MC)
+	return o.MC
 }
 
 // IsITM はイン・ザ・マネーかどうかを判定します。
@@ -542,48 +511,4 @@ func (o *Option) GetTimeValue() *float64 {
 	intrinsic := o.GetIntrinsicValue()
 	timeValue := *o.Theo - intrinsic
 	return &timeValue
-}
-
-// Helper functions
-
-func parseInterfaceToFloat64Opt(v interface{}) *float64 {
-	switch val := v.(type) {
-	case float64:
-		return &val
-	case int:
-		f := float64(val)
-		return &f
-	case string:
-		if val == "" {
-			return nil
-		}
-		if f, err := strconv.ParseFloat(val, 64); err == nil {
-			return &f
-		}
-	}
-	return nil
-}
-
-func parseOptionalFloatOpt(v interface{}) (float64, bool) {
-	switch val := v.(type) {
-	case float64:
-		return val, true
-	case int:
-		return float64(val), true
-	case string:
-		if val == "" {
-			return 0, false
-		}
-		if f, err := strconv.ParseFloat(val, 64); err == nil {
-			return f, true
-		}
-	}
-	return 0, false
-}
-
-func parseOptionalStringOpt(v interface{}) (string, bool) {
-	if str, ok := v.(string); ok && str != "" {
-		return str, true
-	}
-	return "", false
 }
