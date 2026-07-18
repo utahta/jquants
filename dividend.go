@@ -2,7 +2,6 @@ package jquants
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/utahta/jquants/client"
@@ -45,11 +44,11 @@ type DividendResponse struct {
 // 注意: このデータはプレミアムプラン専用APIで取得されます。
 type Dividend struct {
 	// 基本情報
-	PubDate  string `json:"PubDate"`  // 通知日時（年月日）（YYYY-MM-DD形式）
-	PubTime  string `json:"PubTime"`  // 通知日時（時分）（HH:MI形式）
-	Code     string `json:"Code"`     // 銘柄コード
-	RefNo    string `json:"RefNo"`    // リファレンスナンバー（配当通知を一意に特定するための番号）
-	CARefNo  string `json:"CARefNo"`  // CAリファレンスナンバー（訂正・削除の対象となっている配当通知のリファレンスナンバー）
+	PubDate string `json:"PubDate"` // 通知日時（年月日）（YYYY-MM-DD形式）
+	PubTime string `json:"PubTime"` // 通知日時（時分）（HH:MI形式）
+	Code    string `json:"Code"`    // 銘柄コード
+	RefNo   string `json:"RefNo"`   // リファレンスナンバー（配当通知を一意に特定するための番号）
+	CARefNo string `json:"CARefNo"` // CAリファレンスナンバー（訂正・削除の対象となっている配当通知のリファレンスナンバー）
 
 	// 更新・配当区分情報
 	StatCode     string `json:"StatCode"`     // 更新区分（コード）（1: 新規、2: 訂正、3: 削除）
@@ -58,118 +57,25 @@ type Dividend struct {
 	CommSpecCode string `json:"CommSpecCode"` // 記念配当/特別配当コード（0: 通常、1: 記念配当、2: 特別配当、3: 記念・特別配当）
 
 	// 日程情報
-	BoardDate  string  `json:"BoardDate"`  // 取締役会決議日（YYYY-MM-DD形式）
-	IFTerm     string  `json:"IFTerm"`     // 配当基準日年月（YYYY-MM形式）
-	RecDate    string  `json:"RecDate"`    // 基準日（YYYY-MM-DD形式）
-	ExDate     string  `json:"ExDate"`     // 権利落日（YYYY-MM-DD形式）
-	ActRecDate string  `json:"ActRecDate"` // 権利確定日（YYYY-MM-DD形式）
-	PayDate    *string `json:"PayDate"`    // 支払開始予定日（YYYY-MM-DD形式、未定の場合: "-"、非設定の場合: 空文字）
+	// PayDate等のNullable型フィールドは、未定（-）をIsUndetermined()で判別できます。
+	BoardDate  string               `json:"BoardDate"`  // 取締役会決議日（YYYY-MM-DD形式）
+	IFTerm     string               `json:"IFTerm"`     // 配当基準日年月（YYYY-MM形式）
+	RecDate    string               `json:"RecDate"`    // 基準日（YYYY-MM-DD形式）
+	ExDate     string               `json:"ExDate"`     // 権利落日（YYYY-MM-DD形式）
+	ActRecDate string               `json:"ActRecDate"` // 権利確定日（YYYY-MM-DD形式）
+	PayDate    types.NullableString `json:"PayDate"`    // 支払開始予定日（YYYY-MM-DD形式）
 
 	// 配当金額情報
-	DivRate     *float64 `json:"DivRate"`     // １株当たり配当金額（未定の場合: "-"、非設定の場合: 空文字）
-	CommDivRate *float64 `json:"CommDivRate"` // １株当たり記念配当金額（2022年6月6日以降のみ、未定の場合: "-"、非設定の場合: 空文字）
-	SpecDivRate *float64 `json:"SpecDivRate"` // １株当たり特別配当金額（2022年6月6日以降のみ、未定の場合: "-"、非設定の場合: 空文字）
+	DivRate     types.NullableFloat64 `json:"DivRate"`     // １株当たり配当金額
+	CommDivRate types.NullableFloat64 `json:"CommDivRate"` // １株当たり記念配当金額（2022年6月6日以降のみ）
+	SpecDivRate types.NullableFloat64 `json:"SpecDivRate"` // １株当たり特別配当金額（2022年6月6日以降のみ）
 
 	// 税務関連情報（2014年2月24日以降のみ提供）
-	DistAmt           *float64 `json:"DistAmt"`           // 1株当たりの交付金銭等の額（未定の場合: "-"、非設定の場合: 空文字）
-	RetEarn           *float64 `json:"RetEarn"`           // 1株当たりの利益剰余金の額（未定の場合: "-"、非設定の場合: 空文字）
-	DeemDiv           *float64 `json:"DeemDiv"`           // 1株当たりのみなし配当の額（未定の場合: "-"、非設定の場合: 空文字）
-	DeemCapGains      *float64 `json:"DeemCapGains"`      // 1株当たりのみなし譲渡収入の額（未定の場合: "-"、非設定の場合: 空文字）
-	NetAssetDecRatio  *float64 `json:"NetAssetDecRatio"`  // 純資産減少割合（未定の場合: "-"、非設定の場合: 空文字）
-}
-
-// RawDividend is used for unmarshaling JSON response with mixed types
-type RawDividend struct {
-	// 基本情報
-	PubDate  string `json:"PubDate"`
-	PubTime  string `json:"PubTime"`
-	Code     string `json:"Code"`
-	RefNo    string `json:"RefNo"`
-	CARefNo  string `json:"CARefNo"`
-
-	// 更新・配当区分情報
-	StatCode     string `json:"StatCode"`
-	IFCode       string `json:"IFCode"`
-	FRCode       string `json:"FRCode"`
-	CommSpecCode string `json:"CommSpecCode"`
-
-	// 日程情報
-	BoardDate  string               `json:"BoardDate"`
-	IFTerm     string               `json:"IFTerm"`
-	RecDate    string               `json:"RecDate"`
-	ExDate     string               `json:"ExDate"`
-	ActRecDate string               `json:"ActRecDate"`
-	PayDate    types.StringWithDash `json:"PayDate"`
-
-	// 配当金額情報
-	DivRate     types.Float64StringWithDash `json:"DivRate"`
-	CommDivRate types.Float64StringWithDash `json:"CommDivRate"`
-	SpecDivRate types.Float64StringWithDash `json:"SpecDivRate"`
-
-	// 税務関連情報
-	DistAmt          types.Float64StringWithDash `json:"DistAmt"`
-	RetEarn          types.Float64StringWithDash `json:"RetEarn"`
-	DeemDiv          types.Float64StringWithDash `json:"DeemDiv"`
-	DeemCapGains     types.Float64StringWithDash `json:"DeemCapGains"`
-	NetAssetDecRatio types.Float64StringWithDash `json:"NetAssetDecRatio"`
-}
-
-// UnmarshalJSON implements custom JSON unmarshaling for DividendResponse
-func (r *DividendResponse) UnmarshalJSON(data []byte) error {
-	// First unmarshal into RawDividend
-	type rawResponse struct {
-		Data          []RawDividend `json:"data"`
-		PaginationKey string        `json:"pagination_key"`
-	}
-
-	var raw rawResponse
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-
-	// Set pagination key
-	r.PaginationKey = raw.PaginationKey
-
-	// Convert RawDividend to Dividend
-	r.Data = make([]Dividend, len(raw.Data))
-	for idx, rd := range raw.Data {
-		r.Data[idx] = Dividend{
-			// 基本情報
-			PubDate:  rd.PubDate,
-			PubTime:  rd.PubTime,
-			Code:     rd.Code,
-			RefNo:    rd.RefNo,
-			CARefNo:  rd.CARefNo,
-
-			// 更新・配当区分情報
-			StatCode:     rd.StatCode,
-			IFCode:       rd.IFCode,
-			FRCode:       rd.FRCode,
-			CommSpecCode: rd.CommSpecCode,
-
-			// 日程情報
-			BoardDate:  rd.BoardDate,
-			IFTerm:     rd.IFTerm,
-			RecDate:    rd.RecDate,
-			ExDate:     rd.ExDate,
-			ActRecDate: rd.ActRecDate,
-			PayDate:    rd.PayDate.ToStringPtr(),
-
-			// 配当金額情報
-			DivRate:     rd.DivRate.ToFloat64Ptr(),
-			CommDivRate: rd.CommDivRate.ToFloat64Ptr(),
-			SpecDivRate: rd.SpecDivRate.ToFloat64Ptr(),
-
-			// 税務関連情報
-			DistAmt:          rd.DistAmt.ToFloat64Ptr(),
-			RetEarn:          rd.RetEarn.ToFloat64Ptr(),
-			DeemDiv:          rd.DeemDiv.ToFloat64Ptr(),
-			DeemCapGains:     rd.DeemCapGains.ToFloat64Ptr(),
-			NetAssetDecRatio: rd.NetAssetDecRatio.ToFloat64Ptr(),
-		}
-	}
-
-	return nil
+	DistAmt          types.NullableFloat64 `json:"DistAmt"`          // 1株当たりの交付金銭等の額
+	RetEarn          types.NullableFloat64 `json:"RetEarn"`          // 1株当たりの利益剰余金の額
+	DeemDiv          types.NullableFloat64 `json:"DeemDiv"`          // 1株当たりのみなし配当の額
+	DeemCapGains     types.NullableFloat64 `json:"DeemCapGains"`     // 1株当たりのみなし譲渡収入の額
+	NetAssetDecRatio types.NullableFloat64 `json:"NetAssetDecRatio"` // 純資産減少割合
 }
 
 // GetDividend は配当情報を取得します。
@@ -359,53 +265,39 @@ func (d *Dividend) IsOrdinary() bool {
 
 // GetTotalDividendRate は配当金額の合計を計算します（通常＋記念＋特別）。
 func (d *Dividend) GetTotalDividendRate() *float64 {
-	if d.DivRate == nil {
+	rate, ok := d.DivRate.Get()
+	if !ok {
 		return nil
 	}
 
-	total := *d.DivRate
-
-	if d.CommDivRate != nil {
-		total += *d.CommDivRate
-	}
-
-	if d.SpecDivRate != nil {
-		total += *d.SpecDivRate
-	}
-
+	total := rate + d.CommDivRate.Or(0) + d.SpecDivRate.Or(0)
 	return &total
 }
 
 // GetOrdinaryDividendRate は通常配当金額を計算します（総額から記念・特別を除く）。
 func (d *Dividend) GetOrdinaryDividendRate() *float64 {
-	if d.DivRate == nil {
+	rate, ok := d.DivRate.Get()
+	if !ok {
 		return nil
 	}
 
-	ordinary := *d.DivRate
-
-	if d.CommDivRate != nil {
-		ordinary -= *d.CommDivRate
-	}
-
-	if d.SpecDivRate != nil {
-		ordinary -= *d.SpecDivRate
-	}
-
+	ordinary := rate - d.CommDivRate.Or(0) - d.SpecDivRate.Or(0)
 	return &ordinary
 }
 
 // HasPayableDate は支払開始予定日が設定されているかを判定します。
 func (d *Dividend) HasPayableDate() bool {
-	return d.PayDate != nil && *d.PayDate != "-" && *d.PayDate != ""
+	_, ok := d.PayDate.Get()
+	return ok
 }
 
-// IsPayableDateUndecided は支払開始予定日が未定かを判定します。
+// IsPayableDateUndecided は支払開始予定日が未定（-）かを判定します。
 func (d *Dividend) IsPayableDateUndecided() bool {
-	return d.PayDate != nil && *d.PayDate == "-"
+	return d.PayDate.IsUndetermined()
 }
 
-// IsDividendRateUndecided は配当金額が未定かを判定します。
+// IsDividendRateUndecided は配当金額が未定（-）かを判定します。
+// 非設定（空文字）の場合はfalseを返します。
 func (d *Dividend) IsDividendRateUndecided() bool {
-	return d.DivRate == nil
+	return d.DivRate.IsUndetermined()
 }
