@@ -53,37 +53,45 @@ func TestIndicesEndpoint(t *testing.T) {
 				t.Errorf("Index[%d]: Code is empty", i)
 			}
 
-			// 四本値の検証
-			if index.O <= 0 {
-				t.Errorf("Index[%d]: Open = %v, want > 0", i, index.O)
-			}
-			if index.H <= 0 {
-				t.Errorf("Index[%d]: High = %v, want > 0", i, index.H)
-			}
-			if index.L <= 0 {
-				t.Errorf("Index[%d]: Low = %v, want > 0", i, index.L)
-			}
+			// 終値の検証（終値のみ配信の指数はO/H/Lがnil）
 			if index.C <= 0 {
 				t.Errorf("Index[%d]: Close = %v, want > 0", i, index.C)
 			}
 
-			// 四本値の論理的整合性チェック
-			if index.H < index.L {
-				t.Errorf("Index[%d]: High (%v) < Low (%v)", i, index.H, index.L)
-			}
-			if index.O > index.H || index.O < index.L {
-				t.Errorf("Index[%d]: Open (%v) is outside High (%v) - Low (%v) range",
-					i, index.O, index.H, index.L)
-			}
-			if index.C > index.H || index.C < index.L {
-				t.Errorf("Index[%d]: Close (%v) is outside High (%v) - Low (%v) range",
-					i, index.C, index.H, index.L)
+			// 四本値の検証
+			if index.O != nil && index.H != nil && index.L != nil {
+				o, h, l := *index.O, *index.H, *index.L
+				if o <= 0 {
+					t.Errorf("Index[%d]: Open = %v, want > 0", i, o)
+				}
+				if h <= 0 {
+					t.Errorf("Index[%d]: High = %v, want > 0", i, h)
+				}
+				if l <= 0 {
+					t.Errorf("Index[%d]: Low = %v, want > 0", i, l)
+				}
+
+				// 四本値の論理的整合性チェック
+				if h < l {
+					t.Errorf("Index[%d]: High (%v) < Low (%v)", i, h, l)
+				}
+				if o > h || o < l {
+					t.Errorf("Index[%d]: Open (%v) is outside High (%v) - Low (%v) range",
+						i, o, h, l)
+				}
+				if index.C > h || index.C < l {
+					t.Errorf("Index[%d]: Close (%v) is outside High (%v) - Low (%v) range",
+						i, index.C, h, l)
+				}
+			} else if index.O != nil || index.H != nil || index.L != nil {
+				t.Errorf("Index[%d]: O/H/L should be all present or all nil, got O=%s, H=%s, L=%s",
+					i, fmtPrice(index.O), fmtPrice(index.H), fmtPrice(index.L))
 			}
 
 			// 最初の5件の詳細ログ
 			if i < 5 {
-				t.Logf("Index[%d]: Code=%s, Date=%s, O=%.2f, H=%.2f, L=%.2f, C=%.2f",
-					i, index.Code, index.Date, index.O, index.H, index.L, index.C)
+				t.Logf("Index[%d]: Code=%s, Date=%s, O=%s, H=%s, L=%s, C=%.2f",
+					i, index.Code, index.Date, fmtPrice(index.O), fmtPrice(index.H), fmtPrice(index.L), index.C)
 			}
 		}
 
@@ -201,8 +209,8 @@ func TestIndicesEndpoint(t *testing.T) {
 
 			// 最初と最後のデータをログ
 			if i == 0 || i == len(indices)-1 {
-				t.Logf("TOPIX Core30 [%s]: Close=%.2f (O=%.2f, H=%.2f, L=%.2f)",
-					index.Date, index.C, index.O, index.H, index.L)
+				t.Logf("TOPIX Core30 [%s]: Close=%.2f (O=%s, H=%s, L=%s)",
+					index.Date, index.C, fmtPrice(index.O), fmtPrice(index.H), fmtPrice(index.L))
 			}
 		}
 
@@ -240,15 +248,16 @@ func TestIndicesEndpoint(t *testing.T) {
 
 			// 最初と最後のデータをログ
 			if i == 0 || i == len(indices)-1 {
-				t.Logf("TOPIX [%s]: Close=%.2f (O=%.2f, H=%.2f, L=%.2f)",
-					index.Date, index.C, index.O, index.H, index.L)
+				t.Logf("TOPIX [%s]: Close=%.2f (O=%s, H=%s, L=%s)",
+					index.Date, index.C, fmtPrice(index.O), fmtPrice(index.H), fmtPrice(index.L))
 			}
 		}
 	})
 
 	t.Run("GetIndices_HistoricalData", func(t *testing.T) {
-		// 過去の特定期間のデータ取得
+		// 過去の特定期間のデータ取得（codeまたはdateの指定が必須のためcodeを指定）
 		params := jquants.IndicesParams{
+			Code: jquants.IndexTOPIX,
 			From: "2024-01-01",
 			To:   "2024-01-31",
 		}
@@ -258,8 +267,7 @@ func TestIndicesEndpoint(t *testing.T) {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
 			}
-			t.Logf("Failed to get historical indices: %v", err)
-			return
+			t.Fatalf("Failed to get historical indices: %v", err)
 		}
 
 		if resp != nil && len(resp.Data) > 0 {

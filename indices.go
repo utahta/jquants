@@ -23,22 +23,22 @@ func NewIndicesService(c client.HTTPClient) *IndicesService {
 // Index は指数四本値データを表します。
 // J-Quants API /indices/bars/daily エンドポイントのレスポンスデータ。
 type Index struct {
-	Date string  `json:"Date"` // 日付（YYYY-MM-DD形式）
-	Code string  `json:"Code"` // 指数コード
-	O    float64 `json:"O"`    // 始値
-	H    float64 `json:"H"`    // 高値
-	L    float64 `json:"L"`    // 安値
-	C    float64 `json:"C"`    // 終値
+	Date string   `json:"Date"` // 日付（YYYY-MM-DD形式）
+	Code string   `json:"Code"` // 指数コード
+	O    *float64 `json:"O"`    // 始値（終値のみ配信の指数・期間ではnull）
+	H    *float64 `json:"H"`    // 高値（終値のみ配信の指数・期間ではnull）
+	L    *float64 `json:"L"`    // 安値（終値のみ配信の指数・期間ではnull）
+	C    float64  `json:"C"`    // 終値
 }
 
 // RawIndex is used for unmarshaling JSON response with mixed types
 type RawIndex struct {
-	Date string              `json:"Date"`
-	Code string              `json:"Code"`
-	O    types.Float64String `json:"O"`
-	H    types.Float64String `json:"H"`
-	L    types.Float64String `json:"L"`
-	C    types.Float64String `json:"C"`
+	Date string               `json:"Date"`
+	Code string               `json:"Code"`
+	O    *types.Float64String `json:"O"`
+	H    *types.Float64String `json:"H"`
+	L    *types.Float64String `json:"L"`
+	C    types.Float64String  `json:"C"`
 }
 
 // IndicesResponse は指数四本値のレスポンスです。
@@ -69,9 +69,9 @@ func (i *IndicesResponse) UnmarshalJSON(data []byte) error {
 		i.Data[idx] = Index{
 			Date: ri.Date,
 			Code: ri.Code,
-			O:    float64(ri.O),
-			H:    float64(ri.H),
-			L:    float64(ri.L),
+			O:    types.ToFloat64Ptr(ri.O),
+			H:    types.ToFloat64Ptr(ri.H),
+			L:    types.ToFloat64Ptr(ri.L),
 			C:    float64(ri.C),
 		}
 	}

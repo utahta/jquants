@@ -67,9 +67,9 @@ func TestIndicesService_GetIndices(t *testing.T) {
 					{
 						Date: "2024-01-31",
 						Code: "0000",
-						O:    2400.0,
-						H:    2420.0,
-						L:    2390.0,
+						O:    floatPtr(2400.0),
+						H:    floatPtr(2420.0),
+						L:    floatPtr(2390.0),
 						C:    2410.0,
 					},
 				},
@@ -106,7 +106,7 @@ func TestIndicesService_GetIndicesByCode(t *testing.T) {
 	// Mock response - 最初のページ
 	mockResponse1 := IndicesResponse{
 		Data: []Index{
-			{Date: "2024-01-01", Code: "0000", O: 2400.0, H: 2420.0, L: 2390.0, C: 2410.0},
+			{Date: "2024-01-01", Code: "0000", O: floatPtr(2400.0), H: floatPtr(2420.0), L: floatPtr(2390.0), C: 2410.0},
 			{Date: "2024-01-02", Code: "0000", C: 2420.0},
 		},
 		PaginationKey: "next_page_key",
@@ -223,7 +223,7 @@ func TestIndicesService_GetSectorIndex(t *testing.T) {
 	// Mock response - 情報・通信業
 	mockResponse := IndicesResponse{
 		Data: []Index{
-			{Date: "2024-02-01", Code: "0058", O: 3000.0, H: 3050.0, L: 2980.0, C: 3020.0},
+			{Date: "2024-02-01", Code: "0058", O: floatPtr(3000.0), H: floatPtr(3050.0), L: floatPtr(2980.0), C: 3020.0},
 		},
 	}
 	mockClient.SetResponse("GET", "/indices/bars/daily?code=0058", mockResponse)
@@ -279,9 +279,9 @@ func TestIndicesService_GetIndicesByCodeAndDate(t *testing.T) {
 			{
 				Date: "2024-01-01",
 				Code: "0000",
-				O:    2400.0,
-				H:    2420.0,
-				L:    2390.0,
+				O:    floatPtr(2400.0),
+				H:    floatPtr(2420.0),
+				L:    floatPtr(2390.0),
 				C:    2410.0,
 			},
 		},
@@ -348,6 +348,36 @@ func TestIndicesService_GetIndicesByCodeAndDateRange(t *testing.T) {
 	}
 	if indices[2].Date != "2024-01-03" || indices[2].C != 2420.0 {
 		t.Errorf("Last index data mismatch")
+	}
+}
+
+func TestIndicesService_GetIndices_CloseOnlyIndex(t *testing.T) {
+	// 終値のみ配信の指数はO/H/Lがnullで返される（例: 東証REIT用途別指数など）
+	mockClient := client.NewMockClient()
+	service := NewIndicesService(mockClient)
+
+	mockResponse := map[string]interface{}{
+		"data": []map[string]interface{}{
+			{"Date": "2025-06-13", "Code": "0504", "O": nil, "H": nil, "L": nil, "C": 1122.85},
+		},
+		"pagination_key": "",
+	}
+	mockClient.SetResponse("GET", "/indices/bars/daily?date=20250613", mockResponse)
+
+	resp, err := service.GetIndices(context.Background(), IndicesParams{Date: "20250613"})
+	if err != nil {
+		t.Fatalf("GetIndices() error = %v", err)
+	}
+	if len(resp.Data) != 1 {
+		t.Fatalf("GetIndices() returned %d items, want 1", len(resp.Data))
+	}
+
+	index := resp.Data[0]
+	if index.O != nil || index.H != nil || index.L != nil {
+		t.Errorf("O/H/L = %v/%v/%v, want all nil", index.O, index.H, index.L)
+	}
+	if index.C != 1122.85 {
+		t.Errorf("C = %v, want 1122.85", index.C)
 	}
 }
 

@@ -4,6 +4,7 @@
 package e2e
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -55,4 +56,12 @@ func getTestDate() string {
 func getTestDateFormatted() string {
 	// APIレスポンスで使用されるYYYY-MM-DD形式で返す
 	return "2025-06-13"
+}
+
+// fmtPrice はnil許容の価格フィールドをログ表示用に整形する
+func fmtPrice(p *float64) string {
+	if p == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("%.2f", *p)
 }
