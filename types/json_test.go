@@ -202,3 +202,41 @@ func floatPtr(f float64) *float64 {
 func int64Ptr(i int64) *int64 {
 	return &i
 }
+
+func float64Ptr(f float64) *float64 {
+	return &f
+}
+
+func TestFloat64StringWithDash_UnmarshalJSON(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   string
+		want    *float64
+		wantInt *int64
+	}{
+		{name: "number", input: `123.45`, want: float64Ptr(123.45), wantInt: int64Ptr(123)},
+		{name: "numeric string", input: `"678.9"`, want: float64Ptr(678.9), wantInt: int64Ptr(678)},
+		{name: "empty string", input: `""`, want: nil, wantInt: nil},
+		{name: "dash", input: `"-"`, want: nil, wantInt: nil},
+		{name: "null", input: `null`, want: nil, wantInt: nil},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var f Float64StringWithDash
+			if err := json.Unmarshal([]byte(tt.input), &f); err != nil {
+				t.Fatalf("UnmarshalJSON(%s) error = %v", tt.input, err)
+			}
+
+			got := f.ToFloat64Ptr()
+			if (got == nil) != (tt.want == nil) || (got != nil && *got != *tt.want) {
+				t.Errorf("ToFloat64Ptr() = %v, want %v", got, tt.want)
+			}
+
+			gotInt := f.ToInt64Ptr()
+			if (gotInt == nil) != (tt.wantInt == nil) || (gotInt != nil && *gotInt != *tt.wantInt) {
+				t.Errorf("ToInt64Ptr() = %v, want %v", gotInt, tt.wantInt)
+			}
+		})
+	}
+}

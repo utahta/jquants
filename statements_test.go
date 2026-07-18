@@ -558,15 +558,53 @@ func TestStatementsResponse_UnmarshalJSON(t *testing.T) {
 	}
 
 	sEmpty := respEmpty.Data[0]
-	// Empty string is converted to 0 for numeric types in current implementation
-	if sEmpty.Sales == nil || *sEmpty.Sales != 0 {
-		t.Errorf("Expected Sales 0 for empty string, got %v", sEmpty.Sales)
+	// 空文字（非設定）は0ではなくnilになる（0円と未設定を区別する）
+	if sEmpty.Sales != nil {
+		t.Errorf("Expected Sales nil for empty string, got %v", *sEmpty.Sales)
 	}
 	if sEmpty.MatChgSub != "" {
 		t.Errorf("Expected MatChgSub '' for empty string, got %s", sEmpty.MatChgSub)
 	}
-	// Empty string is converted to 0 for numeric types in current implementation
-	if sEmpty.ShOutFY == nil || *sEmpty.ShOutFY != 0 {
-		t.Errorf("Expected ShOutFY 0 for empty string, got %v", sEmpty.ShOutFY)
+	if sEmpty.ShOutFY != nil {
+		t.Errorf("Expected ShOutFY nil for empty string, got %v", *sEmpty.ShOutFY)
+	}
+}
+
+func TestStatementsResponse_UnmarshalJSON_MissingValueVariants(t *testing.T) {
+	// 空文字（非設定）、"-"（未定）、null はいずれもnil、数値・数値文字列は値になる
+	jsonData := `{
+		"data": [
+			{
+				"DiscDate": "2024-01-15",
+				"Code": "72030",
+				"Sales": 1000.5,
+				"OP": "200.5",
+				"OdP": "",
+				"NP": "-",
+				"TA": null
+			}
+		]
+	}`
+
+	var resp StatementsResponse
+	if err := json.Unmarshal([]byte(jsonData), &resp); err != nil {
+		t.Fatalf("UnmarshalJSON failed: %v", err)
+	}
+
+	s := resp.Data[0]
+	if s.Sales == nil || *s.Sales != 1000.5 {
+		t.Errorf("Sales = %v, want 1000.5", s.Sales)
+	}
+	if s.OP == nil || *s.OP != 200.5 {
+		t.Errorf("OP = %v, want 200.5", s.OP)
+	}
+	if s.OdP != nil {
+		t.Errorf("OdP = %v, want nil for empty string", *s.OdP)
+	}
+	if s.NP != nil {
+		t.Errorf("NP = %v, want nil for dash", *s.NP)
+	}
+	if s.TA != nil {
+		t.Errorf("TA = %v, want nil for null", *s.TA)
 	}
 }

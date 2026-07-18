@@ -138,6 +138,14 @@ type Float64StringWithDash struct {
 }
 
 func (f *Float64StringWithDash) UnmarshalJSON(data []byte) error {
+	// JSON null means the value is absent. Without this guard the float64
+	// branch below would succeed as a no-op and record 0.
+	if string(data) == "null" {
+		f.value = nil
+		f.isUndefined = false
+		return nil
+	}
+
 	// Try to unmarshal as float64 first
 	var floatVal float64
 	if err := json.Unmarshal(data, &floatVal); err == nil {
@@ -178,6 +186,15 @@ func (f *Float64StringWithDash) UnmarshalJSON(data []byte) error {
 // ToFloat64Ptr returns the float64 pointer value
 func (f *Float64StringWithDash) ToFloat64Ptr() *float64 {
 	return f.value
+}
+
+// ToInt64Ptr returns the value as an int64 pointer
+func (f *Float64StringWithDash) ToInt64Ptr() *int64 {
+	if f.value == nil {
+		return nil
+	}
+	val := int64(*f.value)
+	return &val
 }
 
 // StringWithDash is a custom type that handles "-" as a special value
