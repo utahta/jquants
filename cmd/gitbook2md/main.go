@@ -667,7 +667,7 @@ func main() {
 		}
 		
 		if outputFile != "" {
-			err = os.WriteFile(outputFile, []byte(markdown), 0644) // #nosec G306
+			err = os.WriteFile(outputFile, []byte(markdown), 0644) // #nosec G306 G703 -- 出力先はCLI利用者が意図して指定するパス
 			if err != nil {
 				log.Fatal(err)
 			}
