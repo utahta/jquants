@@ -13,7 +13,7 @@ func TestShortSellingEndpoint(t *testing.T) {
 	t.Run("GetShortSelling_ByDate", func(t *testing.T) {
 		// 最近の営業日の業種別空売り比率を取得
 		date := getTestDate()
-		
+
 		shorts, err := jq.ShortSelling.GetShortSellingByDate(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
@@ -42,7 +42,7 @@ func TestShortSellingEndpoint(t *testing.T) {
 					t.Errorf("ShortSelling[%d]: Date = %v, want %v", i, short.Date, expectedDate)
 				}
 			}
-			
+
 			if short.S33 == "" {
 				t.Errorf("ShortSelling[%d]: Sector33Code is empty", i)
 			} else {
@@ -51,7 +51,7 @@ func TestShortSellingEndpoint(t *testing.T) {
 					t.Errorf("ShortSelling[%d]: Sector33Code length = %d, want 4", i, len(short.S33))
 				}
 			}
-			
+
 			// 売買代金の検証（負の値は通常ありえない）
 			if short.SellExShortVa < 0 {
 				t.Errorf("ShortSelling[%d]: SellingExcludingShortSellingTurnoverValue = %v, want >= 0",
@@ -65,21 +65,21 @@ func TestShortSellingEndpoint(t *testing.T) {
 				t.Errorf("ShortSelling[%d]: ShortSellingWithoutRestrictionsTurnoverValue = %v, want >= 0",
 					i, short.ShrtNoResVa)
 			}
-			
+
 			// 比率の計算と検証
 			totalTurnover := short.SellExShortVa +
 				short.ShrtWithResVa +
 				short.ShrtNoResVa
-			
+
 			if totalTurnover > 0 {
 				shortSellingRatio := (short.ShrtWithResVa +
 					short.ShrtNoResVa) / totalTurnover * 100
-				
+
 				// 空売り比率が異常でないかチェック（通常0-50%程度）
 				if shortSellingRatio > 100 {
 					t.Errorf("ShortSelling[%d]: Short selling ratio too high: %.2f%%", i, shortSellingRatio)
 				}
-				
+
 				// 最初の5件の詳細ログ
 				if i < 5 {
 					t.Logf("ShortSelling[%d]: Sector=%s, Date=%s",
@@ -92,14 +92,14 @@ func TestShortSellingEndpoint(t *testing.T) {
 				}
 			}
 		}
-		
+
 		t.Logf("Retrieved %d short selling records for date %s", len(shorts), date)
 	})
 
 	t.Run("GetShortSellingBySector", func(t *testing.T) {
 		// 特定業種（輸送用機器：3050）の空売り比率データを取得
 		sectorCode := "3050"
-		
+
 		shorts, err := jq.ShortSelling.GetShortSellingBySector(context.Background(), sectorCode)
 		if err != nil {
 			if isSubscriptionLimited(err) {
@@ -124,9 +124,9 @@ func TestShortSellingEndpoint(t *testing.T) {
 				}
 			}
 		}
-		
+
 		t.Logf("Retrieved %d short selling records for sector %s", len(shorts), sectorCode)
-		
+
 		// 時系列トレンド分析
 		if len(shorts) > 1 {
 			t.Logf("Time series analysis for sector %s:", sectorCode)
@@ -135,12 +135,12 @@ func TestShortSellingEndpoint(t *testing.T) {
 				totalTurnover := short.SellExShortVa +
 					short.ShrtWithResVa +
 					short.ShrtNoResVa
-				
+
 				if totalTurnover > 0 {
 					shortSellingRatio := (short.ShrtWithResVa +
 						short.ShrtNoResVa) / totalTurnover * 100
-					
-					t.Logf("  %s: %.2f%% short selling ratio (turnover: %.0f)", 
+
+					t.Logf("  %s: %.2f%% short selling ratio (turnover: %.0f)",
 						short.Date, shortSellingRatio, totalTurnover)
 				}
 			}
@@ -150,7 +150,7 @@ func TestShortSellingEndpoint(t *testing.T) {
 	t.Run("GetShortSelling_SectorAnalysis", func(t *testing.T) {
 		// 最新日の全業種の空売り比率分析
 		date := getTestDate()
-		
+
 		shorts, err := jq.ShortSelling.GetShortSellingByDate(context.Background(), date)
 		if err != nil {
 			if isSubscriptionLimited(err) {
@@ -169,18 +169,18 @@ func TestShortSellingEndpoint(t *testing.T) {
 			Ratio      float64
 			Turnover   float64
 		}
-		
+
 		var sectorRatios []SectorRatio
-		
+
 		for _, short := range shorts {
 			totalTurnover := short.SellExShortVa +
 				short.ShrtWithResVa +
 				short.ShrtNoResVa
-			
+
 			if totalTurnover > 0 {
 				shortSellingRatio := (short.ShrtWithResVa +
 					short.ShrtNoResVa) / totalTurnover * 100
-				
+
 				sectorRatios = append(sectorRatios, SectorRatio{
 					SectorCode: short.S33,
 					Ratio:      shortSellingRatio,
@@ -188,7 +188,7 @@ func TestShortSellingEndpoint(t *testing.T) {
 				})
 			}
 		}
-		
+
 		// 上位10業種の空売り比率
 		t.Logf("Top 10 sectors by short selling ratio on %s:", date)
 		count := 0
@@ -200,13 +200,13 @@ func TestShortSellingEndpoint(t *testing.T) {
 				sector.SectorCode, sector.Ratio, sector.Turnover/1000000)
 			count++
 		}
-		
+
 		// 統計情報
 		if len(sectorRatios) > 0 {
 			var totalRatio, minRatio, maxRatio float64
 			minRatio = sectorRatios[0].Ratio
 			maxRatio = sectorRatios[0].Ratio
-			
+
 			for _, sector := range sectorRatios {
 				totalRatio += sector.Ratio
 				if sector.Ratio < minRatio {
@@ -216,7 +216,7 @@ func TestShortSellingEndpoint(t *testing.T) {
 					maxRatio = sector.Ratio
 				}
 			}
-			
+
 			avgRatio := totalRatio / float64(len(sectorRatios))
 			t.Logf("Short selling ratio statistics:")
 			t.Logf("  Average: %.2f%%", avgRatio)
@@ -229,8 +229,8 @@ func TestShortSellingEndpoint(t *testing.T) {
 	t.Run("GetShortSelling_MultiSector", func(t *testing.T) {
 		// 複数の主要業種の比較
 		majorSectors := []string{"0050", "1050", "2050", "3050", "4050"} // 主要業種コード
-		sectorData := make(map[string][]float64) // セクター -> 直近の空売り比率リスト
-		
+		sectorData := make(map[string][]float64)                         // セクター -> 直近の空売り比率リスト
+
 		for _, sectorCode := range majorSectors {
 			shorts, err := jq.ShortSelling.GetShortSellingBySector(context.Background(), sectorCode)
 			if err != nil {
@@ -239,11 +239,11 @@ func TestShortSellingEndpoint(t *testing.T) {
 				}
 				continue
 			}
-			
+
 			if len(shorts) == 0 {
 				continue
 			}
-			
+
 			// 直近5日分の空売り比率を計算
 			ratios := make([]float64, 0, 5)
 			for i := 0; i < 5 && i < len(shorts); i++ {
@@ -251,19 +251,19 @@ func TestShortSellingEndpoint(t *testing.T) {
 				totalTurnover := short.SellExShortVa +
 					short.ShrtWithResVa +
 					short.ShrtNoResVa
-				
+
 				if totalTurnover > 0 {
 					ratio := (short.ShrtWithResVa +
 						short.ShrtNoResVa) / totalTurnover * 100
 					ratios = append(ratios, ratio)
 				}
 			}
-			
+
 			if len(ratios) > 0 {
 				sectorData[sectorCode] = ratios
 			}
 		}
-		
+
 		// 業種間比較
 		t.Logf("Major sectors comparison (recent 5 days avg):")
 		for sectorCode, ratios := range sectorData {
@@ -280,13 +280,13 @@ func TestShortSellingEndpoint(t *testing.T) {
 
 	t.Run("GetShortSelling_ErrorHandling", func(t *testing.T) {
 		// エラーケースのテスト
-		
+
 		// 存在しない業種コード（0000は無効）
 		shorts, err := jq.ShortSelling.GetShortSellingBySector(context.Background(), "0000")
 		if err == nil && len(shorts) > 0 {
 			t.Error("Expected error or empty result for invalid sector code")
 		}
-		
+
 		// 未来の日付
 		futureDate := "2030-01-01"
 		shorts, err = jq.ShortSelling.GetShortSellingByDate(context.Background(), futureDate)

@@ -126,8 +126,7 @@ func TestIndicesEndpoint(t *testing.T) {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
 			}
-			t.Logf("Failed to get indices with code filter: %v", err)
-			return
+			t.Fatalf("Failed to get indices with code filter: %v", err)
 		}
 
 		if resp != nil && len(resp.Data) > 0 {

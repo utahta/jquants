@@ -125,8 +125,7 @@ func TestPricesAMEndpoint(t *testing.T) {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation (expected for premium API)")
 			}
-			t.Logf("Failed to get prices AM by date: %v", err)
-			return
+			t.Fatalf("Failed to get prices AM: %v", err)
 		}
 
 		if resp == nil || len(resp.Data) == 0 {

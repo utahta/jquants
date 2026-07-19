@@ -156,8 +156,7 @@ func TestTOPIXEndpoint(t *testing.T) {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
 			}
-			t.Logf("Failed to get TOPIX data for single day: %v", err)
-			return
+			t.Fatalf("Failed to get TOPIX data for single day: %v", err)
 		}
 
 		if resp != nil && len(resp.Data) > 0 {

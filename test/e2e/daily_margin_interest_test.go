@@ -119,8 +119,7 @@ func TestDailyMarginInterestEndpoint(t *testing.T) {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
 			}
-			t.Logf("Failed to get daily margin interest by date: %v", err)
-			return
+			t.Fatalf("Failed to get daily margin interest by date: %v", err)
 		}
 
 		if resp == nil || len(resp.Data) == 0 {
@@ -236,7 +235,7 @@ func TestDailyMarginInterestEndpoint(t *testing.T) {
 	t.Run("GetDailyMarginInterestByCodeAndDateRange", func(t *testing.T) {
 		// 期間指定のテスト
 		to := getTestDate()
-		from := "20250601" // 約2週間分
+		from := getTestDateDaysAgo(14) // 約2週間分
 
 		interests, err := jq.DailyMarginInterest.GetDailyMarginInterestByCodeAndDateRange(context.Background(), "13260", from, to)
 		if err != nil {
