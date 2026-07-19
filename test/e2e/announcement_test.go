@@ -20,9 +20,7 @@ func TestAnnouncementEndpoint(t *testing.T) {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
 			}
-			// 決算発表予定がない日の可能性もある
-			t.Logf("No announcement data (might be no announcements): %v", err)
-			return
+			t.Fatalf("Failed to get announcements: %v", err)
 		}
 
 		if resp == nil || len(resp.Data) == 0 {
@@ -133,8 +131,7 @@ func TestAnnouncementEndpoint(t *testing.T) {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
 			}
-			t.Logf("No announcement data for date %s: %v", date, err)
-			return
+			t.Fatalf("Failed to get announcements for date %s: %v", date, err)
 		}
 
 		if resp != nil && len(resp.Data) > 0 {

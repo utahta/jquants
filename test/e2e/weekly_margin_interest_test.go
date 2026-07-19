@@ -130,8 +130,7 @@ func TestWeeklyMarginInterestEndpoint(t *testing.T) {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
 			}
-			t.Logf("Failed to get weekly margin interest by date: %v", err)
-			return
+			t.Fatalf("Failed to get weekly margin interest by date: %v", err)
 		}
 
 		if resp == nil || len(resp.Data) == 0 {

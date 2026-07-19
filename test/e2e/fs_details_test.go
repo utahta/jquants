@@ -194,24 +194,18 @@ func TestFSDetailsEndpoint(t *testing.T) {
 	})
 
 	t.Run("GetFSDetails_ByDate", func(t *testing.T) {
-		// 最近の営業日の財務詳細を取得
-		date := getTestDate()
-
-		params := jquants.FSDetailsParams{
-			Date: date,
-		}
-
-		details, err := jq.FSDetails.GetFSDetails(context.Background(), params)
-		if err != nil {
-			if isSubscriptionLimited(err) {
-				t.Skip("Skipping due to subscription limitation (expected for premium API)")
+		// 開示は毎営業日あるとは限らないため、開示がある営業日を直近から探す
+		var details *jquants.FSDetailsResponse
+		date := findPopulatedTestDate(t, 5, func(d string) (int, error) {
+			var err error
+			details, err = jq.FSDetails.GetFSDetails(context.Background(), jquants.FSDetailsParams{Date: d})
+			if details == nil {
+				return 0, err
 			}
-			t.Logf("Failed to get FS details by date: %v", err)
-			return
-		}
-
-		if details == nil || len(details.Data) == 0 {
-			t.Skip("No FS details data for the specified date")
+			return len(details.Data), err
+		})
+		if date == "" {
+			t.Skip("No FS details found on recent trading days")
 		}
 
 		t.Logf("Retrieved %d FS details records for %s", len(details.Data), date)
@@ -219,7 +213,7 @@ func TestFSDetailsEndpoint(t *testing.T) {
 		// 日付の一致確認
 		for i, detail := range details.Data {
 			// 日付形式をYYYY-MM-DDに統一して比較
-			expectedDate := getTestDateFormatted()
+			expectedDate := formatDate(date)
 			if detail.DiscDate != expectedDate {
 				t.Errorf("Detail[%d]: DisclosedDate = %v, want %v",
 					i, detail.DiscDate, expectedDate)

@@ -6,6 +6,8 @@ package e2e
 import (
 	"context"
 	"testing"
+
+	"github.com/utahta/jquants"
 )
 
 // TestStatementsEndpoint は/fins/statementsエンドポイントの完全なテスト
@@ -26,7 +28,7 @@ func TestStatementsEndpoint(t *testing.T) {
 
 		// 最新の財務諸表を詳細に検証
 		latest := statements[0]
-		
+
 		// 基本情報の検証
 		if latest.Code != "7203" && latest.Code != "72030" {
 			t.Errorf("LocalCode = %v, want 7203 or 72030", latest.Code)
@@ -65,7 +67,7 @@ func TestStatementsEndpoint(t *testing.T) {
 		if latest.DiscNo == "" {
 			t.Error("DisclosureNumber is empty")
 		}
-		
+
 		// 書類・期間情報の検証
 		if latest.DocType == "" {
 			t.Error("TypeOfDocument is empty")
@@ -111,12 +113,12 @@ func TestStatementsEndpoint(t *testing.T) {
 				t.Errorf("CurrentFiscalYearEndDate format invalid = %v, want YYYY-MM-DD", latest.CurFYEn)
 			}
 		}
-		
+
 		// 書類種別の検証（会計基準は実際の構造体にはない）
 		if latest.DocType == "" {
 			t.Error("TypeOfDocument is empty")
 		}
-		
+
 		// 財務データの検証（nilチェックと値の妥当性確認）
 		validateFinancialValue(t, "NetSales", latest.Sales)
 		validateFinancialValue(t, "OperatingProfit", latest.OP)
@@ -128,13 +130,13 @@ func TestStatementsEndpoint(t *testing.T) {
 		validateFinancialValue(t, "Equity", latest.Eq)
 		validateFinancialValue(t, "EquityToAssetRatio", latest.EqAR)
 		validateFinancialValue(t, "BookValuePerShare", latest.BPS)
-		
+
 		// キャッシュフロー情報の検証
 		validateFinancialValue(t, "CashFlowsFromOperatingActivities", latest.CFO)
 		validateFinancialValue(t, "CashFlowsFromInvestingActivities", latest.CFI)
 		validateFinancialValue(t, "CashFlowsFromFinancingActivities", latest.CFF)
 		validateFinancialValue(t, "CashAndEquivalents", latest.CashEq)
-		
+
 		// 配当情報の検証
 		validateFinancialValue(t, "ResultDividendPerShareAnnual", latest.DivAnn)
 		validateFinancialValue(t, "ResultDividendPerShare1stQuarter", latest.Div1Q)
@@ -142,7 +144,7 @@ func TestStatementsEndpoint(t *testing.T) {
 		validateFinancialValue(t, "ResultDividendPerShare3rdQuarter", latest.Div3Q)
 		validateFinancialValue(t, "ResultDividendPerShareFiscalYearEnd", latest.DivFY)
 		validateFinancialValue(t, "ResultPayoutRatioAnnual", latest.PayoutRatioAn)
-		
+
 		// 新規追加フィールド: REIT関連と配当総額
 		validateFinancialValue(t, "DistributionsPerUnitREIT", latest.DivUnit)
 		validateFinancialValue(t, "ResultTotalDividendPaidAnnual", latest.DivTotalAnn)
@@ -158,7 +160,7 @@ func TestStatementsEndpoint(t *testing.T) {
 		// 新規追加フィールド: 予想REIT関連と配当総額
 		validateFinancialValue(t, "ForecastDistributionsPerUnitREIT", latest.FDivUnit)
 		validateFinancialValue(t, "ForecastTotalDividendPaidAnnual", latest.FDivTotalAnn)
-		
+
 		// 予想財務データの検証
 		validateFinancialValue(t, "ForecastNetSales", latest.FSales)
 		validateFinancialValue(t, "ForecastOperatingProfit", latest.FOP)
@@ -172,7 +174,7 @@ func TestStatementsEndpoint(t *testing.T) {
 		validateFinancialValue(t, "ForecastOrdinaryProfit2ndQuarter", latest.FOdP2Q)
 		validateFinancialValue(t, "ForecastProfit2ndQuarter", latest.FNP2Q)
 		validateFinancialValue(t, "ForecastEarningsPerShare2ndQuarter", latest.FEPS2Q)
-		
+
 		// 翌期予想配当
 		validateFinancialValue(t, "NextYearForecastDividendPerShare1stQuarter", latest.NxFDiv1Q)
 		validateFinancialValue(t, "NextYearForecastDividendPerShare2ndQuarter", latest.NxFDiv2Q)
@@ -195,7 +197,7 @@ func TestStatementsEndpoint(t *testing.T) {
 		validateFinancialValue(t, "NextYearForecastOrdinaryProfit", latest.NxFOdP)
 		validateFinancialValue(t, "NextYearForecastProfit", latest.NxFNp)
 		validateFinancialValue(t, "NextYearForecastEarningsPerShare", latest.NxFEPS)
-		
+
 		// 修正情報の検証（string型フィールド）
 		t.Logf("MaterialChangesInSubsidiaries: %v", latest.MatChgSub)
 		t.Logf("SignificantChangesInTheScopeOfConsolidation: %v", latest.SigChgInC)
@@ -216,7 +218,7 @@ func TestStatementsEndpoint(t *testing.T) {
 		if latest.AvgSh != nil {
 			t.Logf("AverageNumberOfShares: %d", *latest.AvgSh)
 		}
-		
+
 		// 単体財務データの検証
 		validateFinancialValue(t, "NonConsolidatedNetSales", latest.NCSales)
 		validateFinancialValue(t, "NonConsolidatedOperatingProfit", latest.NCOP)
@@ -255,7 +257,7 @@ func TestStatementsEndpoint(t *testing.T) {
 		validateFinancialValue(t, "NextYearForecastNonConsolidatedOrdinaryProfit", latest.NxFNCOdP)
 		validateFinancialValue(t, "NextYearForecastNonConsolidatedProfit", latest.NxFNCNP)
 		validateFinancialValue(t, "NextYearForecastNonConsolidatedEarningsPerShare", latest.NxFNCEPS)
-		
+
 		t.Logf("Successfully validated all fields for statement: %s", latest.DiscDate)
 	})
 
@@ -274,12 +276,12 @@ func TestStatementsEndpoint(t *testing.T) {
 		}
 
 		t.Logf("Retrieved %d statements", len(statements))
-		
+
 		// 複数の決算期のデータが取得できているかを確認
 		if len(statements) >= 2 {
 			first := statements[0]
 			second := statements[1]
-			
+
 			// 決算期が異なることを確認
 			if first.CurFYEn == second.CurFYEn {
 				t.Logf("Warning: Multiple statements with same fiscal year end date")
@@ -291,44 +293,39 @@ func TestStatementsEndpoint(t *testing.T) {
 	})
 
 	t.Run("GetStatementsByDate", func(t *testing.T) {
-		// 特定日の財務諸表を取得（過去の営業日を使用）
-		date := getTestDate()
-		
-		// GetStatementsByDateメソッドを使用
-		statements, err := jq.Statements.GetStatementsByDate(context.Background(), date)
-		if err != nil {
-			if isSubscriptionLimited(err) {
-				t.Skip("Skipping due to subscription limitation")
-			}
-			// 指定日にデータがない可能性もある
-			t.Logf("No statements data for date %s: %v", date, err)
-			return
+		// 開示は毎営業日あるとは限らないため、開示がある営業日を直近から探す
+		var statements []jquants.Statement
+		date := findPopulatedTestDate(t, 5, func(d string) (int, error) {
+			var err error
+			statements, err = jq.Statements.GetStatementsByDate(context.Background(), d)
+			return len(statements), err
+		})
+		if date == "" {
+			t.Skip("No statements found on recent trading days")
 		}
 
-		if len(statements) > 0 {
-			t.Logf("Found %d statements for date %s", len(statements), date)
-			
-			// 各財務諸表の基本検証
-			for i, stmt := range statements {
-				if i >= 5 {
-					break // 最初の5件のみ詳細検証
-				}
-				
-				if stmt.Code == "" {
-					t.Errorf("Statement[%d]: Code is empty", i)
-				} else {
-					// Codeは5桁
-					if len(stmt.Code) != 5 {
-						t.Errorf("Statement[%d]: Code length = %d, want 5", i, len(stmt.Code))
-					}
-				}
-				// DiscDateの検証（APIはYYYY-MM-DD形式で返す）
-				expectedDate := getTestDateFormatted()
-				if stmt.DiscDate != expectedDate {
-					t.Errorf("Statement[%d]: DiscDate = %v, want %v", i, stmt.DiscDate, expectedDate)
-				}
-				t.Logf("Statement[%d]: %s - %s", i, stmt.Code, stmt.DocType)
+		t.Logf("Found %d statements for date %s", len(statements), date)
+
+		// 各財務諸表の基本検証
+		for i, stmt := range statements {
+			if i >= 5 {
+				break // 最初の5件のみ詳細検証
 			}
+
+			if stmt.Code == "" {
+				t.Errorf("Statement[%d]: Code is empty", i)
+			} else {
+				// Codeは5桁
+				if len(stmt.Code) != 5 {
+					t.Errorf("Statement[%d]: Code length = %d, want 5", i, len(stmt.Code))
+				}
+			}
+			// DiscDateの検証（APIはYYYY-MM-DD形式で返す）
+			expectedDate := formatDate(date)
+			if stmt.DiscDate != expectedDate {
+				t.Errorf("Statement[%d]: DiscDate = %v, want %v", i, stmt.DiscDate, expectedDate)
+			}
+			t.Logf("Statement[%d]: %s - %s", i, stmt.Code, stmt.DocType)
 		}
 	})
 }

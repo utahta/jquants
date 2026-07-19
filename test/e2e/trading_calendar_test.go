@@ -93,8 +93,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 			if strings.Contains(err.Error(), "status=502") {
 				t.Skipf("Skipping due to temporary server error: %v", err)
 			}
-			t.Logf("Failed to get trading calendar for historical period: %v", err)
-			return
+			t.Fatalf("Failed to get trading calendar for historical period: %v", err)
 		}
 
 		if len(calendar) == 0 {
@@ -246,8 +245,7 @@ func TestTradingCalendarEndpoint(t *testing.T) {
 			if strings.Contains(err.Error(), "status=502") {
 				t.Skipf("Skipping due to temporary server error: %v", err)
 			}
-			t.Logf("Failed to get calendar for single date: %v", err)
-			return
+			t.Fatalf("Failed to get calendar for single date: %v", err)
 		}
 
 		if len(calendar) == 0 {

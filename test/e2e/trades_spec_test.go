@@ -5,6 +5,7 @@ package e2e
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -14,19 +15,34 @@ import (
 // TestTradesSpecEndpoint は/equities/investor-typesエンドポイントの完全なテスト
 func TestTradesSpecEndpoint(t *testing.T) {
 	t.Run("GetTradesSpec_ByDateRange", func(t *testing.T) {
-		// 最近の営業日の投資部門別売買状況を取得
-		date := getTestDate()
-
-		trades, err := jq.TradesSpec.GetTradesSpecByDateRange(context.Background(), date, date)
+		// 週次データのため、直近30日の範囲から公表済みデータを特定し、
+		// その公表日で単日クエリを検証する（from/toは公表日でフィルタされる）
+		rangeTrades, err := jq.TradesSpec.GetTradesSpecByDateRange(context.Background(), getTestDateDaysAgo(30), getTestDate())
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
 			}
 			t.Fatalf("Failed to get trades spec: %v", err)
 		}
+		if len(rangeTrades) == 0 {
+			t.Skip("No trades spec data in the last 30 days")
+		}
 
+		// 最新の公表日を単日クエリの対象にする
+		latestPub := ""
+		for _, tr := range rangeTrades {
+			if tr.PubDate > latestPub {
+				latestPub = tr.PubDate
+			}
+		}
+		date := strings.ReplaceAll(latestPub, "-", "")
+
+		trades, err := jq.TradesSpec.GetTradesSpecByDateRange(context.Background(), date, date)
+		if err != nil {
+			t.Fatalf("Failed to get trades spec for %s: %v", date, err)
+		}
 		if len(trades) == 0 {
-			t.Skip("No trades spec data available")
+			t.Fatalf("Expected trades spec data for populated date %s, got none", date)
 		}
 
 		// 各投資部門別売買データを詳細に検証
@@ -118,29 +134,27 @@ func TestTradesSpecEndpoint(t *testing.T) {
 		}
 	})
 
-	t.Run("GetTradesSpecBySection_All", func(t *testing.T) {
-		// 全市場の投資部門別売買状況を取得
-		trades, err := jq.TradesSpec.GetTradesSpecBySection(context.Background(), "All")
+	t.Run("GetTradesSpecBySection_TokyoNagoya", func(t *testing.T) {
+		// 東証および名証（最も広い集計区分）の投資部門別売買状況を取得
+		trades, err := jq.TradesSpec.GetTradesSpecBySection(context.Background(), jquants.SectionTokyoNagoya)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
 			}
-			t.Logf("Failed to get trades spec for All: %v", err)
-			return
+			t.Fatalf("Failed to get trades spec for TokyoNagoya: %v", err)
 		}
 
 		if len(trades) == 0 {
-			t.Skip("No trades spec data available for All")
+			t.Skip("No trades spec data available for TokyoNagoya")
 		}
 
-		// 全市場データの検証
 		for i, trade := range trades {
-			if trade.Section != "All" {
-				t.Errorf("Trade[%d]: Section = %v, want All", i, trade.Section)
+			if trade.Section != jquants.SectionTokyoNagoya {
+				t.Errorf("Trade[%d]: Section = %v, want %v", i, trade.Section, jquants.SectionTokyoNagoya)
 			}
 		}
 
-		t.Logf("Retrieved %d All market trades spec records", len(trades))
+		t.Logf("Retrieved %d TokyoNagoya trades spec records", len(trades))
 	})
 
 	t.Run("GetTradesSpec_MultipleMarkets", func(t *testing.T) {
@@ -154,8 +168,7 @@ func TestTradesSpecEndpoint(t *testing.T) {
 				if isSubscriptionLimited(err) {
 					t.Skip("Skipping due to subscription limitation")
 				}
-				t.Logf("Failed to get trades spec for %s: %v", market, err)
-				continue
+				t.Fatalf("Failed to get trades spec for %s: %v", market, err)
 			}
 
 			if len(trades) > 0 {

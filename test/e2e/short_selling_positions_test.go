@@ -40,13 +40,13 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 			if position.SSName == "" {
 				t.Errorf("Position[%d]: ShortSellerName is empty", i)
 			}
-			
+
 			// 日付の妥当性チェック
 			if position.DiscDate < position.CalcDate {
 				t.Errorf("Position[%d]: DisclosedDate (%s) < CalculatedDate (%s)",
 					i, position.DiscDate, position.CalcDate)
 			}
-			
+
 			// 残高割合の検証（通常0.5%以上で報告義務）
 			if position.ShrtPosToSO < 0.5 {
 				t.Logf("Position[%d]: Low ratio: %.2f%% (might be below reporting threshold)",
@@ -56,7 +56,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 				t.Errorf("Position[%d]: Extremely high ratio: %.2f%%",
 					i, position.ShrtPosToSO)
 			}
-			
+
 			// 株数の検証
 			if position.ShrtPosShares <= 0 {
 				t.Errorf("Position[%d]: ShortPositionsInSharesNumber = %v, want > 0",
@@ -66,12 +66,12 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 				t.Errorf("Position[%d]: ShortPositionsInTradingUnitsNumber = %v, want > 0",
 					i, position.ShrtPosUnits)
 			}
-			
+
 			// 住所情報の検証（オプショナル）
 			if position.SSAddr == "" {
 				t.Logf("Position[%d]: ShortSellerAddress is empty", i)
 			}
-			
+
 			// 投資一任契約の情報確認
 			hasDiscretionary := position.HasDiscretionaryInvestment()
 			if hasDiscretionary {
@@ -83,19 +83,19 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 					t.Logf("  Fund: %s", position.FundName)
 				}
 			}
-			
+
 			// 個人投資家かチェック
 			if position.IsIndividual() {
 				t.Logf("Position[%d]: Individual investor", i)
 			}
-			
+
 			// 最初の5件の詳細ログ
 			if i < 5 {
 				t.Logf("Position[%d]: %s", i, position.SSName)
 				t.Logf("  Disclosed: %s, Calculated: %s", position.DiscDate, position.CalcDate)
-				t.Logf("  Ratio: %.2f%%, Shares: %.0f", 
+				t.Logf("  Ratio: %.2f%%, Shares: %.0f",
 					position.ShrtPosToSO, position.ShrtPosShares)
-				
+
 				// 前回からの変化
 				changeRatio := position.GetPositionChangeRatio()
 				if changeRatio != 0 {
@@ -107,22 +107,20 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 				}
 			}
 		}
-		
+
 		t.Logf("Retrieved %d short selling positions for code 7203", len(positions))
 	})
 
 	t.Run("GetShortSellingPositions_ByDisclosedDate", func(t *testing.T) {
 		// 最近の金曜日の全銘柄空売り残高報告を取得
 		disclosedDate := getRecentFriday()
-		
+
 		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByDisclosedDate(context.Background(), disclosedDate)
 		if err != nil {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
 			}
-			// データがない可能性もある
-			t.Logf("No positions data for date %s: %v", disclosedDate, err)
-			return
+			t.Fatalf("Failed to get positions for date %s: %v", disclosedDate, err)
 		}
 
 		if len(positions) == 0 {
@@ -138,21 +136,21 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 				break // 最初の10件のみ確認
 			}
 		}
-		
+
 		// 銘柄別の集計
 		codeCount := make(map[string]int)
 		sellerCount := make(map[string]int)
-		
+
 		for _, position := range positions {
 			codeCount[position.Code]++
 			sellerCount[position.SSName]++
 		}
-		
+
 		t.Logf("Disclosed date %s summary:", disclosedDate)
 		t.Logf("  Total positions: %d", len(positions))
 		t.Logf("  Unique codes: %d", len(codeCount))
 		t.Logf("  Unique sellers: %d", len(sellerCount))
-		
+
 		// 最も多く報告している空売り者
 		maxCount := 0
 		topSeller := ""
@@ -185,7 +183,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 		increases := 0
 		decreases := 0
 		noChanges := 0
-		
+
 		for _, position := range positions {
 			if position.IsIncrease() {
 				increases++
@@ -195,19 +193,19 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 				noChanges++
 			}
 		}
-		
+
 		t.Logf("Position change analysis for code 7203:")
 		t.Logf("  Increases: %d", increases)
 		t.Logf("  Decreases: %d", decreases)
 		t.Logf("  No changes: %d", noChanges)
-		
+
 		// 大きな変化があったポジション
 		t.Logf("Significant position changes:")
 		for i, position := range positions {
 			if i >= 5 {
 				break
 			}
-			
+
 			changeRatio := position.GetPositionChangeRatio()
 			if abs(changeRatio) > 10 { // 10%以上の変化
 				direction := "increased"
@@ -226,7 +224,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 		// 過去1ヶ月の期間でトヨタ自動車の空売り残高を取得
 		to := time.Now().Format("2006-01-02")
 		from := time.Now().AddDate(0, -1, 0).Format("2006-01-02")
-		
+
 		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByCodeAndDateRange(context.Background(), "7203", from, to)
 		if err != nil {
 			if isSubscriptionLimited(err) {
@@ -240,7 +238,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 		}
 
 		t.Logf("Retrieved %d positions for period %s to %s", len(positions), from, to)
-		
+
 		// 期間内の日付確認
 		for _, position := range positions {
 			if position.DiscDate < from || position.DiscDate > to {
@@ -248,7 +246,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 					position.DiscDate, from, to)
 			}
 		}
-		
+
 		// 時系列トレンド
 		if len(positions) > 1 {
 			t.Logf("Monthly trend analysis:")
@@ -257,7 +255,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 				if i >= 5 {
 					break
 				}
-				
+
 				currentRatio := position.ShrtPosToSO
 				if i > 0 {
 					change := currentRatio - prevRatio
@@ -289,7 +287,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 		below1Percent := 0
 		oneToFivePercent := 0
 		aboveFivePercent := 0
-		
+
 		for _, position := range positions {
 			ratio := position.ShrtPosToSO
 			if ratio < 1.0 {
@@ -300,12 +298,12 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 				aboveFivePercent++
 			}
 		}
-		
+
 		t.Logf("Position threshold analysis:")
 		t.Logf("  Below 1%%: %d positions", below1Percent)
 		t.Logf("  1%% to 5%%: %d positions", oneToFivePercent)
 		t.Logf("  Above 5%%: %d positions", aboveFivePercent)
-		
+
 		// 最大ポジション
 		maxRatio := 0.0
 		maxSeller := ""
@@ -315,7 +313,7 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 				maxSeller = position.SSName
 			}
 		}
-		
+
 		if maxSeller != "" {
 			t.Logf("Largest position: %s with %.2f%%", maxSeller, maxRatio)
 		}
@@ -323,13 +321,13 @@ func TestShortSellingPositionsEndpoint(t *testing.T) {
 
 	t.Run("GetShortSellingPositions_ErrorHandling", func(t *testing.T) {
 		// エラーケースのテスト
-		
+
 		// 存在しない銘柄コード
 		positions, err := jq.ShortSellingPositions.GetShortSellingPositionsByCode(context.Background(), "99999")
 		if err == nil && len(positions) > 0 {
 			t.Error("Expected error or empty result for invalid code")
 		}
-		
+
 		// 無効な日付
 		positions, err = jq.ShortSellingPositions.GetShortSellingPositionsByDisclosedDate(context.Background(), "invalid-date")
 		if err == nil && len(positions) > 0 {

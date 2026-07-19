@@ -174,8 +174,7 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 			if isSubscriptionLimited(err) {
 				t.Skip("Skipping due to subscription limitation")
 			}
-			t.Logf("No quotes data for date %s: %v", date, err)
-			return
+			t.Fatalf("Failed to get quotes for date %s: %v", date, err)
 		}
 
 		if resp == nil || len(resp.Data) == 0 {
