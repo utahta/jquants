@@ -10,7 +10,7 @@ J-Quants API v2（日本の株式市場データを提供するAPI）のGoクラ
 
 **重要**: J-Quants APIの仕様を確認する際は、以下の順序で参照してください：
 
-1. **最初に必ず`docs/v2/`ディレクトリを確認** - このリポジトリ内のv2 APIドキュメント
+1. **最初に必ず`docs/v2/`ディレクトリを確認** - 公式ドキュメントのローカルキャッシュ（gitignore対象）。存在しない・古い場合は `make docs-sync` で取得
 2. **不明な点がある場合のみ**: https://jpx-jquants.com/ja/spec/ - 公式APIリファレンス（各ページはURL末尾に`.md`を付けるとMarkdownで直接取得可能。例: https://jpx-jquants.com/ja/spec/eq-bars-daily.md ）
 
 ## 開発コマンド
@@ -23,12 +23,13 @@ make test-cover    # カバレッジ付きテスト
 make lint          # リント
 make test-e2e      # E2Eテスト（JQUANTS_API_KEY が必要）
 make test-run TEST=TestQuotesService_GetDailyQuotes  # 特定のテスト
+make docs-sync     # 公式APIドキュメントを docs/v2/ に同期
 ```
 
 ## 新しいAPIサービスの追加時の注意
 
 - `jquants.go`の`JQuantsAPI`構造体への登録を忘れない（忘れてもコンパイルは通る）
-- `docs/v2/`ディレクトリにドキュメントを追加する
+- `make docs-sync` で対象APIの最新ドキュメントを取得して参照する
 
 ## 実装上の注意点
 
