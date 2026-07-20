@@ -311,6 +311,7 @@ type RawStatement struct {
 type StatementsResponse struct {
 	Data          []Statement `json:"data"`
 	PaginationKey string      `json:"pagination_key"`
+	Cursor        string      `json:"cursor"` // 差分取得用カーソル（Premiumプランのみ）
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling
@@ -319,6 +320,7 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 	type rawResponse struct {
 		Data          []RawStatement `json:"data"`
 		PaginationKey string         `json:"pagination_key"`
+		Cursor        string         `json:"cursor"`
 	}
 
 	var raw rawResponse
@@ -327,6 +329,7 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 	}
 
 	s.PaginationKey = raw.PaginationKey
+	s.Cursor = raw.Cursor
 
 	// Convert RawStatement to Statement
 	s.Data = make([]Statement, len(raw.Data))
@@ -479,6 +482,7 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 type StatementsParams struct {
 	Code          string // 銘柄コード（4桁または5桁）
 	Date          string // 開示日付（YYYYMMDD または YYYY-MM-DD）
+	Cursor        string // 差分取得用カーソル。前回レスポンスのcursorを指定すると前回リクエスト以降のデータを取得（Premiumプランのみ。pagination_keyと同時指定不可）
 	PaginationKey string // ページネーションキー
 }
 
@@ -487,8 +491,13 @@ type StatementsParams struct {
 // パラメータ:
 // - Code: 銘柄コード（例: "7203" または "72030"）
 // - Date: 開示日付（例: "20240101" または "2024-01-01"）
+// - Cursor: 差分取得用カーソル（Premiumプランのみ）
 // - PaginationKey: ページネーション用キー
 func (s *StatementsService) GetStatements(ctx context.Context, params StatementsParams) (*StatementsResponse, error) {
+	if params.Cursor != "" && params.PaginationKey != "" {
+		return nil, fmt.Errorf("cursor and pagination_key cannot be specified at the same time")
+	}
+
 	path := "/fins/summary"
 
 	query := "?"
@@ -497,6 +506,9 @@ func (s *StatementsService) GetStatements(ctx context.Context, params Statements
 	}
 	if params.Date != "" {
 		query += fmt.Sprintf("date=%s&", params.Date)
+	}
+	if params.Cursor != "" {
+		query += fmt.Sprintf("cursor=%s&", params.Cursor)
 	}
 	if params.PaginationKey != "" {
 		query += fmt.Sprintf("pagination_key=%s&", params.PaginationKey)
@@ -507,7 +519,14 @@ func (s *StatementsService) GetStatements(ctx context.Context, params Statements
 	}
 
 	var resp StatementsResponse
-	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
+	var err error
+	if params.Cursor != "" {
+		// cursorによる差分取得はポーリング用途のため、キャッシュを経由しない
+		err = client.DoRequestNoCache(ctx, s.client, "GET", path, nil, &resp)
+	} else {
+		err = s.client.DoRequest(ctx, "GET", path, nil, &resp)
+	}
+	if err != nil {
 		return nil, fmt.Errorf("failed to get statements: %w", err)
 	}
 

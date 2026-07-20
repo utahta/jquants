@@ -36,6 +36,11 @@ func TestStatementsService_GetStatements(t *testing.T) {
 			wantPath: "/fins/summary?date=20240101&pagination_key=key123",
 		},
 		{
+			name:     "with date and cursor",
+			params:   StatementsParams{Date: "20240101", Cursor: "cur123"},
+			wantPath: "/fins/summary?date=20240101&cursor=cur123",
+		},
+		{
 			name:     "with no parameters",
 			params:   StatementsParams{},
 			wantPath: "/fins/summary",
@@ -116,6 +121,20 @@ func TestStatementsService_GetStatements(t *testing.T) {
 				t.Errorf("Expected path %s, got %s", tt.wantPath, mockClient.LastPath)
 			}
 		})
+	}
+}
+
+func TestStatementsService_GetStatements_CursorConflict(t *testing.T) {
+	mockClient := client.NewMockClient()
+	service := NewStatementsService(mockClient)
+
+	_, err := service.GetStatements(context.Background(), StatementsParams{
+		Date:          "20240101",
+		Cursor:        "cur123",
+		PaginationKey: "key123",
+	})
+	if err == nil {
+		t.Error("GetStatements() expected error for cursor and pagination_key specified together")
 	}
 }
 
@@ -606,5 +625,28 @@ func TestStatementsResponse_UnmarshalJSON_MissingValueVariants(t *testing.T) {
 	}
 	if s.TA != nil {
 		t.Errorf("TA = %v, want nil for null", *s.TA)
+	}
+}
+
+func TestStatementsService_GetStatements_CursorSkipsCache(t *testing.T) {
+	mockClient := client.NewMockClient()
+	service := NewStatementsService(mockClient)
+	mockClient.SetResponse("GET", "/fins/summary?date=20240101&cursor=cur123", StatementsResponse{})
+	mockClient.SetResponse("GET", "/fins/summary?date=20240101", StatementsResponse{})
+
+	// cursorによるポーリングはキャッシュをバイパスすること
+	if _, err := service.GetStatements(context.Background(), StatementsParams{Date: "20240101", Cursor: "cur123"}); err != nil {
+		t.Fatalf("GetStatements() error = %v", err)
+	}
+	if !mockClient.LastSkipCache {
+		t.Error("GetStatements() with cursor should bypass the session cache")
+	}
+
+	// cursorなしは通常どおりキャッシュ対象
+	if _, err := service.GetStatements(context.Background(), StatementsParams{Date: "20240101"}); err != nil {
+		t.Fatalf("GetStatements() error = %v", err)
+	}
+	if mockClient.LastSkipCache {
+		t.Error("GetStatements() without cursor should use the session cache")
 	}
 }

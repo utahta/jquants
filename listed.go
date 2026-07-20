@@ -81,6 +81,18 @@ const (
 	Sector33Other         = "9999" // その他
 )
 
+// 商品区分コード定義
+const (
+	ProductCategoryDomesticStock   = "011" // 内国株券
+	ProductCategoryPreferredEquity = "012" // 優先出資証券
+	ProductCategoryREIT            = "013" // REIT
+	ProductCategoryETF             = "014" // ETF
+	ProductCategoryForeignStock    = "021" // 外国株券
+	ProductCategoryForeignREIT     = "022" // 外国REIT
+	ProductCategoryForeignETF      = "023" // 外国ETF
+	ProductCategoryForeignDR       = "024" // 外国株預託証券
+)
+
 // ListedService は上場企業情報を取得するサービスです。
 // 企業名、業種分類、市場区分などの基本情報を提供します。
 type ListedService struct {
@@ -110,6 +122,17 @@ type ListedInfo struct {
 	MktNm    string `json:"MktNm"`    // 市場区分名（プライム、スタンダード、グロース等）
 	Mrgn     string `json:"Mrgn"`     // 貸借信用区分（1: 信用 / 2: 貸借 / 3: その他）（Standard/Premiumのみ）
 	MrgnNm   string `json:"MrgnNm"`   // 貸借信用区分名（Standard/Premiumのみ）
+	ProdCat  string `json:"ProdCat"`  // 商品区分コード（ProductCategory定数を参照）
+}
+
+// IsETF はETF（外国ETF含む）かを判定します。
+func (l *ListedInfo) IsETF() bool {
+	return l.ProdCat == ProductCategoryETF || l.ProdCat == ProductCategoryForeignETF
+}
+
+// IsREIT はREIT（外国REIT含む）かを判定します。
+func (l *ListedInfo) IsREIT() bool {
+	return l.ProdCat == ProductCategoryREIT || l.ProdCat == ProductCategoryForeignREIT
 }
 
 type ListedInfoResponse struct {
