@@ -94,6 +94,7 @@ size := httpClient.CacheSize()
 - キャッシュキーはリクエストパス（クエリパラメータ含む）で区別されます
 - 同時リクエストの重複排除（singleflight）により効率的に動作します
 - 待機中にコンテキストをキャンセルした呼び出し元は即座にエラーで戻ります（進行中のリクエストは完了してキャッシュされます）
+- 署名付きダウンロードURLを返すAPI（Bulk・TDnetのファイルURL取得）はURLが失効するためキャッシュを経由しません
 - キャッシュはクライアントインスタンスの生存期間のみ有効です
 
 ## 利用可能なAPI
@@ -104,6 +105,7 @@ size := httpClient.CacheSize()
 |---------|---------|------|
 | **株価** | Quotes | 日次株価四本値 |
 | **株価** | PricesAM | 前場四本値 |
+| **株価** | MinuteQuotes | 株価分足 |
 | **銘柄情報** | Listed | 上場銘柄一覧 |
 | **財務** | Statements | 財務情報 |
 | **財務** | FSDetails | 財務諸表詳細（BS/PL/CF） |
@@ -121,6 +123,11 @@ size := httpClient.CacheSize()
 | **信用取引** | DailyMarginInterest | 日々公表信用取引残高 |
 | **空売り** | ShortSelling | 業種別空売り比率 |
 | **空売り** | ShortSellingPositions | 空売り残高報告 |
+| **適時開示** | TimelyDisclosure | TDnet適時開示情報 |
+| **EDINET** | EdinetMajorShareholders | 大株主状況 |
+| **EDINET** | EdinetCrossShareholdings | 政策保有株式 |
+| **EDINET** | EdinetLargeVolumeShareholders | 大量保有報告書 |
+| **ダウンロード** | Bulk | CSV一括ダウンロード |
 
 ※各APIの利用可能なプランについては、[J-Quants公式サイト](https://jpx-jquants.com/)で確認してください。
 
@@ -296,18 +303,6 @@ quote.O, quote.H, quote.L, quote.C
 ```
 
 詳細は[公式の移行ガイド](https://jpx-jquants.com/ja/spec/migration-v1-v2)を参照してください。
-
-## エラーハンドリング
-
-```go
-quotes, err := jq.Quotes.GetDailyQuotesByCode(ctx, "9999")
-if err != nil {
-    // APIエラーの詳細を取得
-    if apiErr, ok := err.(*client.APIError); ok {
-        fmt.Printf("APIエラー: %d - %s\n", apiErr.StatusCode, apiErr.Message)
-    }
-}
-```
 
 ## 注意事項
 

@@ -46,8 +46,26 @@ func TestFSDetailsService_GetFSDetails(t *testing.T) {
 			wantPath: "/fins/details?code=86970&pagination_key=key123",
 		},
 		{
+			name: "with date and cursor",
+			params: FSDetailsParams{
+				Date:   "2023-01-30",
+				Cursor: "cur123",
+			},
+			wantPath: "/fins/details?date=2023-01-30&cursor=cur123",
+		},
+		{
 			name:     "with no required parameters",
 			params:   FSDetailsParams{},
+			wantPath: "",
+			wantErr:  true,
+		},
+		{
+			name: "with cursor and pagination key",
+			params: FSDetailsParams{
+				Date:          "2023-01-30",
+				Cursor:        "cur123",
+				PaginationKey: "key123",
+			},
 			wantPath: "",
 			wantErr:  true,
 		},
@@ -620,5 +638,28 @@ func TestFSDetailsService_GetFSDetails_Error(t *testing.T) {
 	// Verify
 	if err == nil {
 		t.Error("GetFSDetails() expected error but got nil")
+	}
+}
+
+func TestFSDetailsService_GetFSDetails_CursorSkipsCache(t *testing.T) {
+	mockClient := client.NewMockClient()
+	service := NewFSDetailsService(mockClient)
+	mockClient.SetResponse("GET", "/fins/details?date=20230130&cursor=cur123", FSDetailsResponse{})
+	mockClient.SetResponse("GET", "/fins/details?date=20230130", FSDetailsResponse{})
+
+	// cursorによるポーリングはキャッシュをバイパスすること
+	if _, err := service.GetFSDetails(context.Background(), FSDetailsParams{Date: "20230130", Cursor: "cur123"}); err != nil {
+		t.Fatalf("GetFSDetails() error = %v", err)
+	}
+	if !mockClient.LastSkipCache {
+		t.Error("GetFSDetails() with cursor should bypass the session cache")
+	}
+
+	// cursorなしは通常どおりキャッシュ対象
+	if _, err := service.GetFSDetails(context.Background(), FSDetailsParams{Date: "20230130"}); err != nil {
+		t.Fatalf("GetFSDetails() error = %v", err)
+	}
+	if mockClient.LastSkipCache {
+		t.Error("GetFSDetails() without cursor should use the session cache")
 	}
 }

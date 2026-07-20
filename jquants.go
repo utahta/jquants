@@ -23,50 +23,68 @@ import "github.com/utahta/jquants/client"
 // - Futures: 先物取引データ
 // - Options: 個別株オプション
 // - FSDetails: 財務諸表詳細（BS/PL詳細データ）
+// - MinuteQuotes: 株価分足（アドオン契約が必要）
+// - TimelyDisclosure: TDnet適時開示情報（アドオン契約が必要）
+// - EdinetMajorShareholders: 大株主状況（有価証券報告書ベース）
+// - EdinetCrossShareholdings: 政策保有株式（有価証券報告書ベース）
+// - EdinetLargeVolumeShareholders: 大量保有報告書
+// - Bulk: CSV一括ダウンロード
 type JQuantsAPI struct {
-	client                client.HTTPClient
-	Quotes                *QuotesService
-	PricesAM              *PricesAMService
-	Listed                *ListedService
-	Statements            *StatementsService
-	Dividend              *DividendService
-	Announcement          *AnnouncementService
-	TradesSpec            *TradesSpecService
-	WeeklyMarginInterest  *WeeklyMarginInterestService
-	DailyMarginInterest   *DailyMarginInterestService
-	ShortSelling          *ShortSellingService
-	ShortSellingPositions *ShortSellingPositionsService
-	Breakdown             *BreakdownService
-	TradingCalendar       *TradingCalendarService
-	Indices               *IndicesService
-	TOPIX                 *TOPIXService
-	IndexOption           *IndexOptionService
-	Futures               *FuturesService
-	Options               *OptionsService
-	FSDetails             *FSDetailsService
+	client                        client.HTTPClient
+	Quotes                        *QuotesService
+	PricesAM                      *PricesAMService
+	MinuteQuotes                  *MinuteQuotesService
+	Listed                        *ListedService
+	Statements                    *StatementsService
+	Dividend                      *DividendService
+	Announcement                  *AnnouncementService
+	TradesSpec                    *TradesSpecService
+	WeeklyMarginInterest          *WeeklyMarginInterestService
+	DailyMarginInterest           *DailyMarginInterestService
+	ShortSelling                  *ShortSellingService
+	ShortSellingPositions         *ShortSellingPositionsService
+	Breakdown                     *BreakdownService
+	TradingCalendar               *TradingCalendarService
+	Indices                       *IndicesService
+	TOPIX                         *TOPIXService
+	IndexOption                   *IndexOptionService
+	Futures                       *FuturesService
+	Options                       *OptionsService
+	FSDetails                     *FSDetailsService
+	TimelyDisclosure              *TimelyDisclosureService
+	EdinetMajorShareholders       *EdinetMajorShareholdersService
+	EdinetCrossShareholdings      *EdinetCrossShareholdingsService
+	EdinetLargeVolumeShareholders *EdinetLargeVolumeShareholdersService
+	Bulk                          *BulkService
 }
 
 func NewJQuantsAPI(c client.HTTPClient) *JQuantsAPI {
 	return &JQuantsAPI{
-		client:                c,
-		Quotes:                NewQuotesService(c),
-		PricesAM:              NewPricesAMService(c),
-		Listed:                NewListedService(c),
-		Statements:            NewStatementsService(c),
-		Dividend:              NewDividendService(c),
-		Announcement:          NewAnnouncementService(c),
-		TradesSpec:            NewTradesSpecService(c),
-		WeeklyMarginInterest:  NewWeeklyMarginInterestService(c),
-		DailyMarginInterest:   NewDailyMarginInterestService(c),
-		ShortSelling:          NewShortSellingService(c),
-		ShortSellingPositions: NewShortSellingPositionsService(c),
-		Breakdown:             NewBreakdownService(c),
-		TradingCalendar:       NewTradingCalendarService(c),
-		Indices:               NewIndicesService(c),
-		TOPIX:                 NewTOPIXService(c),
-		IndexOption:           NewIndexOptionService(c),
-		Futures:               NewFuturesService(c),
-		Options:               NewOptionsService(c),
-		FSDetails:             NewFSDetailsService(c),
+		client:                        c,
+		Quotes:                        NewQuotesService(c),
+		PricesAM:                      NewPricesAMService(c),
+		MinuteQuotes:                  NewMinuteQuotesService(c),
+		Listed:                        NewListedService(c),
+		Statements:                    NewStatementsService(c),
+		Dividend:                      NewDividendService(c),
+		Announcement:                  NewAnnouncementService(c),
+		TradesSpec:                    NewTradesSpecService(c),
+		WeeklyMarginInterest:          NewWeeklyMarginInterestService(c),
+		DailyMarginInterest:           NewDailyMarginInterestService(c),
+		ShortSelling:                  NewShortSellingService(c),
+		ShortSellingPositions:         NewShortSellingPositionsService(c),
+		Breakdown:                     NewBreakdownService(c),
+		TradingCalendar:               NewTradingCalendarService(c),
+		Indices:                       NewIndicesService(c),
+		TOPIX:                         NewTOPIXService(c),
+		IndexOption:                   NewIndexOptionService(c),
+		Futures:                       NewFuturesService(c),
+		Options:                       NewOptionsService(c),
+		FSDetails:                     NewFSDetailsService(c),
+		TimelyDisclosure:              NewTimelyDisclosureService(c),
+		EdinetMajorShareholders:       NewEdinetMajorShareholdersService(c),
+		EdinetCrossShareholdings:      NewEdinetCrossShareholdingsService(c),
+		EdinetLargeVolumeShareholders: NewEdinetLargeVolumeShareholdersService(c),
+		Bulk:                          NewBulkService(c),
 	}
 }

@@ -9,12 +9,13 @@ import (
 
 // MockClient is a mock implementation of HTTPClient interface for testing
 type MockClient struct {
-	Responses    map[string]interface{}
-	Errors       map[string]error
-	RequestCount int
-	LastMethod   string
-	LastPath     string
-	LastBody     interface{}
+	Responses     map[string]interface{}
+	Errors        map[string]error
+	RequestCount  int
+	LastMethod    string
+	LastPath      string
+	LastBody      interface{}
+	LastSkipCache bool
 }
 
 // NewMockClient creates a new mock client
@@ -35,6 +36,7 @@ func (m *MockClient) DoRequest(ctx context.Context, method, path string, body in
 	m.LastMethod = method
 	m.LastPath = path
 	m.LastBody = body
+	m.LastSkipCache = false
 
 	key := fmt.Sprintf("%s:%s", method, path)
 
@@ -65,6 +67,13 @@ func (m *MockClient) DoRequest(ctx context.Context, method, path string, body in
 	}
 
 	return fmt.Errorf("no mock response set for %s", key)
+}
+
+// DoRequestNoCache implements NoCacheRequester interface
+func (m *MockClient) DoRequestNoCache(ctx context.Context, method, path string, body interface{}, result interface{}) error {
+	err := m.DoRequest(ctx, method, path, body, result)
+	m.LastSkipCache = true
+	return err
 }
 
 // SetResponse sets a mock response for a specific method and path

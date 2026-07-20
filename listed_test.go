@@ -391,3 +391,31 @@ func TestListedService_GetListedByMarket(t *testing.T) {
 		}
 	}
 }
+
+func TestListedInfo_ProductCategoryHelpers(t *testing.T) {
+	tests := []struct {
+		name     string
+		prodCat  string
+		wantETF  bool
+		wantREIT bool
+	}{
+		{name: "domestic stock", prodCat: ProductCategoryDomesticStock, wantETF: false, wantREIT: false},
+		{name: "ETF", prodCat: ProductCategoryETF, wantETF: true, wantREIT: false},
+		{name: "foreign ETF", prodCat: ProductCategoryForeignETF, wantETF: true, wantREIT: false},
+		{name: "REIT", prodCat: ProductCategoryREIT, wantETF: false, wantREIT: true},
+		{name: "foreign REIT", prodCat: ProductCategoryForeignREIT, wantETF: false, wantREIT: true},
+		{name: "empty", prodCat: "", wantETF: false, wantREIT: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			info := ListedInfo{ProdCat: tt.prodCat}
+			if got := info.IsETF(); got != tt.wantETF {
+				t.Errorf("IsETF() = %v, want %v", got, tt.wantETF)
+			}
+			if got := info.IsREIT(); got != tt.wantREIT {
+				t.Errorf("IsREIT() = %v, want %v", got, tt.wantREIT)
+			}
+		})
+	}
+}

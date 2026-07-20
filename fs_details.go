@@ -25,6 +25,7 @@ func NewFSDetailsService(c client.HTTPClient) *FSDetailsService {
 type FSDetailsParams struct {
 	Code          string // 銘柄コード（codeまたはdateのいずれかが必須）
 	Date          string // 開示日（YYYYMMDD または YYYY-MM-DD）（codeまたはdateのいずれかが必須）
+	Cursor        string // 差分取得用カーソル。前回レスポンスのcursorを指定すると前回リクエスト以降のデータを取得（pagination_keyと同時指定不可）
 	PaginationKey string // ページネーションキー
 }
 
@@ -32,6 +33,7 @@ type FSDetailsParams struct {
 type FSDetailsResponse struct {
 	Data          []FSDetail `json:"data"`
 	PaginationKey string     `json:"pagination_key"` // ページネーションキー
+	Cursor        string     `json:"cursor"`         // 差分取得用カーソル
 }
 
 // FSDetail は財務諸表詳細情報を表します。
@@ -60,6 +62,9 @@ func (s *FSDetailsService) GetFSDetails(ctx context.Context, params FSDetailsPar
 	if params.Code == "" && params.Date == "" {
 		return nil, fmt.Errorf("either code or date parameter is required")
 	}
+	if params.Cursor != "" && params.PaginationKey != "" {
+		return nil, fmt.Errorf("cursor and pagination_key cannot be specified at the same time")
+	}
 
 	path := "/fins/details"
 
@@ -70,6 +75,9 @@ func (s *FSDetailsService) GetFSDetails(ctx context.Context, params FSDetailsPar
 	if params.Date != "" {
 		query += fmt.Sprintf("date=%s&", params.Date)
 	}
+	if params.Cursor != "" {
+		query += fmt.Sprintf("cursor=%s&", params.Cursor)
+	}
 	if params.PaginationKey != "" {
 		query += fmt.Sprintf("pagination_key=%s&", params.PaginationKey)
 	}
@@ -79,7 +87,14 @@ func (s *FSDetailsService) GetFSDetails(ctx context.Context, params FSDetailsPar
 	}
 
 	var resp FSDetailsResponse
-	if err := s.client.DoRequest(ctx, "GET", path, nil, &resp); err != nil {
+	var err error
+	if params.Cursor != "" {
+		// cursorによる差分取得はポーリング用途のため、キャッシュを経由しない
+		err = client.DoRequestNoCache(ctx, s.client, "GET", path, nil, &resp)
+	} else {
+		err = s.client.DoRequest(ctx, "GET", path, nil, &resp)
+	}
+	if err != nil {
 		return nil, fmt.Errorf("failed to get fs details: %w", err)
 	}
 

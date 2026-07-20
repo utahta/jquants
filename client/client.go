@@ -32,6 +32,23 @@ type Client struct {
 // ClientOption is a function type for configuring Client settings.
 type ClientOption func(*Client)
 
+// NoCacheRequester is implemented by clients that can bypass their session
+// cache for a single request.
+type NoCacheRequester interface {
+	DoRequestNoCache(ctx context.Context, method, path string, body interface{}, result interface{}) error
+}
+
+// DoRequestNoCache performs a request without using the session cache when the
+// client supports it, falling back to a normal DoRequest otherwise.
+// Use it for responses that must not be reused: expiring signed URLs and
+// cursor-based differential polling.
+func DoRequestNoCache(ctx context.Context, c HTTPClient, method, path string, body interface{}, result interface{}) error {
+	if nc, ok := c.(NoCacheRequester); ok {
+		return nc.DoRequestNoCache(ctx, method, path, body, result)
+	}
+	return c.DoRequest(ctx, method, path, body, result)
+}
+
 // WithCache enables caching functionality.
 // Cache is only applied to GET requests.
 func WithCache() ClientOption {
@@ -126,6 +143,17 @@ func (c *Client) DoRequest(ctx context.Context, method, path string, body interf
 		return err
 	}
 
+	return decodeResponse(respBody, result)
+}
+
+// DoRequestNoCache performs a request bypassing the session cache and the
+// singleflight deduplication, so every call reaches the server. Responses are
+// not stored in the cache. See NoCacheRequester for when to use this.
+func (c *Client) DoRequestNoCache(ctx context.Context, method, path string, body interface{}, result interface{}) error {
+	respBody, err := c.doHTTPRequest(ctx, method, path, body)
+	if err != nil {
+		return err
+	}
 	return decodeResponse(respBody, result)
 }
 

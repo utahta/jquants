@@ -106,6 +106,77 @@ func TestClient_DoRequest_CacheHitMiss(t *testing.T) {
 	}
 }
 
+func TestClient_DoRequestNoCache(t *testing.T) {
+	var callCount int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		callCount++
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]int{"count": callCount})
+	}))
+	defer server.Close()
+
+	c := NewClient("test-api-key", WithCache())
+	c.baseURL = server.URL
+
+	type response struct {
+		Count int `json:"count"`
+	}
+
+	// DoRequestNoCache always hits the server and never populates the cache
+	var resp1, resp2 response
+	if err := c.DoRequestNoCache(context.Background(), http.MethodGet, "/signed", nil, &resp1); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := c.DoRequestNoCache(context.Background(), http.MethodGet, "/signed", nil, &resp2); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if callCount != 2 {
+		t.Errorf("expected 2 calls (cache bypassed), got %d", callCount)
+	}
+	if resp1.Count != 1 || resp2.Count != 2 {
+		t.Errorf("expected fresh responses 1 and 2, got %d and %d", resp1.Count, resp2.Count)
+	}
+	if c.CacheSize() != 0 {
+		t.Errorf("expected empty cache after DoRequestNoCache requests, got %d entries", c.CacheSize())
+	}
+
+	// An existing cache entry is not read by DoRequestNoCache
+	var resp3, resp4 response
+	if err := c.DoRequest(context.Background(), http.MethodGet, "/signed", nil, &resp3); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := c.DoRequestNoCache(context.Background(), http.MethodGet, "/signed", nil, &resp4); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp4.Count != 4 {
+		t.Errorf("expected DoRequestNoCache to bypass existing cache entry, got count %d", resp4.Count)
+	}
+}
+
+// plainHTTPClient is an HTTPClient implementation without NoCacheRequester
+// support, emulating a downstream custom client.
+type plainHTTPClient struct {
+	calls int
+}
+
+func (p *plainHTTPClient) DoRequest(ctx context.Context, method, path string, body interface{}, result interface{}) error {
+	p.calls++
+	return nil
+}
+
+func TestDoRequestNoCache_FallbackForPlainClient(t *testing.T) {
+	p := &plainHTTPClient{}
+
+	// NoCacheRequesterを実装しないクライアントでは通常のDoRequestにフォールバックする
+	err := DoRequestNoCache(context.Background(), p, http.MethodGet, "/signed", nil, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if p.calls != 1 {
+		t.Errorf("expected fallback to DoRequest exactly once, got %d calls", p.calls)
+	}
+}
+
 func TestClient_DoRequest_CacheDisabled(t *testing.T) {
 	var callCount int
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
