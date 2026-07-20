@@ -261,8 +261,8 @@ make test-e2e
 jquants/
 ├── client/        # HTTPクライアント（認証含む）
 ├── types/         # カスタム型定義
-├── docs/          # APIドキュメント
-│   └── v2/        # v2 APIドキュメント
+├── docs/v2/       # 公式APIドキュメントのローカルキャッシュ（make docs-sync で取得）
+├── scripts/       # 開発用スクリプト
 ├── test/e2e/      # E2Eテスト
 ├── *.go           # 各APIサービス実装
 └── Makefile       # ビルドタスク
@@ -295,7 +295,7 @@ quote.Open, quote.High, quote.Low, quote.Close
 quote.O, quote.H, quote.L, quote.C
 ```
 
-詳細は `docs/v2/migration-v1-v2.md` を参照してください。
+詳細は[公式の移行ガイド](https://jpx-jquants.com/ja/spec/migration-v1-v2)を参照してください。
 
 ## エラーハンドリング
 

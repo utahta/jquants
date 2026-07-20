@@ -1,4 +1,4 @@
-.PHONY: help test test-v test-cover test-e2e test-e2e-v lint clean install-tools check
+.PHONY: help test test-v test-cover test-e2e test-e2e-v lint clean install-tools check docs-sync
 
 # デフォルトターゲット
 help:
@@ -12,6 +12,7 @@ help:
 	@echo "  make lint         - golangci-lintでコードをチェック"
 	@echo "  make clean        - テスト成果物をクリーン"
 	@echo "  make install-tools - 開発ツールをインストール"
+	@echo "  make docs-sync    - 公式APIドキュメントを docs/v2/ に同期"
 
 # コンパイルチェック（ビルドはしない）
 check:
@@ -79,3 +80,7 @@ mod-tidy:
 # 依存関係のダウンロード
 mod-download:
 	go mod download
+
+# 公式APIドキュメントを docs/v2/ に同期（ローカルキャッシュ。コミットしない）
+docs-sync:
+	./scripts/sync-docs.sh
