@@ -1,6 +1,8 @@
 # J-Quants Go Client
 
-J-Quants API v2のGo言語クライアントライブラリです。日本の株式市場データに簡単にアクセスできます。
+J-Quants API v2のGo言語クライアントライブラリです。株価・財務情報など日本の株式市場データを扱うAPIをGoから簡単に利用できます。
+
+利用には[J-Quants](https://jpx-jquants.com/)のAPIキーが必要です（取得できるデータは契約プランに応じます）。
 
 ## 特徴
 
@@ -8,8 +10,6 @@ J-Quants API v2のGo言語クライアントライブラリです。日本の株
 - 🔐 APIキーによるシンプルな認証
 - 📄 ページネーション対応
 - 🚀 セッション単位のキャッシュ機能（オプション）
-- 🧪 充実したテストカバレッジ
-- 📝 詳細なドキュメント
 
 ## インストール
 
@@ -93,12 +93,12 @@ size := httpClient.CacheSize()
 - キャッシュはGETリクエストのみに適用されます
 - キャッシュキーはリクエストパス（クエリパラメータ含む）で区別されます
 - 同時リクエストの重複排除（singleflight）により効率的に動作します
-- 重複排除の待機中にコンテキストをキャンセルした場合、その呼び出し元だけが即座にエラーで戻り、進行中のリクエスト自体は完了してキャッシュに保存されます
+- 待機中にコンテキストをキャンセルした呼び出し元は即座にエラーで戻ります（進行中のリクエストは完了してキャッシュされます）
 - キャッシュはクライアントインスタンスの生存期間のみ有効です
 
 ## 利用可能なAPI
 
-このライブラリでアクセスできるAPIエンドポイント：
+このライブラリでは以下のAPIエンドポイントにアクセスできます。
 
 | カテゴリ | サービス | 説明 |
 |---------|---------|------|
@@ -122,7 +122,7 @@ size := httpClient.CacheSize()
 | **空売り** | ShortSelling | 業種別空売り比率 |
 | **空売り** | ShortSellingPositions | 空売り残高報告 |
 
-※各APIの利用可能なプランについては、[J-Quants公式サイト](https://jpx-jquants.com/)でご確認ください。
+※各APIの利用可能なプランについては、[J-Quants公式サイト](https://jpx-jquants.com/)で確認してください。
 
 ## 使用例
 
@@ -192,10 +192,10 @@ for _, stmt := range statements {
 
 ```go
 // 銘柄コードで取得
-data, err := jq.DailyMarginInterest.GetDailyMarginInterestByCode(ctx, "13260")
+data, err := jq.DailyMarginInterest.GetDailyMarginInterestByCode(ctx, "1326")
 
 // 公表日で取得
-data, err := jq.DailyMarginInterest.GetDailyMarginInterestByDate(ctx, "20240208")
+data, err := jq.DailyMarginInterest.GetDailyMarginInterestByDate(ctx, "2024-02-08")
 
 // 公表理由の確認
 for _, d := range data {
@@ -207,7 +207,7 @@ for _, d := range data {
 
 ### ページネーション対応
 
-大量のデータを扱うAPIではページネーションがサポートされています：
+大量のデータを扱うAPIではページネーションがサポートされています。
 
 ```go
 params := jquants.DailyQuotesParams{
@@ -251,7 +251,7 @@ make test-cover
 # リントチェック
 make lint
 
-# E2Eテスト（API Keyが必要）
+# E2Eテスト（APIキーが必要）
 make test-e2e
 ```
 
@@ -264,19 +264,17 @@ jquants/
 ├── docs/          # APIドキュメント
 │   └── v2/        # v2 APIドキュメント
 ├── test/e2e/      # E2Eテスト
-├── cmd/           # コマンドラインツール
-│   └── gitbook2md/  # GitBook→Markdown変換ツール
 ├── *.go           # 各APIサービス実装
 └── Makefile       # ビルドタスク
 ```
 
-## V1からV2への移行
+## v1からv2への移行
 
-J-Quants API v2では以下の変更があります：
+J-Quants API v2では以下の変更があります。
 
 ### 認証方式の変更
 
-| 項目 | V1 | V2 |
+| 項目 | v1 | v2 |
 |------|-----|-----|
 | 認証方式 | トークン方式（ID Token/Refresh Token） | APIキー方式（x-api-key） |
 | 認証パッケージ | `auth/` パッケージを使用 | `client` パッケージに統合 |
@@ -290,28 +288,14 @@ J-Quants API v2では以下の変更があります：
 ### コード例
 
 ```go
-// V1
+// v1
 quote.Open, quote.High, quote.Low, quote.Close
 
-// V2
+// v2
 quote.O, quote.H, quote.L, quote.C
 ```
 
 詳細は `docs/v2/migration-v1-v2.md` を参照してください。
-
-## ツール
-
-### gitbook2md
-
-GitBookのドキュメントをMarkdown形式に変換するツールです。
-
-```bash
-# ビルド
-cd cmd/gitbook2md && go build
-
-# URLから直接変換
-./gitbook2md --url https://jpx.gitbook.io/j-quants-ja/api-reference/statements --output statements.md
-```
 
 ## エラーハンドリング
 
@@ -330,7 +314,7 @@ if err != nil {
 - J-Quants APIの利用には適切なサブスクリプションが必要です
 - プランごとにレートリミットが設定されています（Free: 5/分, Light: 60/分, Standard: 120/分, Premium: 500/分）
 - 営業日以外はデータが取得できない場合があります
-- 詳細なAPI仕様は[公式ドキュメント](https://jpx.gitbook.io/j-quants-ja/api-reference)を参照してください
+- 詳細なAPI仕様は[公式ドキュメント](https://jpx-jquants.com/ja/spec/)を参照してください
 
 ## ライセンス
 

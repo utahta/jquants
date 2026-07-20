@@ -11,7 +11,7 @@ J-Quants API v2（日本の株式市場データを提供するAPI）のGoクラ
 **重要**: J-Quants APIの仕様を確認する際は、以下の順序で参照してください：
 
 1. **最初に必ず`docs/v2/`ディレクトリを確認** - このリポジトリ内のv2 APIドキュメント
-2. **不明な点がある場合のみ**: https://jpx.gitbook.io/j-quants-ja/api-reference - 公式APIリファレンス
+2. **不明な点がある場合のみ**: https://jpx-jquants.com/ja/spec/ - 公式APIリファレンス（各ページはURL末尾に`.md`を付けるとMarkdownで直接取得可能。例: https://jpx-jquants.com/ja/spec/eq-bars-daily.md ）
 
 ## 開発コマンド
 

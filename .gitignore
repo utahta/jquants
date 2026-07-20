@@ -24,7 +24,6 @@ go.work.sum
 
 # Project specific
 tmp/
-cmd/gitbook2md/gitbook2md
 
 # IDE specific files
 .idea/
