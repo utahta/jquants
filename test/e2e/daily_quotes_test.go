@@ -140,6 +140,20 @@ func TestDailyQuotesEndpoint(t *testing.T) {
 				t.Errorf("Quote[%d]: AdjVo is nil", i)
 			}
 
+			// 時価総額の検証（ETF・ETN等および取引が存在しない日はnil）
+			if quote.MktCap != nil && *quote.MktCap <= 0 {
+				t.Errorf("Quote[%d]: MktCap = %v, want > 0", i, *quote.MktCap)
+			}
+
+			// 権利落種類の検証（権利落ち日以外はnil）
+			if quote.ExRT != nil {
+				switch *quote.ExRT {
+				case jquants.ExRightsTypeSplit, jquants.ExRightsTypeReverseSplit, jquants.ExRightsTypeRightsIssue:
+				default:
+					t.Errorf("Quote[%d]: ExRT = %v, want 1, 2 or 3", i, *quote.ExRT)
+				}
+			}
+
 			if i == 0 {
 				// 最初のデータの詳細ログ
 				t.Logf("Latest quote: Date=%s, O=%v, H=%v, L=%v, C=%v, Vo=%v",

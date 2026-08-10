@@ -9,6 +9,13 @@ import (
 	"github.com/utahta/jquants/types"
 )
 
+// 権利落種類コード定義
+const (
+	ExRightsTypeSplit        = "1" // 株式分割（株式無償割当を含む）
+	ExRightsTypeReverseSplit = "2" // 株式併合
+	ExRightsTypeRightsIssue  = "3" // ライツイシュー
+)
+
 // QuotesService は株価データを取得するサービスです。
 // 日次の株価情報（始値、高値、安値、終値、出来高）や調整後株価を提供します。
 type QuotesService struct {
@@ -76,6 +83,10 @@ type DailyQuote struct {
 	AAdjL  *float64 `json:"AAdjL"`  // 調整済み後場安値
 	AAdjC  *float64 `json:"AAdjC"`  // 調整済み後場終値
 	AAdjVo *float64 `json:"AAdjVo"` // 調整済み後場売買高
+
+	// 時価総額・コーポレートアクション
+	MktCap *float64 `json:"MktCap"` // 時価総額（百万円）。ETF・ETN等および取引が存在しない日はnil
+	ExRT   *string  `json:"ExRT"`   // 権利落種類（ExRightsType定数を参照）。権利落ち日以外はnil
 }
 
 // RawDailyQuote is used for unmarshaling JSON response with mixed types
@@ -125,6 +136,9 @@ type RawDailyQuote struct {
 	AAdjL  types.NullableFloat64 `json:"AAdjL"`
 	AAdjC  types.NullableFloat64 `json:"AAdjC"`
 	AAdjVo types.NullableFloat64 `json:"AAdjVo"`
+	// 時価総額・コーポレートアクション
+	MktCap types.NullableFloat64 `json:"MktCap"`
+	ExRT   types.NullableString  `json:"ExRT"`
 }
 
 type DailyQuotesResponse struct {
@@ -197,6 +211,9 @@ func (d *DailyQuotesResponse) UnmarshalJSON(data []byte) error {
 			AAdjL:  rdq.AAdjL.Ptr(),
 			AAdjC:  rdq.AAdjC.Ptr(),
 			AAdjVo: rdq.AAdjVo.Ptr(),
+			// 時価総額・コーポレートアクション
+			MktCap: rdq.MktCap.Ptr(),
+			ExRT:   rdq.ExRT.Ptr(),
 		}
 	}
 
@@ -387,4 +404,14 @@ func (q *DailyQuote) HasMorningData() bool {
 // HasAfternoonData は後場データが存在するかを判定します（Premiumプランのみ）
 func (q *DailyQuote) HasAfternoonData() bool {
 	return q.AO != nil || q.AH != nil || q.AL != nil || q.AC != nil
+}
+
+// HasExRights は権利落ち日かどうかを判定します。
+func (q *DailyQuote) HasExRights() bool {
+	return q.ExRT != nil
+}
+
+// IsExRightsType は指定した権利落種類（ExRightsType定数）に該当するかを判定します。
+func (q *DailyQuote) IsExRightsType(exRightsType string) bool {
+	return q.ExRT != nil && *q.ExRT == exRightsType
 }
