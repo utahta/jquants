@@ -9,7 +9,8 @@ import (
 
 // AnnouncementService は決算発表予定データを取得するサービスです。
 // 翌営業日に決算発表が行われる銘柄の情報を提供します。
-// 現在は3月期・9月期決算会社のみ対応しています。
+// 現在は3月期・9月期決算会社のみ対応しており、REITのデータは含まれません。
+// 全上場銘柄の予定日や変更履歴が必要な場合はEarningsDateServiceを使用します。
 type AnnouncementService struct {
 	client client.HTTPClient
 }
