@@ -47,6 +47,7 @@ type Statement struct {
 	NP     *float64 `json:"NP"`     // 当期純利益
 	TA     *float64 `json:"TA"`     // 総資産
 	Eq     *float64 `json:"Eq"`     // 純資産
+	ShEq   *float64 `json:"ShEq"`   // 自己資本
 	CashEq *float64 `json:"CashEq"` // 現金及び現金同等物期末残高
 	CFO    *float64 `json:"CFO"`    // 営業活動によるキャッシュ・フロー
 	CFI    *float64 `json:"CFI"`    // 投資活動によるキャッシュ・フロー
@@ -57,6 +58,7 @@ type Statement struct {
 	DEPS *float64 `json:"DEPS"` // 潜在株式調整後一株あたり当期純利益
 	BPS  *float64 `json:"BPS"`  // 一株あたり純資産
 	EqAR *float64 `json:"EqAR"` // 自己資本比率
+	ROE  *float64 `json:"ROE"`  // 自己資本利益率
 
 	// 配当実績
 	Div1Q         *float64 `json:"Div1Q"`         // 一株あたり配当実績_第1四半期末
@@ -134,7 +136,9 @@ type Statement struct {
 	NCEPS   *float64 `json:"NCEPS"`   // 一株あたり当期純利益_非連結
 	NCTA    *float64 `json:"NCTA"`    // 総資産_非連結
 	NCEq    *float64 `json:"NCEq"`    // 純資産_非連結
+	NCShEq  *float64 `json:"NCShEq"`  // 自己資本_非連結
 	NCEqAR  *float64 `json:"NCEqAR"`  // 自己資本比率_非連結
+	NCROE   *float64 `json:"NCROE"`   // 自己資本利益率_非連結
 	NCBPS   *float64 `json:"NCBPS"`   // 一株あたり純資産_非連結
 
 	// 非連結第2四半期予想
@@ -189,6 +193,7 @@ type RawStatement struct {
 	NP     types.NullableFloat64 `json:"NP"`
 	TA     types.NullableFloat64 `json:"TA"`
 	Eq     types.NullableFloat64 `json:"Eq"`
+	ShEq   types.NullableFloat64 `json:"ShEq"`
 	CashEq types.NullableFloat64 `json:"CashEq"`
 	CFO    types.NullableFloat64 `json:"CFO"`
 	CFI    types.NullableFloat64 `json:"CFI"`
@@ -199,6 +204,7 @@ type RawStatement struct {
 	DEPS types.NullableFloat64 `json:"DEPS"`
 	BPS  types.NullableFloat64 `json:"BPS"`
 	EqAR types.NullableFloat64 `json:"EqAR"`
+	ROE  types.NullableFloat64 `json:"ROE"`
 
 	// 配当実績
 	Div1Q         types.NullableFloat64 `json:"Div1Q"`
@@ -276,7 +282,9 @@ type RawStatement struct {
 	NCEPS   types.NullableFloat64 `json:"NCEPS"`
 	NCTA    types.NullableFloat64 `json:"NCTA"`
 	NCEq    types.NullableFloat64 `json:"NCEq"`
+	NCShEq  types.NullableFloat64 `json:"NCShEq"`
 	NCEqAR  types.NullableFloat64 `json:"NCEqAR"`
+	NCROE   types.NullableFloat64 `json:"NCROE"`
 	NCBPS   types.NullableFloat64 `json:"NCBPS"`
 
 	// 非連結第2四半期予想
@@ -356,6 +364,7 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 			NP:     rs.NP.Ptr(),
 			TA:     rs.TA.Ptr(),
 			Eq:     rs.Eq.Ptr(),
+			ShEq:   rs.ShEq.Ptr(),
 			CashEq: rs.CashEq.Ptr(),
 			CFO:    rs.CFO.Ptr(),
 			CFI:    rs.CFI.Ptr(),
@@ -366,6 +375,7 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 			DEPS: rs.DEPS.Ptr(),
 			BPS:  rs.BPS.Ptr(),
 			EqAR: rs.EqAR.Ptr(),
+			ROE:  rs.ROE.Ptr(),
 
 			// 配当実績
 			Div1Q:         rs.Div1Q.Ptr(),
@@ -443,7 +453,9 @@ func (s *StatementsResponse) UnmarshalJSON(data []byte) error {
 			NCEPS:   rs.NCEPS.Ptr(),
 			NCTA:    rs.NCTA.Ptr(),
 			NCEq:    rs.NCEq.Ptr(),
+			NCShEq:  rs.NCShEq.Ptr(),
 			NCEqAR:  rs.NCEqAR.Ptr(),
+			NCROE:   rs.NCROE.Ptr(),
 			NCBPS:   rs.NCBPS.Ptr(),
 
 			// 非連結第2四半期予想
