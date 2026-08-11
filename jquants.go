@@ -9,7 +9,8 @@ import "github.com/utahta/jquants/client"
 // - Listed: 企業情報（企業名、業種、市場区分）
 // - Statements: 財務諸表（売上高、利益、ROE/ROA）
 // - Dividend: 配当情報（配当金、権利確定日、支払日）
-// - Announcement: 決算発表予定（発表日、発表時刻）
+// - Announcement: 翌営業日の決算発表予定（3月期・9月期決算会社のみ）
+// - EarningsDate: 決算発表予定日（全上場銘柄、公表・変更履歴を含む）
 // - TradesSpec: 投資部門別売買状況（機関投資家、個人投資家等の売買動向）
 // - WeeklyMarginInterest: 信用取引週末残高（信用買い/売り残高）
 // - DailyMarginInterest: 日々公表信用取引残高（日々公表銘柄の信用残高）
@@ -38,6 +39,7 @@ type JQuantsAPI struct {
 	Statements                    *StatementsService
 	Dividend                      *DividendService
 	Announcement                  *AnnouncementService
+	EarningsDate                  *EarningsDateService
 	TradesSpec                    *TradesSpecService
 	WeeklyMarginInterest          *WeeklyMarginInterestService
 	DailyMarginInterest           *DailyMarginInterestService
@@ -68,6 +70,7 @@ func NewJQuantsAPI(c client.HTTPClient) *JQuantsAPI {
 		Statements:                    NewStatementsService(c),
 		Dividend:                      NewDividendService(c),
 		Announcement:                  NewAnnouncementService(c),
+		EarningsDate:                  NewEarningsDateService(c),
 		TradesSpec:                    NewTradesSpecService(c),
 		WeeklyMarginInterest:          NewWeeklyMarginInterestService(c),
 		DailyMarginInterest:           NewDailyMarginInterestService(c),

@@ -2,6 +2,7 @@ package jquants
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
@@ -305,6 +306,109 @@ func TestDailyQuote_HasData(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.quote.HasMorningData(); got != tt.want {
 				t.Errorf("HasMorningData() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDailyQuotesResponse_UnmarshalJSON(t *testing.T) {
+	raw := `{
+		"data": [
+			{
+				"Date": "2023-03-24",
+				"Code": "86970",
+				"O": 2047.0,
+				"H": 2069.0,
+				"L": 2035.0,
+				"C": 2045.0,
+				"UL": "0",
+				"LL": "0",
+				"Vo": 2202500.0,
+				"Va": 4507051850.0,
+				"AdjFactor": 1.0,
+				"AdjC": 2045.0,
+				"MktCap": 1083850.0,
+				"ExRT": null
+			},
+			{
+				"Date": "2023-03-27",
+				"Code": "86970",
+				"C": 1025.0,
+				"UL": "0",
+				"LL": "0",
+				"AdjFactor": 0.5,
+				"AdjC": 1025.0,
+				"MktCap": null,
+				"ExRT": "1"
+			}
+		],
+		"pagination_key": "value1.value2."
+	}`
+
+	var resp DailyQuotesResponse
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatalf("UnmarshalJSON() error = %v", err)
+	}
+
+	if len(resp.Data) != 2 {
+		t.Fatalf("UnmarshalJSON() returned %d items, want 2", len(resp.Data))
+	}
+
+	q := resp.Data[0]
+	if q.MktCap == nil || *q.MktCap != 1083850.0 {
+		t.Errorf("UnmarshalJSON() MktCap = %v, want 1083850.0", ptrToStr(q.MktCap))
+	}
+	if q.ExRT != nil {
+		t.Errorf("UnmarshalJSON() ExRT = %v, want nil", *q.ExRT)
+	}
+
+	q = resp.Data[1]
+	if q.MktCap != nil {
+		t.Errorf("UnmarshalJSON() MktCap = %v, want nil", *q.MktCap)
+	}
+	if q.ExRT == nil || *q.ExRT != ExRightsTypeSplit {
+		t.Errorf("UnmarshalJSON() ExRT = %v, want %v", q.ExRT, ExRightsTypeSplit)
+	}
+}
+
+func TestDailyQuote_ExRightsMethods(t *testing.T) {
+	tests := []struct {
+		name            string
+		quote           DailyQuote
+		wantHasExRights bool
+		exRightsType    string
+		wantIsType      bool
+	}{
+		{
+			name:            "権利落ちなし",
+			quote:           DailyQuote{},
+			wantHasExRights: false,
+			exRightsType:    ExRightsTypeSplit,
+			wantIsType:      false,
+		},
+		{
+			name:            "株式分割",
+			quote:           DailyQuote{ExRT: stringPtr(ExRightsTypeSplit)},
+			wantHasExRights: true,
+			exRightsType:    ExRightsTypeSplit,
+			wantIsType:      true,
+		},
+		{
+			name:            "ライツイシューを株式併合として判定しない",
+			quote:           DailyQuote{ExRT: stringPtr(ExRightsTypeRightsIssue)},
+			wantHasExRights: true,
+			exRightsType:    ExRightsTypeReverseSplit,
+			wantIsType:      false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.quote.HasExRights(); got != tt.wantHasExRights {
+				t.Errorf("HasExRights() = %v, want %v", got, tt.wantHasExRights)
+			}
+			if got := tt.quote.IsExRightsType(tt.exRightsType); got != tt.wantIsType {
+				t.Errorf("IsExRightsType(%v) = %v, want %v", tt.exRightsType, got, tt.wantIsType)
 			}
 		})
 	}

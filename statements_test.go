@@ -335,7 +335,9 @@ func TestStatementsResponse_UnmarshalJSON(t *testing.T) {
 				"DEPS": "149.8",
 				"TA": "50000000000",
 				"Eq": "30000000000",
+				"ShEq": "28000000000",
 				"EqAR": "60.0",
+				"ROE": "0.112",
 				"BPS": "3000.0",
 				"CashEq": "5000000000",
 				"CFO": "3000000000",
@@ -379,6 +381,8 @@ func TestStatementsResponse_UnmarshalJSON(t *testing.T) {
 				"NCOP": "1600000000",
 				"NCNP": "1200000000",
 				"NCEPS": "120.0",
+				"NCShEq": "",
+				"NCROE": "",
 				"FNCSales2Q": "4000000000",
 				"FNCOP2Q": "800000000",
 				"FNCOdP2Q": "820000000",
@@ -436,6 +440,21 @@ func TestStatementsResponse_UnmarshalJSON(t *testing.T) {
 	}
 	if s.CFI == nil || *s.CFI != -1500000000 {
 		t.Errorf("Expected CFI -1500000000, got %v", s.CFI)
+	}
+
+	// Check shareholders' equity and ROE
+	if s.ShEq == nil || *s.ShEq != 28000000000 {
+		t.Errorf("Expected ShEq 28000000000, got %v", s.ShEq)
+	}
+	if s.ROE == nil || *s.ROE != 0.112 {
+		t.Errorf("Expected ROE 0.112, got %v", s.ROE)
+	}
+	// 連結決算のみの開示では非連結項目は空文字で届く
+	if s.NCShEq != nil {
+		t.Errorf("Expected NCShEq nil, got %v", *s.NCShEq)
+	}
+	if s.NCROE != nil {
+		t.Errorf("Expected NCROE nil, got %v", *s.NCROE)
 	}
 
 	// Check string fields (bool values are now strings in v2)

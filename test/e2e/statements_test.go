@@ -128,7 +128,9 @@ func TestStatementsEndpoint(t *testing.T) {
 		validateFinancialValue(t, "DilutedEarningsPerShare", latest.DEPS)
 		validateFinancialValue(t, "TotalAssets", latest.TA)
 		validateFinancialValue(t, "Equity", latest.Eq)
+		validateFinancialValue(t, "ShareholdersEquity", latest.ShEq)
 		validateFinancialValue(t, "EquityToAssetRatio", latest.EqAR)
+		validateFinancialValue(t, "ReturnOnEquity", latest.ROE)
 		validateFinancialValue(t, "BookValuePerShare", latest.BPS)
 
 		// キャッシュフロー情報の検証
@@ -227,7 +229,9 @@ func TestStatementsEndpoint(t *testing.T) {
 		validateFinancialValue(t, "NonConsolidatedEarningsPerShare", latest.NCEPS)
 		validateFinancialValue(t, "NonConsolidatedTotalAssets", latest.NCTA)
 		validateFinancialValue(t, "NonConsolidatedEquity", latest.NCEq)
+		validateFinancialValue(t, "NonConsolidatedShareholdersEquity", latest.NCShEq)
 		validateFinancialValue(t, "NonConsolidatedEquityToAssetRatio", latest.NCEqAR)
+		validateFinancialValue(t, "NonConsolidatedReturnOnEquity", latest.NCROE)
 		validateFinancialValue(t, "NonConsolidatedBookValuePerShare", latest.NCBPS)
 
 		// 単体予想（第2四半期）
