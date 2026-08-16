@@ -192,7 +192,7 @@ func (c *Client) doHTTPRequest(ctx context.Context, method, path string, body in
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: status=%d, body=%s", resp.StatusCode, string(respBody))
+		return nil, &APIError{StatusCode: resp.StatusCode, Body: string(respBody)}
 	}
 
 	return respBody, nil

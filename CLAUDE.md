@@ -36,3 +36,6 @@ make docs-sync     # 公式APIドキュメントを docs/v2/ に同期
 1. **nil安全性**: APIレスポンスの欠損フィールドはポインタで表現
 2. **型変換**: APIはJSONの型を不整合に返すことがあるため、`types`パッケージのカスタム型で処理
 3. **定数定義**: 市場区分コード、業種コード、開示書類種別などは定数として定義済み（再定義しない）
+4. **エラー**: HTTPステータス起因のエラーは `client.APIError`（`client/errors.go`）で返す。利用側は `errors.As` やヘルパー（`client.IsRateLimitExceeded` など）で判定する
+   - `APIError.Error()` の書式 `API error: status=%d, body=%s` は後方互換のため変更しない（`client/errors_test.go` で固定）
+   - サービス側でエラーを包む際は必ず `%w` を使う（`errors.As` を壊さないため）

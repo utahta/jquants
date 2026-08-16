@@ -97,6 +97,48 @@ size := httpClient.CacheSize()
 - 署名付きダウンロードURLを返すAPI（Bulk・TDnetのファイルURL取得）はURLが失効するためキャッシュを経由しません
 - キャッシュはクライアントインスタンスの生存期間のみ有効です
 
+## エラーハンドリング
+
+APIがエラーステータスを返した場合は `*client.APIError` が返ります。各サービスはこれを `%w` でラップするため、`errors.As` でステータスコードとレスポンスボディを取り出せます。
+
+```go
+quotes, err := jq.Quotes.GetDailyQuotesByCode(ctx, "7203")
+
+var apiErr *client.APIError
+if errors.As(err, &apiErr) {
+    log.Printf("status=%d body=%s", apiErr.StatusCode, apiErr.Body)
+}
+```
+
+利用頻度の高い判定にはヘルパーを用意しています。
+
+| ヘルパー | 対象ステータス |
+|---------|--------------|
+| `client.IsRateLimitExceeded(err)` | 429 |
+| `client.IsAuthError(err)` | 401, 403 |
+| `client.IsServerError(err)` | 5xx |
+| `client.StatusCode(err)` | 任意（`(code int, ok bool)` を返す） |
+
+```go
+for {
+    quotes, err := jq.Quotes.GetDailyQuotesByCode(ctx, "7203")
+    switch {
+    case err == nil:
+        return quotes, nil
+    case client.IsRateLimitExceeded(err):
+        time.Sleep(time.Minute) // 待機してから再試行
+    case client.IsServerError(err):
+        time.Sleep(10 * time.Second)
+    default:
+        return nil, err // 認証エラー・パラメータ不正などは再試行しても解決しない
+    }
+}
+```
+
+- 403はAPIキーが不正な場合のほか、契約プランに含まれないデータへアクセスした場合にも返ります
+- データが存在しない場合に210を返すAPI（前場四本値など）があり、これも `*client.APIError`（`StatusCode` が210）になります
+- 通信エラーやレスポンスのデコードエラーは `*client.APIError` にならないため、`client.StatusCode` の `ok` は false になります
+
 ## 利用可能なAPI
 
 このライブラリでは以下のAPIエンドポイントにアクセスできます。
