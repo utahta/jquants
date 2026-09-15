@@ -5,6 +5,7 @@ import "github.com/utahta/jquants/client"
 // JQuantsAPI はJ-Quants APIの各サービスを統合したインターフェースです。
 // 各サービスの説明:
 // - Quotes: 株価データ（日次の始値、高値、安値、終値、出来高）
+// - Valuation: バリュエーション指標（実績・予想指標、時価総額）
 // - PricesAM: 前場四本値データ（午前中の取引データ）
 // - Listed: 企業情報（企業名、業種、市場区分）
 // - Statements: 財務諸表（売上高、利益、ROE/ROA）
@@ -12,7 +13,7 @@ import "github.com/utahta/jquants/client"
 // - Announcement: 翌営業日の決算発表予定（3月期・9月期決算会社のみ）
 // - EarningsDate: 決算発表予定日（全上場銘柄、公表・変更履歴を含む）
 // - TradesSpec: 投資部門別売買状況（機関投資家、個人投資家等の売買動向）
-// - WeeklyMarginInterest: 信用取引週末残高（信用買い/売り残高）
+// - WeeklyMarginInterest: 信用取引残高（信用買い/売り残高）
 // - DailyMarginInterest: 日々公表信用取引残高（日々公表銘柄の信用残高）
 // - ShortSelling: 業種別空売り比率（業種ごとの空売り状況）
 // - ShortSellingPositions: 空売り残高報告（大口の空売りポジション）
@@ -26,13 +27,14 @@ import "github.com/utahta/jquants/client"
 // - FSDetails: 財務諸表詳細（BS/PL詳細データ）
 // - MinuteQuotes: 株価分足（アドオン契約が必要）
 // - TimelyDisclosure: TDnet適時開示情報（アドオン契約が必要）
-// - EdinetMajorShareholders: 大株主状況（有価証券報告書ベース）
+// - EdinetMajorShareholders: 大株主状況（有価証券・半期・四半期報告書）
 // - EdinetCrossShareholdings: 政策保有株式（有価証券報告書ベース）
 // - EdinetLargeVolumeShareholders: 大量保有報告書
 // - Bulk: CSV一括ダウンロード
 type JQuantsAPI struct {
 	client                        client.HTTPClient
 	Quotes                        *QuotesService
+	Valuation                     *ValuationService
 	PricesAM                      *PricesAMService
 	MinuteQuotes                  *MinuteQuotesService
 	Listed                        *ListedService
@@ -64,6 +66,7 @@ func NewJQuantsAPI(c client.HTTPClient) *JQuantsAPI {
 	return &JQuantsAPI{
 		client:                        c,
 		Quotes:                        NewQuotesService(c),
+		Valuation:                     NewValuationService(c),
 		PricesAM:                      NewPricesAMService(c),
 		MinuteQuotes:                  NewMinuteQuotesService(c),
 		Listed:                        NewListedService(c),

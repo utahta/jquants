@@ -2,8 +2,11 @@ package jquants
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"reflect"
 	"testing"
+	"time"
 
 	"github.com/utahta/jquants/client"
 )
@@ -44,6 +47,16 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterest(t *testing.T) {
 				PaginationKey: "key123",
 			},
 			wantPath: "/markets/margin-interest?date=20230217&pagination_key=key123",
+		},
+		{
+			name:     "with published date only",
+			params:   WeeklyMarginInterestParams{PublishedDate: "2026-09-28"},
+			wantPath: "/markets/margin-interest?published_date=2026-09-28",
+		},
+		{
+			name:     "with code and published date and pagination",
+			params:   WeeklyMarginInterestParams{Code: "86970", PublishedDate: "20260928", PaginationKey: "next"},
+			wantPath: "/markets/margin-interest?code=86970&published_date=20260928&pagination_key=next",
 		},
 	}
 
@@ -93,7 +106,7 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterest(t *testing.T) {
 	}
 }
 
-func TestWeeklyMarginInterestService_GetWeeklyMarginInterest_RequiresCodeOrDate(t *testing.T) {
+func TestWeeklyMarginInterestService_GetWeeklyMarginInterest_RequiresFilter(t *testing.T) {
 	// Setup
 	mockClient := client.NewMockClient()
 	service := NewWeeklyMarginInterestService(mockClient)
@@ -103,10 +116,78 @@ func TestWeeklyMarginInterestService_GetWeeklyMarginInterest_RequiresCodeOrDate(
 
 	// Verify
 	if err == nil {
-		t.Error("GetWeeklyMarginInterest() expected error for missing code and date but got nil")
+		t.Fatal("GetWeeklyMarginInterest() expected error for missing filters but got nil")
 	}
-	if err.Error() != "either code or date parameter is required" {
-		t.Errorf("GetWeeklyMarginInterest() error = %v, want 'either code or date parameter is required'", err)
+	if err.Error() != "either code, date or published_date parameter is required" {
+		t.Errorf("GetWeeklyMarginInterest() error = %v", err)
+	}
+	if mockClient.RequestCount != 0 {
+		t.Errorf("sent %d requests for invalid parameters", mockClient.RequestCount)
+	}
+}
+
+func TestWeeklyMarginInterestService_RejectsPublishedDateWithApplicationDate(t *testing.T) {
+	tests := []WeeklyMarginInterestParams{
+		{PublishedDate: "20260928", Date: "20260925"},
+		{Code: "86970", PublishedDate: "20260928", From: "20260925"},
+		{Code: "86970", PublishedDate: "20260928", To: "20260925"},
+	}
+	for _, params := range tests {
+		c := client.NewMockClient()
+		_, err := NewWeeklyMarginInterestService(c).GetWeeklyMarginInterest(context.Background(), params)
+		if err == nil || c.RequestCount != 0 {
+			t.Errorf("params %+v: error = %v, requests = %d; want validation error without request", params, err, c.RequestCount)
+		}
+	}
+}
+
+func TestWeeklyMarginInterestResponse_DailyFields(t *testing.T) {
+	raw := `{"data":[
+		{"PubDate":"2026-09-28","Date":"2026-09-25","Code":"86970","IssType":"2",
+		 "ShrtVol":257400,"LongVol":"225000","ShrtNegVol":242800,"LongNegVol":81900,"ShrtStdVol":14600,"LongStdVol":143100,
+		 "ShrtVal":514800000,"LongVal":"450000000","ShrtNegVal":"485600000","LongNegVal":163800000,"ShrtStdVal":29200000,"LongStdVal":"286200000"},
+		{"Date":"2026-09-18","Code":"86970","PubDate":null,"ShrtVal":null,"LongVal":null,"ShrtNegVal":null,"LongNegVal":null,"ShrtStdVal":null,"LongStdVal":null},
+		{"Date":"2026-09-11","Code":"86970"},
+		{"Date":"2026-09-25","Code":"99990","PubDate":"2026-09-28","ShrtVal":0,"LongVal":"0","ShrtNegVal":0,"LongNegVal":"0","ShrtStdVal":0,"LongStdVal":"0"}
+	],"pagination_key":"next"}`
+	want := []WeeklyMarginInterest{
+		{
+			PubDate: stringPtr("2026-09-28"), Date: "2026-09-25", Code: "86970", IssType: "2",
+			ShrtVol: 257400, LongVol: 225000, ShrtNegVol: 242800, LongNegVol: 81900, ShrtStdVol: 14600, LongStdVol: 143100,
+			ShrtVal: floatPtr(514800000), LongVal: floatPtr(450000000), ShrtNegVal: floatPtr(485600000),
+			LongNegVal: floatPtr(163800000), ShrtStdVal: floatPtr(29200000), LongStdVal: floatPtr(286200000),
+		},
+		{Date: "2026-09-18", Code: "86970"},
+		{Date: "2026-09-11", Code: "86970"},
+		{
+			PubDate: stringPtr("2026-09-28"), Date: "2026-09-25", Code: "99990",
+			ShrtVal: floatPtr(0), LongVal: floatPtr(0), ShrtNegVal: floatPtr(0),
+			LongNegVal: floatPtr(0), ShrtStdVal: floatPtr(0), LongStdVal: floatPtr(0),
+		},
+	}
+	var resp WeeklyMarginInterestResponse
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(resp.Data, want) || resp.PaginationKey != "next" {
+		t.Errorf("response = %+v, want %+v with pagination key next", resp, want)
+	}
+}
+
+func TestWeeklyMarginInterestService_GetWeeklyMarginInterestByPublishedDate(t *testing.T) {
+	c := client.NewMockClient()
+	c.SetResponse("GET", "/markets/margin-interest?published_date=20260928", json.RawMessage(
+		`{"data":[{"PubDate":"2026-09-28","Date":"2026-09-25","Code":"86970"}],"pagination_key":"next"}`))
+	c.SetResponse("GET", "/markets/margin-interest?published_date=20260928&pagination_key=next", json.RawMessage(
+		`{"data":[{"PubDate":"2026-09-28","Date":"2026-09-25","Code":"72030"}],"pagination_key":""}`))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	data, err := NewWeeklyMarginInterestService(c).GetWeeklyMarginInterestByPublishedDate(ctx, "20260928")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(data) != 2 || data[0].Code != "86970" || data[1].Code != "72030" || c.RequestCount != 2 {
+		t.Errorf("data = %+v, requests = %d; want both pages", data, c.RequestCount)
 	}
 }
 

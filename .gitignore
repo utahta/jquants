@@ -26,6 +26,7 @@ go.work.sum
 tmp/
 # 公式APIドキュメントのローカルキャッシュ（make docs-sync で取得）
 docs/v2/
+docs/ai/
 
 # IDE specific files
 .idea/

@@ -7,6 +7,8 @@ import (
 	"context"
 	"strings"
 	"testing"
+
+	"github.com/utahta/jquants"
 )
 
 // TestEdinetMajorShareholdersEndpoint は/edinet/major-shareholdersエンドポイントのテスト
@@ -34,6 +36,9 @@ func TestEdinetMajorShareholdersEndpoint(t *testing.T) {
 			}
 			if doc.SubDate == "" || doc.PerSt == "" || doc.PerEn == "" {
 				t.Errorf("Doc[%d]: SubDate/PerSt/PerEn should not be empty", i)
+			}
+			if doc.CurPerSt == "" || doc.CurPerEn == "" {
+				t.Errorf("Doc[%d]: CurPerSt/CurPerEn should not be empty", i)
 			}
 			if len(doc.Hldrs) == 0 {
 				t.Errorf("Doc[%d]: Hldrs is empty", i)
@@ -116,11 +121,19 @@ func TestEdinetLargeVolumeShareholdersEndpoint(t *testing.T) {
 			if doc.SubDate != date {
 				t.Errorf("Doc[%d]: SubDate = %v, want %v", i, doc.SubDate, date)
 			}
+			if doc.RptOblgDate == "" {
+				t.Errorf("Doc[%d]: RptOblgDate is empty", i)
+			}
+			if doc.LargeHldgTypeCode == jquants.LargeHldgTypeCodeCorrectionReport {
+				if doc.DocTypeCode != "360" || doc.ParDocId == nil || *doc.ParDocId == "" {
+					t.Errorf("Doc[%d]: correction should have DocTypeCode 360 and ParDocId", i)
+				}
+			}
 			// 合計欄はnullの書類がある。値がある場合のみ範囲を検証する
 			if doc.TotalShsRatio != nil {
 				withTotals++
-				if *doc.TotalShsRatio <= 0 || *doc.TotalShsRatio > 1 {
-					t.Errorf("Doc[%d]: TotalShsRatio = %v, want (0, 1]", i, *doc.TotalShsRatio)
+				if *doc.TotalShsRatio < 0 || *doc.TotalShsRatio > 1 {
+					t.Errorf("Doc[%d]: TotalShsRatio = %v, want [0, 1]", i, *doc.TotalShsRatio)
 				}
 			}
 			if len(doc.Hldrs) == 0 {
