@@ -10,7 +10,7 @@ import (
 )
 
 // EdinetLargeVolumeShareholdersService は大量保有報告書（EDINET）を取得するサービスです。
-// 大量保有報告書・変更報告書に記載されている発行者、提出者情報を取得します。
+// 大量保有報告書・変更報告書・訂正報告書の発行者、提出者情報を取得します。
 type EdinetLargeVolumeShareholdersService struct {
 	client client.HTTPClient
 }
@@ -28,6 +28,7 @@ const (
 	LargeHldgTypeCodeChangeReportShortTermTransfer = "3" // 変更報告書（短期大量譲渡）
 	LargeHldgTypeCodeSpecialReport                 = "4" // 大量保有報告書（特例対象株券等）
 	LargeHldgTypeCodeSpecialChangeReport           = "5" // 変更報告書（特例対象株券等）
+	LargeHldgTypeCodeCorrectionReport              = "6" // 訂正報告書
 )
 
 // EdinetLargeVolumeShareholdersParams は大量保有報告書のリクエストパラメータです。
@@ -46,22 +47,23 @@ type EdinetLargeVolumeShareholdersResponse struct {
 	PaginationKey string                            `json:"pagination_key"` // ページネーションキー
 }
 
-// EdinetLargeVolumeShareholderDoc は大量保有報告書・変更報告書1書類分のデータを表します。
+// EdinetLargeVolumeShareholderDoc は大量保有報告書・変更報告書・訂正報告書を表します。
 // J-Quants API /edinet/large-volume-shareholders エンドポイントのレスポンスデータ。
-// データは提出日2021年7月1日以降、対象書類は大量保有報告書・変更報告書等（書類種別コード350）。
-// Standardプラン以上で利用可能。
+// データは提出日2021年7月1日以降。Standardプラン以上で利用可能。
 type EdinetLargeVolumeShareholderDoc struct {
 	// 書類メタ情報
-	DocId             string `json:"DocId"`             // EDINET書類管理番号（S + 7桁英数字）
-	Code              string `json:"Code"`              // 発行者（保有対象銘柄）の銘柄コード（5桁）
-	EdinetCode        string `json:"EdinetCode"`        // 発行者のEDINETコード
-	IsrName           string `json:"IsrName"`           // 発行者名
-	DocTypeCode       string `json:"DocTypeCode"`       // 書類種別コード（350=大量保有報告書関連）
-	SubDate           string `json:"SubDate"`           // 提出日（YYYY-MM-DD形式）
-	SubTime           string `json:"SubTime"`           // 提出時刻（HH:MM:SS形式）
-	LargeHldgTypeCode string `json:"LargeHldgTypeCode"` // 大量保有書類種別コード（LargeHldgTypeCode定数を参照）
-	DocTitle          string `json:"DocTitle"`          // 書類表題（例: 大量保有報告書）
-	ChgRsn            string `json:"ChgRsn"`            // 報告義務発生日における変更事由（変更報告書のみ）
+	DocId             string  `json:"DocId"`             // EDINET書類管理番号（S + 7桁英数字）
+	Code              string  `json:"Code"`              // 発行者（保有対象銘柄）の銘柄コード（5桁）
+	EdinetCode        string  `json:"EdinetCode"`        // 発行者のEDINETコード
+	IsrName           string  `json:"IsrName"`           // 発行者名
+	DocTypeCode       string  `json:"DocTypeCode"`       // 書類種別コード（350=大量保有報告書関連、360=訂正）
+	SubDate           string  `json:"SubDate"`           // 提出日（YYYY-MM-DD形式）
+	SubTime           string  `json:"SubTime"`           // 提出時刻（HH:MM:SS形式）
+	RptOblgDate       string  `json:"RptOblgDate"`       // 報告義務発生日（YYYY-MM-DD形式）
+	ParDocId          *string `json:"ParDocId"`          // 訂正元書類の管理番号。訂正報告書以外はnil
+	LargeHldgTypeCode string  `json:"LargeHldgTypeCode"` // 大量保有書類種別コード（LargeHldgTypeCode定数を参照）
+	DocTitle          string  `json:"DocTitle"`          // 書類表題（例: 大量保有報告書）
+	ChgRsn            string  `json:"ChgRsn"`            // 報告義務発生日における変更事由（変更報告書のみ）
 
 	// 保有状況の合計
 	TotalShsHeld      *float64 `json:"TotalShsHeld"`      // 保有株券等の数の合計（株）（合計欄の記載がない書類ではnull）
@@ -139,16 +141,18 @@ type EdinetLargeVolumeShareholderCreditor struct {
 // RawEdinetLargeVolumeShareholderDoc is used for unmarshaling JSON response with mixed types
 type RawEdinetLargeVolumeShareholderDoc struct {
 	// 書類メタ情報
-	DocId             string `json:"DocId"`
-	Code              string `json:"Code"`
-	EdinetCode        string `json:"EdinetCode"`
-	IsrName           string `json:"IsrName"`
-	DocTypeCode       string `json:"DocTypeCode"`
-	SubDate           string `json:"SubDate"`
-	SubTime           string `json:"SubTime"`
-	LargeHldgTypeCode string `json:"LargeHldgTypeCode"`
-	DocTitle          string `json:"DocTitle"`
-	ChgRsn            string `json:"ChgRsn"`
+	DocId             string               `json:"DocId"`
+	Code              string               `json:"Code"`
+	EdinetCode        string               `json:"EdinetCode"`
+	IsrName           string               `json:"IsrName"`
+	DocTypeCode       string               `json:"DocTypeCode"`
+	SubDate           string               `json:"SubDate"`
+	SubTime           string               `json:"SubTime"`
+	RptOblgDate       string               `json:"RptOblgDate"`
+	ParDocId          types.NullableString `json:"ParDocId"`
+	LargeHldgTypeCode string               `json:"LargeHldgTypeCode"`
+	DocTitle          string               `json:"DocTitle"`
+	ChgRsn            string               `json:"ChgRsn"`
 
 	// 保有状況の合計
 	TotalShsHeld      types.NullableFloat64 `json:"TotalShsHeld"`
@@ -253,6 +257,8 @@ func (rd RawEdinetLargeVolumeShareholderDoc) toDoc() EdinetLargeVolumeShareholde
 		DocTypeCode:       rd.DocTypeCode,
 		SubDate:           rd.SubDate,
 		SubTime:           rd.SubTime,
+		RptOblgDate:       rd.RptOblgDate,
+		ParDocId:          rd.ParDocId.Ptr(),
 		LargeHldgTypeCode: rd.LargeHldgTypeCode,
 		DocTitle:          rd.DocTitle,
 		ChgRsn:            rd.ChgRsn,

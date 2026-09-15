@@ -566,6 +566,34 @@ func TestEdinetLargeVolumeShareholdersService_GetLargeVolumeShareholdersByDate(t
 	}
 }
 
+func TestEdinetLargeVolumeShareholdersResponse_CorrectionReports(t *testing.T) {
+	raw := `{"data":[
+		{"DocId":"S100ABCD","DocTypeCode":"350","LargeHldgTypeCode":"1","RptOblgDate":"2026-09-01","ParDocId":null},
+		{"DocId":"S100ABCE","DocTypeCode":"360","LargeHldgTypeCode":"6","RptOblgDate":"2026-09-02","ParDocId":"S100ABCD"},
+		{"DocId":"S100ABCF","DocTypeCode":"350","LargeHldgTypeCode":"2"}
+	]}`
+	var resp EdinetLargeVolumeShareholdersResponse
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatal(err)
+	}
+	if len(resp.Data) != 3 {
+		t.Fatalf("got %d reports, want 3", len(resp.Data))
+	}
+	original, correction, legacy := resp.Data[0], resp.Data[1], resp.Data[2]
+	if original.ParDocId != nil || original.RptOblgDate != "2026-09-01" {
+		t.Errorf("original report = %+v", original)
+	}
+	if correction.ParDocId == nil || *correction.ParDocId != original.DocId {
+		t.Errorf("correction parent = %v, want %s", correction.ParDocId, original.DocId)
+	}
+	if correction.DocTypeCode != "360" || correction.LargeHldgTypeCode != LargeHldgTypeCodeCorrectionReport || correction.RptOblgDate != "2026-09-02" {
+		t.Errorf("correction report = %+v", correction)
+	}
+	if legacy.ParDocId != nil || legacy.RptOblgDate != "" {
+		t.Errorf("omitted fields = %+v", legacy)
+	}
+}
+
 func TestEdinetLargeVolumeShareholderDoc_IsChangeReport(t *testing.T) {
 	tests := []struct {
 		name string
@@ -577,6 +605,7 @@ func TestEdinetLargeVolumeShareholderDoc_IsChangeReport(t *testing.T) {
 		{name: "change report with short term transfer", code: LargeHldgTypeCodeChangeReportShortTermTransfer, want: true},
 		{name: "special report", code: LargeHldgTypeCodeSpecialReport, want: false},
 		{name: "special change report", code: LargeHldgTypeCodeSpecialChangeReport, want: true},
+		{name: "correction report", code: LargeHldgTypeCodeCorrectionReport, want: false},
 		{name: "unknown", code: LargeHldgTypeCodeUnknown, want: false},
 	}
 

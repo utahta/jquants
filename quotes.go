@@ -84,9 +84,11 @@ type DailyQuote struct {
 	AAdjC  *float64 `json:"AAdjC"`  // 調整済み後場終値
 	AAdjVo *float64 `json:"AAdjVo"` // 調整済み後場売買高
 
-	// 時価総額・コーポレートアクション
-	MktCap *float64 `json:"MktCap"` // 時価総額（百万円）。ETF・ETN等および取引が存在しない日はnil
-	ExRT   *string  `json:"ExRT"`   // 権利落種類（ExRightsType定数を参照）。権利落ち日以外はnil
+	// MktCapは自己株式を含む時価総額（百万円）です。
+	//
+	// Deprecated: APIで削除予定（時期未定）。Valuation.MktCapを使用してください。
+	MktCap *float64 `json:"MktCap"`
+	ExRT   *string  `json:"ExRT"` // 権利落種類（ExRightsType定数を参照）。権利落ち日以外はnil
 }
 
 // RawDailyQuote is used for unmarshaling JSON response with mixed types

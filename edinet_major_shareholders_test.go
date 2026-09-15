@@ -265,6 +265,34 @@ func TestEdinetMajorShareholdersService_GetMajorShareholders_DecodesNestedHolder
 	}
 }
 
+func TestEdinetMajorShareholdersResponse_ReportingPeriods(t *testing.T) {
+	raw := `{"data":[
+		{"DocTypeCode":"120","PerSt":"2025-04-01","PerEn":"2026-03-31","CurPerSt":"2025-04-01","CurPerEn":"2026-03-31"},
+		{"DocTypeCode":"160","PerSt":"2025-04-01","PerEn":"2026-03-31","CurPerSt":"2025-04-01","CurPerEn":"2025-09-30"},
+		{"DocTypeCode":"140","PerSt":"2025-04-01","PerEn":"2026-03-31","CurPerSt":"2025-07-01","CurPerEn":"2025-09-30"}
+	]}`
+	var resp EdinetMajorShareholdersResponse
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		t.Fatal(err)
+	}
+	want := []struct{ code, start, end string }{
+		{"120", "2025-04-01", "2026-03-31"},
+		{"160", "2025-04-01", "2025-09-30"},
+		{"140", "2025-07-01", "2025-09-30"},
+	}
+	if len(resp.Data) != len(want) {
+		t.Fatalf("got %d reports, want %d", len(resp.Data), len(want))
+	}
+	for i, doc := range resp.Data {
+		if doc.DocTypeCode != want[i].code || doc.CurPerSt != want[i].start || doc.CurPerEn != want[i].end {
+			t.Errorf("report %d: got %+v, want %+v", i, doc, want[i])
+		}
+		if doc.PerSt != "2025-04-01" || doc.PerEn != "2026-03-31" {
+			t.Errorf("report %d: fiscal year = %s to %s", i, doc.PerSt, doc.PerEn)
+		}
+	}
+}
+
 func TestEdinetMajorShareholdersService_GetMajorShareholdersByCode(t *testing.T) {
 	// Setup
 	mockClient := client.NewMockClient()
