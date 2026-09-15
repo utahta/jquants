@@ -1,0 +1,43 @@
+name: tagpr
+
+on:
+  push:
+    branches: [main]
+  pull_request_target:
+    branches: [main]
+    types: [labeled, unlabeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+jobs:
+  tagpr:
+    if: >-
+      github.event_name == 'push' ||
+      (
+        github.event.pull_request.state == 'open' &&
+        github.event.pull_request.head.repo.full_name == github.repository &&
+        startsWith(github.event.pull_request.head.ref, 'tagpr-from-') &&
+        contains(github.event.pull_request.labels.*.name, 'tagpr') &&
+        (github.event.label.name == 'tagpr:minor' || github.event.label.name == 'tagpr:major')
+      )
+    runs-on: ubuntu-latest
+    concurrency:
+      group: tagpr
+      cancel-in-progress: false
+      queue: max
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # An empty ref preserves the push event's commit for release detection.
+          ref: ${{ github.event_name == 'pull_request_target' && 'main' || '' }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Create release pull request or release
+        uses: Songmu/tagpr@v1.20.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
