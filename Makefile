@@ -58,7 +58,7 @@ clean:
 # 開発ツールのインストール
 install-tools:
 	@echo "golangci-lintをインストール中..."
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2
 	@echo "開発ツールのインストールが完了しました"
 
 # 全テスト実行（単体テスト + リント）
